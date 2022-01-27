@@ -14,6 +14,6 @@ def convert(filepath):
 
 
 if __name__ == '__main__':
-    filepath = sys.argv[1].strip().replace('\\', '')
+    filepath = sys.argv[1].strip()
 
     convert(filepath)
