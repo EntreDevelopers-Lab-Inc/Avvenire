@@ -1,0 +1,12 @@
+{
+    "name": "Number 10",
+    "description": "Picture of number 10",
+    "images": "https://ipfs.io/ipfs/QmXuxG21RtEbga9xk3c2ancUnQv2DppUnyEf6XzEBGd9ZP/10.jpg",
+    "attributes": [
+        {
+            "trait_type": "Rank",
+            "value": 10,
+            "max_value": 30
+        }
+    ]
+}

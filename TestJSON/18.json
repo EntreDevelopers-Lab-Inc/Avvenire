@@ -1,0 +1,12 @@
+{
+    "name": "Number 18",
+    "description": "Picture of number 18",
+    "images": "https://ipfs.io/ipfs/QmXuxG21RtEbga9xk3c2ancUnQv2DppUnyEf6XzEBGd9ZP/18.jpg",
+    "attributes": [
+        {
+            "trait_type": "Rank",
+            "value": 18,
+            "max_value": 30
+        }
+    ]
+}
