@@ -1,7 +1,11 @@
 pillow
 flask
-flask_restful
-flask_sqlalchemy
-flask_cors
-flask_bcrypt
+flask-restful
+flask-sqlalchemy
+flask-cors
+flask-bcrypt
 phonenumbers
+flask-jwt-extended
+eth-account
+web3
+random
