@@ -1,0 +1,221 @@
+
+<!DOCTYPE html>
+<html lang="zxx">
+ <head>
+  <meta charset="utf-8"/>
+  <meta content="" name="description"/>
+  <meta content="IE=edge" http-equiv="X-UA-Compatible"/>
+  <meta content="width=device-width, initial-scale=1, shrink-to-fit=no" name="viewport"/>
+  <!-- Title -->
+  <title>
+   Avvenire
+  </title>
+  <!-- Favicon -->
+  <link href="{{url_for('static', filename='img/core-img/favicon.ico')}}" rel="icon"/>
+  <!-- Core Stylesheet -->
+  <link href="{{url_for('static', filename='css/style.css')}}" rel="stylesheet"/>
+  <!-- Responsive Stylesheet -->
+  <link href="{{url_for('static', filename='css/responsive.css')}}" rel="stylesheet"/>
+ </head>
+ <body class="darker">
+  <!-- Preloader -->
+  <div id="preloader">
+   <div class="preload-content">
+    <div id="dream-load">
+    </div>
+   </div>
+  </div>
+  <!-- ##### Header Area Start ##### -->
+  <nav class="navbar navbar-expand-lg navbar-white fixed-top" id="banner">
+   <div class="container">
+    <!-- Brand -->
+    <a class="navbar-brand" href="#">
+     <span>
+      <img alt="logo" src="{{url_for('static', filename='img/core-img/logo.png')}}"/>
+     </span>
+     Avvenire
+    </a>
+    <!-- Toggler/collapsibe Button -->
+    <button class="navbar-toggler" data-target="#collapsibleNavbar" data-toggle="collapse" type="button">
+     <span class="navbar-toggler-icon">
+     </span>
+    </button>
+    <!-- Navbar links -->
+    <div class="collapse navbar-collapse" id="collapsibleNavbar">
+     <ul class="navbar-nav ml-auto">
+      <li class="nav-item">
+       <a class="nav-link" href="{{url_for('home')}}#">
+        Home
+       </a>
+      </li>
+      <li class="nav-item dropdown">
+       <a class="nav-link" href="{{url_for('home')}}#roadmap">
+        Roadmap
+       </a>
+      </li>
+      <li class="nav-item dropdown">
+       <a class="nav-link" href="{{url_for('home')}}#art">
+        Art
+       </a>
+      </li>
+      <li class="nav-item dropdown">
+       <a class="nav-link" href="{{url_for('home')}}#faq">
+        FAQ
+       </a>
+      </li>
+      </li>
+      <li class="nav-item dropdown">
+       <a class="nav-link" href="{{url_for('home')}}#team">
+        Our Team
+       </a>
+      </li>
+      <li class="lh-55px">
+       <a class="btn login-btn ml-50" href="{{url_for('connect_wallet')}}">
+        Connect Wallet
+       </a>
+      </li>
+     </ul>
+    </div>
+   </div>
+  </nav>
+  <!-- ##### Header Area End ##### -->
+  {% block content %}{% endblock %}
+
+  <!-- ##### Footer Area Start ##### -->
+  <footer class="main-footer text-center">
+   <!--Widgets Section-->
+   <div class="widgets-section padding-top-small padding-bottom-small">
+    <div class="container">
+     <div class="row clearfix">
+      <!--Footer Column-->
+      <div class="footer-column col-md-4 col-sm-6 col-xs-12">
+       <div class="footer-widget about-widget">
+        <h3 class="has-line-center">
+         About Us
+        </h3>
+        <div class="widget-content">
+         <div class="text">
+          At the end of the day, going forward, a new normal that has evolved generation X is on the runway heading towards a streamlined cloud solution.
+         </div>
+         <ul class="social-links">
+          <li>
+           <a href="#">
+            <span class="fa fa-facebook-f">
+            </span>
+           </a>
+          </li>
+          <li>
+           <a href="#">
+            <span class="fa fa-twitter">
+            </span>
+           </a>
+          </li>
+          <li>
+           <a href="#">
+            <span class="fa fa-google-plus">
+            </span>
+           </a>
+          </li>
+          <li>
+           <a href="#">
+            <span class="fa fa-linkedin">
+            </span>
+           </a>
+          </li>
+          <li>
+           <a href="#">
+            <span class="fa fa-instagram">
+            </span>
+           </a>
+          </li>
+         </ul>
+        </div>
+       </div>
+      </div>
+      <!--End Footer Column-->
+      <!--Footer Column-->
+      <div class="footer-column col-md-4 col-sm-6 col-xs-12">
+       <div class="footer-widget contact-widget">
+        <h3 class="has-line-center">
+         Contact Us
+        </h3>
+        <div class="widget-content">
+         <ul class="contact-info">
+          <li>
+           <div class="icon">
+            <span class="flaticon-support">
+            </span>
+           </div>
+          </li>
+          <li>
+           10, Mc Donald Avenue, Sunset Park, Newyork
+          </li>
+          <li>
+           +99 999 9999
+          </li>
+          <li>
+           info@yourdomain.com
+          </li>
+         </ul>
+        </div>
+       </div>
+      </div>
+      <!--End Footer Column-->
+      <!--Footer Column-->
+      <div class="footer-column col-md-4 col-sm-12 col-xs-12">
+       <div class="footer-widget newsletter-widget">
+        <h3 class="has-line-center">
+         Newsletter
+        </h3>
+        <div class="widget-content">
+         <div class="text">
+          Stay Updated with our latest news. We promise not to spam
+         </div>
+         <div class="newsletter-form">
+          <form method="post">
+           <div class="form-group">
+            <input name="field-name" placeholder="Your Email" required="" type="email" value=""/>
+            <button class="send-btn" type="submit">
+             <span class="fa fa-paper-plane-o">
+             </span>
+            </button>
+           </div>
+          </form>
+         </div>
+        </div>
+       </div>
+      </div>
+      <!--End Footer Column-->
+     </div>
+    </div>
+   </div>
+   <!--Footer Bottom-->
+   <div class="footer-bottom">
+    <div class="auto-container">
+     <div class="copyright-text">
+      Copyright ©. All Rights Reserved
+     </div>
+    </div>
+   </div>
+  </footer>
+  <!-- ##### Footer Area End ##### -->
+  <!-- ########## All JS ########## -->
+  <!-- jQuery js -->
+  <script src="{{url_for('static', filename='js/jquery.min.js')}}">
+  </script>
+  <!-- Popper js -->
+  <script src="{{url_for('static', filename='js/popper.min.js')}}">
+  </script>
+  <!-- Bootstrap js -->
+  <script src="{{url_for('static', filename='js/bootstrap.min.js')}}">
+  </script>
+  <!-- All Plugins js -->
+  <script src="{{url_for('static', filename='js/plugins.js')}}">
+  </script>
+  <script src="{{url_for('static', filename='js/jquery.syotimer.min.js')}}">
+  </script>
+  <!-- script js -->
+  <script src="{{url_for('static', filename='js/script.js')}}">
+  </script>
+ </body>
+</html>
