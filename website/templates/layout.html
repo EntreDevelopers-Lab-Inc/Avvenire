@@ -51,32 +51,41 @@
         Home
        </a>
       </li>
-      <li class="nav-item dropdown">
+      <li class="nav-item">
        <a class="nav-link" href="{{url_for('home')}}#roadmap">
         Roadmap
        </a>
       </li>
-      <li class="nav-item dropdown">
+      <li class="nav-item">
        <a class="nav-link" href="{{url_for('home')}}#art">
         Art
        </a>
       </li>
-      <li class="nav-item dropdown">
+      <li class="nav-item">
        <a class="nav-link" href="{{url_for('home')}}#faq">
         FAQ
        </a>
       </li>
       </li>
-      <li class="nav-item dropdown">
+      <li class="nav-item">
        <a class="nav-link" href="{{url_for('home')}}#team">
         Our Team
        </a>
       </li>
+      {% if logged_in %}
+      <li class="nav-item">
+       <a class="nav-link" href="{{url_for('logout')}}">
+        Disconnect Wallet
+       </a>
+      </li>
+      <!--Put Mint Here-->
+      {% else %}
       <li class="lh-55px">
        <a class="btn login-btn ml-50" href="{{url_for('connect_wallet')}}">
         Connect Wallet
        </a>
       </li>
+      {% endif %}
      </ul>
     </div>
    </div>

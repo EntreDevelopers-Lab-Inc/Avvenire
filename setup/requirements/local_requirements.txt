@@ -8,4 +8,4 @@ phonenumbers
 flask-jwt-extended
 eth-account
 web3
-random
+PyJWT

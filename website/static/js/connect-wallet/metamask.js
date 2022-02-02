@@ -30,11 +30,13 @@ function handleAuth(accountAddress, signature)
     body: JSON.stringify([accountAddress,signature])
   }).then((response) => {
     return response.json();
-
-    // redirect to home
   })
   .then((data) => {
     console.log(data);
+
+    document.cookie = 'token=' + data['token'];
+
+    location.href = '/';
   });
 
 }
