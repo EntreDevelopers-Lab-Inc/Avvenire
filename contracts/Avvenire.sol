@@ -21,17 +21,25 @@ contract Avvenire is ERC721A, Ownable, ERC721AOwnersExplicit {
     uint256 immutable maxBatch = 10;
     uint256 immutable pricePerToken = 0.1 ether;
 
-    // uint8 immutable whiteListMax = 2;
-    bool isAllowListActive;
-    bool isRegMintActive;
+    uint8 immutable whiteListMax = 2;
+    bool isWhiteListActive;
+    bool isMintActive;
 
     // mapping for whitelist. (address => # of NFTs can mint)
-    mapping(address => uint8) private _allowList;
+    mapping(address => uint8) private _whiteList;
 
     constructor(string memory name_, string memory symbol_)
         ERC721A(name_, symbol_)
         Ownable()
     {}
+
+    function enableWhiteList() external onlyOwner {
+        isWhiteListActive = true;
+    }
+
+    function enableMint() external onlyOwner {
+        isMintActive = true;
+    }
 
     function numberMinted(address owner) public view returns (uint256) {
         return _numberMinted(owner);
@@ -78,6 +86,7 @@ contract Avvenire is ERC721A, Ownable, ERC721AOwnersExplicit {
         payable
         properMint(quantity)
     {
+        require(isMintActive, "Minting is not active");
         //sendValue(owner,msg.value);
         _safeMint(to, quantity);
     }
@@ -93,15 +102,19 @@ contract Avvenire is ERC721A, Ownable, ERC721AOwnersExplicit {
         uint256 quantity,
         bytes memory _data
     ) public payable properMint(quantity) {
+        require(isMintActive, "Minting is not active");
         _safeMint(to, quantity, _data);
     }
 
-    function setAllowList(address[] calldata addresses, uint8 numAllowedToMint)
+    /**
+     * whiteList numMinted needs to be seperated from AddressData.numberMinted
+     */
+    function setWhiteList(address[] calldata addresses, uint8 numAllowedToMint)
         external
         onlyOwner
     {
         for (uint256 i = 0; i < addresses.length; i++) {
-            _allowList[addresses[i]] = numAllowedToMint;
+            _whiteList[addresses[i]] = numAllowedToMint;
         }
     }
 
@@ -112,13 +125,13 @@ contract Avvenire is ERC721A, Ownable, ERC721AOwnersExplicit {
     {
         uint256 ts = totalSupply();
 
-        require(isAllowListActive, "Allow list is not active");
+        require(isWhiteListActive, "White list is not active");
         require(
-            quantity <= _allowList[msg.sender],
-            "Exceeded max available to purchase"
+            quantity <= _whiteList[msg.sender],
+            "Exceeded whitelist max available to purchase"
         );
 
-        _allowList[msg.sender] -= quantity;
+        _whiteList[msg.sender] -= quantity;
         for (uint256 i = 0; i < quantity; i++) {
             _safeMint(msg.sender, ts + i);
         }
