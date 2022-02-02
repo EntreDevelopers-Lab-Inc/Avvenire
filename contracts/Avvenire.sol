@@ -1,6 +1,9 @@
 // SPDX-License-Identifier: MIT
 // Creators: TokyoDan
 
+/// @title Avvenire NFT Collection
+/// @author TokyoDan
+
 pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts/access/Ownable.sol";
@@ -11,7 +14,7 @@ import "erc721a/contracts/extensions/ERC721AOwnersExplicit.sol";
 
 contract Avvenire is ERC721A, Ownable, ERC721AOwnersExplicit {
     /**
-     * @dev Initialized instead assigning in constructor. Optimizes on gas
+     * Initialized instead assigning in constructor. Optimizes on gas
      * Max supply eventually needs to be set to 10000...
      */
     uint256 immutable maxSupply = 30;
@@ -33,7 +36,7 @@ contract Avvenire is ERC721A, Ownable, ERC721AOwnersExplicit {
     }
 
     /**
-     * @dev Overriding _baseURI() found in the ERC721A contract
+     * Overriding _baseURI() found in the ERC721A contract
      * Base URI for computing {tokenURI}. If set, the resulting URI for
      */
     function _baseURI() internal view override returns (string memory) {
@@ -46,8 +49,8 @@ contract Avvenire is ERC721A, Ownable, ERC721AOwnersExplicit {
     }
 
     /**
-     * @dev Modifier to guarantee that mint quantity cannot exceed the max supply
-     * currentIndex starts at 0;
+     * Modifier to guarantee that mint quantity cannot exceed the max supply
+     * @param quantity the number of tokens to be minted
      */
     modifier properMint(uint256 quantity) {
         require(
@@ -60,7 +63,9 @@ contract Avvenire is ERC721A, Ownable, ERC721AOwnersExplicit {
     }
 
     /**
-     * @dev see ERC721A. Added properMint modifier
+     * See ERC721A
+     * @param to address that receives the mint
+     * @param quantity quantity that should be minted
      */
     function safeMint(address to, uint256 quantity)
         public
@@ -72,7 +77,10 @@ contract Avvenire is ERC721A, Ownable, ERC721AOwnersExplicit {
     }
 
     /**
-     * @dev see ERC721A. Added properMint modifier
+     * See ERC721A
+     * @param to address that receives the mint
+     * @param quantity quantity that should be minted
+     * @param _data additional data
      */
     function safeMint(
         address to,
@@ -82,13 +90,31 @@ contract Avvenire is ERC721A, Ownable, ERC721AOwnersExplicit {
         _safeMint(to, quantity, _data);
     }
 
+    function mint(
+        address to,
+        uint256 quantity,
+        bytes memory _data,
+        bool safe
+    ) public payable properMint(quantity) {
+        _mint(to, quantity, _data, safe);
+    }
+
     /**
-     * @dev see ERC721AOwnersExplicit.sol and ERC721A.sol
+     * See ERC721AOwnersExplicit.sol and ERC721A.sol
      * function _setOwnersExplicit() adds addresses to blank spots in _addressData mapping
      * this subsequently eliminates the loops in the ownerOf() function
+     * @param quantity is the number of tokens that you want to set explicit
      */
-    function setOwnersExplicit(uint256 quantity) public onlyOwner {
-        _setOwnersExplicit(quantity);
+    // function setOwnersExplicit(uint256 quantity) public onlyOwner {
+    //     _setOwnersExplicit(quantity);
+    // }
+
+    /**
+     * Function to set all ownership as explicit
+     */
+    function setAllExplicit() external onlyOwner {
+        //currentIndex initialized @ 0
+        _setOwnersExplicit(currentIndex + 1);
     }
 
     //Following functionality needs to be added: Whitelist,
