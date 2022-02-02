@@ -19,8 +19,14 @@ contract Avvenire is ERC721A, Ownable, ERC721AOwnersExplicit {
      */
     uint256 immutable maxSupply = 30;
     uint256 immutable maxBatch = 10;
-    uint256 immutable whiteList_MaxBatch = 2;
-    uint256 immutable price = 0.1 ether;
+    uint256 immutable pricePerToken = 0.1 ether;
+
+    // uint8 immutable whiteListMax = 2;
+    bool isAllowListActive;
+    bool isRegMintActive;
+
+    // mapping for whitelist. (address => # of NFTs can mint)
+    mapping(address => uint8) private _allowList;
 
     constructor(string memory name_, string memory symbol_)
         ERC721A(name_, symbol_)
@@ -58,7 +64,7 @@ contract Avvenire is ERC721A, Ownable, ERC721AOwnersExplicit {
             "Mint quantity will exceed max supply"
         );
         require(quantity <= maxBatch, "Mint quantity exceeds max batch");
-        require(msg.value >= price);
+        require(msg.value >= pricePerToken * quantity);
         _;
     }
 
@@ -90,13 +96,32 @@ contract Avvenire is ERC721A, Ownable, ERC721AOwnersExplicit {
         _safeMint(to, quantity, _data);
     }
 
-    function mint(
-        address to,
-        uint256 quantity,
-        bytes memory _data,
-        bool safe
-    ) public payable properMint(quantity) {
-        _mint(to, quantity, _data, safe);
+    function setAllowList(address[] calldata addresses, uint8 numAllowedToMint)
+        external
+        onlyOwner
+    {
+        for (uint256 i = 0; i < addresses.length; i++) {
+            _allowList[addresses[i]] = numAllowedToMint;
+        }
+    }
+
+    function whiteListMint(uint8 quantity)
+        external
+        payable
+        properMint(quantity)
+    {
+        uint256 ts = totalSupply();
+
+        require(isAllowListActive, "Allow list is not active");
+        require(
+            quantity <= _allowList[msg.sender],
+            "Exceeded max available to purchase"
+        );
+
+        _allowList[msg.sender] -= quantity;
+        for (uint256 i = 0; i < quantity; i++) {
+            _safeMint(msg.sender, ts + i);
+        }
     }
 
     /**
