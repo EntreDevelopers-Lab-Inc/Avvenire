@@ -12,35 +12,39 @@ import "erc721a/contracts/ERC721A.sol";
 import "@openzeppelin/contracts/utils/Strings.sol";
 import "erc721a/contracts/extensions/ERC721AOwnersExplicit.sol";
 
+// Do I need to implement ERC721A if I already make Avvenire ERC721AOwnersExplicit?
 contract Avvenire is ERC721A, Ownable, ERC721AOwnersExplicit {
     /**
      * Initialized instead assigning in constructor. Optimizes on gas
      * Max supply eventually needs to be set to 10000...
      */
     uint256 immutable maxSupply = 30;
-    uint256 immutable maxBatch = 10;
-    uint256 immutable pricePerToken = 0.1 ether;
+    uint8 immutable whiteListMaxMint = 2;
+    uint8 immutable maxMint = 10;
+    uint256 pricePerToken = 0.1 ether;
 
-    uint8 immutable whiteListMax = 2;
     bool isWhiteListActive;
     bool isMintActive;
 
-    // mapping for whitelist. (address => # of NFTs can mint)
-    mapping(address => uint8) private _whiteList;
+    // mapping for whitelist. (address => boolean)
+    mapping(address => bool) private _whiteList;
 
     constructor(string memory name_, string memory symbol_)
         ERC721A(name_, symbol_)
         Ownable()
     {}
 
-    function enableWhiteList() external onlyOwner {
-        isWhiteListActive = true;
+    //Enable or disable whiteList mint
+    function setWhiteListStatus(bool state_) public onlyOwner {
+        isWhiteListActive = state_;
     }
 
-    function enableMint() external onlyOwner {
-        isMintActive = true;
+    //Enable or disable mint
+    function setMintStatus(bool state_) public onlyOwner {
+        isMintActive = state_;
     }
 
+    // Needed??
     function numberMinted(address owner) public view returns (uint256) {
         return _numberMinted(owner);
     }
@@ -67,12 +71,16 @@ contract Avvenire is ERC721A, Ownable, ERC721AOwnersExplicit {
      * @param quantity the number of tokens to be minted
      */
     modifier properMint(uint256 quantity) {
+        require(isMintActive, "Minting is not active");
         require(
             quantity <= (maxSupply - currentIndex),
             "Mint quantity will exceed max supply"
         );
-        require(quantity <= maxBatch, "Mint quantity exceeds max batch");
-        require(msg.value >= pricePerToken * quantity);
+        require(
+            quantity <= maxMint - _numberMinted(msg.sender),
+            "Mint quantity exceeds max number you can mint"
+        );
+        require(msg.value >= pricePerToken * quantity, "Not enough ETH sent");
         _;
     }
 
@@ -86,8 +94,6 @@ contract Avvenire is ERC721A, Ownable, ERC721AOwnersExplicit {
         payable
         properMint(quantity)
     {
-        require(isMintActive, "Minting is not active");
-        //sendValue(owner,msg.value);
         _safeMint(to, quantity);
     }
 
@@ -102,39 +108,39 @@ contract Avvenire is ERC721A, Ownable, ERC721AOwnersExplicit {
         uint256 quantity,
         bytes memory _data
     ) public payable properMint(quantity) {
-        require(isMintActive, "Minting is not active");
         _safeMint(to, quantity, _data);
     }
 
     /**
      * whiteList numMinted needs to be seperated from AddressData.numberMinted
      */
-    function setWhiteList(address[] calldata addresses, uint8 numAllowedToMint)
-        external
-        onlyOwner
-    {
+
+    function setWhiteList(address[] calldata addresses) external onlyOwner {
         for (uint256 i = 0; i < addresses.length; i++) {
-            _whiteList[addresses[i]] = numAllowedToMint;
+            _whiteList[addresses[i]] = true;
         }
     }
 
-    function whiteListMint(uint8 quantity)
-        external
-        payable
-        properMint(quantity)
-    {
-        uint256 ts = totalSupply();
-
-        require(isWhiteListActive, "White list is not active");
+    /**
+     * Function to mint during the White List phase
+     * @param quantity number of tokens to mint
+     */
+    function whiteListMint(uint8 quantity) external payable {
+        require(isWhiteListActive, "White list minting is not active");
         require(
-            quantity <= _whiteList[msg.sender],
-            "Exceeded whitelist max available to purchase"
+            quantity <= maxSupply - currentIndex,
+            "Mint quantity will exceed max supply"
         );
+        // Takes care of 2 cases:
+        // A. When quantity exceeds whiteListMaxMint
+        // B. When whiteListMinter tries to mint a second time
+        require(
+            quantity <= whiteListMaxMint - _numberMinted(msg.sender),
+            "Mint quantity exceeds max number you can mint during whitelist"
+        );
+        require(msg.value >= pricePerToken * quantity, "Not enough ETH sent");
 
-        _whiteList[msg.sender] -= quantity;
-        for (uint256 i = 0; i < quantity; i++) {
-            _safeMint(msg.sender, ts + i);
-        }
+        _safeMint(msg.sender, quantity);
     }
 
     /**
@@ -151,9 +157,6 @@ contract Avvenire is ERC721A, Ownable, ERC721AOwnersExplicit {
      * Function to set all ownership as explicit
      */
     function setAllExplicit() external onlyOwner {
-        //currentIndex initialized @ 0
-        _setOwnersExplicit(currentIndex + 1);
+        _setOwnersExplicit(currentIndex);
     }
-
-    //Following functionality needs to be added: Whitelist,
 }
