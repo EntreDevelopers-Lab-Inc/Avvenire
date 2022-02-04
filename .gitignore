@@ -137,3 +137,6 @@ typechain
 #Hardhat files
 cache
 artifacts
+
+#Config file
+brownie-config.yaml

@@ -6,17 +6,11 @@
 
 pragma solidity ^0.8.0;
 
-// import "@openzeppelin/contracts/access/Ownable.sol";
-// import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
-// import "erc721a/contracts/ERC721A.sol";
-// import "@openzeppelin/contracts/utils/Strings.sol";
-// import "erc721a/contracts/extensions/ERC721AOwnersExplicit.sol";
-
-import "../node_modules/@openzeppelin/contracts/access/Ownable.sol";
-import "../node_modules/@openzeppelin/contracts/security/ReentrancyGuard.sol";
-import "../node_modules/erc721a/contracts/ERC721A.sol";
-import "../node_modules/@openzeppelin/contracts/utils/Strings.sol";
-import "../node_modules/erc721a/contracts/extensions/ERC721AOwnersExplicit.sol";
+import "@openzeppelin/contracts/access/Ownable.sol";
+import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
+import "@chiru-labs/contracts/ERC721A.sol";
+import "@openzeppelin/contracts/utils/Strings.sol";
+import "@chiru-labs/contracts/extensions/ERC721AOwnersExplicit.sol";
 
 // Do I need to implement ERC721A if I already make Avvenire ERC721AOwnersExplicit?
 contract Avvenire is ERC721A, Ownable, ERC721AOwnersExplicit {
