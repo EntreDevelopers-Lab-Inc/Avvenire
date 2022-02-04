@@ -76,8 +76,8 @@ function connect() {
 
 }
 
-// connect by default
-connect();
+// connect by default (disabled)
+// connect();
 
 /*
 web3.eth.getAccounts()
