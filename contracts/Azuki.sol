@@ -84,6 +84,10 @@ contract Azuki is Ownable, ERC721A, ReentrancyGuard {
         refundIfOver(totalCost); // make sure to refund the excess
     }
 
+    /**
+     * @notice function to mint for allow list
+     */
+    // We should change the implementation so user can mint more than 1
     // seperate function to mint if the user is on the whitelist
     function allowlistMint() external payable callerIsUser {
         // this should take a quantity argument to allow whitelists to get more
@@ -245,6 +249,7 @@ contract Azuki is Ownable, ERC721A, ReentrancyGuard {
         );
         for (uint256 i = 0; i < addresses.length; i++) {
             allowlist[addresses[i]] = numSlots[i]; // why not just set all of them to the same number?
+            // Likely wanted to give some people (maybe even themselves) the ability to mint more @ whitelist - Daniel
         }
     }
 
@@ -280,14 +285,14 @@ contract Azuki is Ownable, ERC721A, ReentrancyGuard {
     string private _baseTokenURI;
 
     /**
-     * @notice returns the placeholder URI used prior to the reveal
+     * @notice returns the baseURI; used in TokenURI
      */
     function _baseURI() internal view virtual override returns (string memory) {
         return _baseTokenURI;
     }
 
     /**
-     * @notice set the placeholder URI used prior to the reveal
+     * @notice sets the baseURI
      * @param baseURI the base URI
      */
     function setBaseURI(string calldata baseURI) external onlyOwner {
