@@ -7,13 +7,21 @@ pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
-import "./ERC721A.sol";
+import "@chiru-labs/contracts/ERC721A.sol";
+// _setOwnersExplicit( ) moved from the ERC721A contract to an extension
+import "@chiru-labs/contracts/extensions/ERC721AOwnersExplicit.sol";
 import "@openzeppelin/contracts/utils/Strings.sol";
 
-contract Azuki is Ownable, ERC721A, ReentrancyGuard {
+// ERC721AOwnersExplicit already inherits from ERC721A
+// Since it is an abstract contract do I need to make Azuki inherit both?
+contract Azuki is Ownable, ERC721A, ERC721AOwnersExplicit, ReentrancyGuard {
     uint256 public immutable maxPerAddressDuringMint; // constant for later assignment>?t
     uint256 public immutable amountForDevs; // Specifiy amount minted for Devs
     uint256 public immutable amountForAuctionAndDev; // this name should change to just amountForAuction
+
+    // collectionSize and maxBatchSize removed from ERC721A -- Need to add here
+    uint256 public immutable collectionSize;
+    uint256 public immutable maxBatchSize;
 
     struct SaleConfig {
         uint32 auctionSaleStartTime; //
@@ -41,10 +49,14 @@ contract Azuki is Ownable, ERC721A, ReentrancyGuard {
         uint256 collectionSize_,
         uint256 amountForAuctionAndDev_,
         uint256 amountForDevs_
-    ) ERC721A("Azuki", "AZUKI", maxBatchSize_, collectionSize_) {
+    ) ERC721A("Azuki", "AZUKI") {
         maxPerAddressDuringMint = maxBatchSize_;
         amountForAuctionAndDev = amountForAuctionAndDev_; // set the amount on constructing the contract
         amountForDevs = amountForDevs_;
+        // Initialized manually because ERC721A contract was updated
+        collectionSize = collectionSize_;
+        maxBatchSize = maxBatchSize_;
+
         require(
             amountForAuctionAndDev_ <= collectionSize_, // make sure that the collection can handle the size of the auction
             "larger collection size needed"
@@ -61,7 +73,7 @@ contract Azuki is Ownable, ERC721A, ReentrancyGuard {
 
     /**
      * @notice function used to mint during the auction
-     * @param quantity
+     * @param quantity quantity to mint
      */
     function auctionMint(uint256 quantity) external payable callerIsUser {
         // set the number to mint to the user within this auction
@@ -237,7 +249,7 @@ contract Azuki is Ownable, ERC721A, ReentrancyGuard {
      * @notice sets the whitelist w/ the respective amount of number of NFTs that each address can mint
      * Requires that the addresses[] and numSlots[] are the same length
      * @param addresses the whitelist addresses
-     * @param numslots the respective number of NFTs that they can mint
+     * @param numSlots the respective number of NFTs that they can mint
      */
     function seedAllowlist(
         address[] memory addresses,
