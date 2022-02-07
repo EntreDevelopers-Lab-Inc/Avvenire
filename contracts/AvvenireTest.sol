@@ -121,16 +121,16 @@ contract AvvenireTest is
     function allowlistMint(uint256 quantity) external payable callerIsUser {
         // this should take a quantity argument to allow whitelists to get more
         uint256 price = uint256(saleConfig.mintlistPrice);
-        require(price != 0, "allowlist sale has not begun yet");
+        require(price != 0, "Allowlist sale has not begun yet");
         require(allowlist[msg.sender] > 0, "not eligible for allowlist mint"); // this also checks the decrement
         // need a require statement to make sure that quantity is less than the limit for each user
         require(
             totalSupply() + quantity <= collectionSize,
-            "reached max supply"
+            "Reached max supply"
         );
         require(
             numberMinted(msg.sender) + quantity <= maxPerAddressDuringWhiteList,
-            "can not mint this many"
+            "Can not mint this many"
         );
 
         allowlist[msg.sender] = allowlist[msg.sender] - quantity;
@@ -291,23 +291,13 @@ contract AvvenireTest is
         }
     }
 
-    // we should have a function to clear the allow list
-    // Seems like a waste.  Extra gas -- Daniel
-
-    function clearAllowList() external onlyOwner {
-        // Mappings do not have a length
-    }
-
-    // another function to remove someone from the allow list (can just set their balance to 0), as we may want to remove people from the whitelist
-    // Unsure how to properly remove from mappings.  You're prob right - Daniel
-
     /**
      * @notice Removes a user from the whitelist
      * @param toRemove the public address of the user
      */
     function removeFromAllowList(address toRemove) external onlyOwner {
-        require(allowList[toRemove] > 0, "User already minted");
-        allowList[toRemove] = 0;
+        require(allowlist[toRemove] > 0, "User already minted");
+        allowlist[toRemove] = 0;
     }
 
     /**
@@ -347,10 +337,13 @@ contract AvvenireTest is
      * @notice function to withdraw the money from the contract. Only callable by the owner
      */
     function withdrawMoney() external onlyOwner nonReentrant {
-        // take the money out and put it in the owners wallet
+        // Pay devs
+        (bool sent, ) = devAddress.call{value: paymentToDevs}("");
+        require(sent, "dev transfer failed");
 
+        // Withdraw rest of the contract
         (bool success, ) = msg.sender.call{value: address(this).balance}("");
-        require(success, "Transfer failed."); // why check the requirement after?
+        require(success, "team transfer failed."); // why check the requirement after?
     }
 
     /**
