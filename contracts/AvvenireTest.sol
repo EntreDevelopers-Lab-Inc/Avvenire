@@ -339,10 +339,11 @@ contract AvvenireTest is
     function withdrawMoney() external onlyOwner nonReentrant {
         // Pay devs
         (bool sent, ) = devAddress.call{value: paymentToDevs}("");
-        require(sent, "dev transfer failed");
 
         // Withdraw rest of the contract
         (bool success, ) = msg.sender.call{value: address(this).balance}("");
+
+        require(sent, "dev transfer failed");
         require(success, "team transfer failed."); // why check the requirement after?
     }
 
