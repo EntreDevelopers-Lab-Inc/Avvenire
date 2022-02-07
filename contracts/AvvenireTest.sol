@@ -46,6 +46,9 @@ contract AvvenireTest is
     mapping(address => uint256) public allowlist;
     mapping(address => uint256) public totalPaid;
 
+    // Assigned at end of dutch auction
+    uint256 public endingPrice;
+
     /**
      * @notice Constructor calls on ERC721A constructor and sets the previously defined global variables
      * @param maxBatchPublic_ the number for the max batch size and max # of NFTs per address duriing mint
@@ -116,6 +119,11 @@ contract AvvenireTest is
 
         //Add to totalPaid
         totalPaid[msg.sender] = totalPaid[msg.sender] + totalCost;
+
+        // Update ending price if totalSupply() == amountForAuctionAndDev
+        if (totalSupply() == amountForAuctionAndDev) {
+            endingPrice = getAuctionPrice(_saleStartTime);
+        }
     }
 
     /**
@@ -143,6 +151,11 @@ contract AvvenireTest is
         refundIfOver(totalCost);
         //Add to totalPaid mapping
         totalPaid[msg.sender] = totalPaid[msg.sender] + totalCost;
+
+        // Update ending price if totalSupply() == amountForAuctionAndDev
+        if (totalSupply() == amountForAuctionAndDev) {
+            endingPrice = price;
+        }
     }
 
     /**
@@ -183,6 +196,11 @@ contract AvvenireTest is
         uint256 totalCost = publicPrice * quantity;
         refundIfOver(totalCost);
         totalPaid[msg.sender] = totalPaid[msg.sender] + totalCost;
+
+        // Update ending price if totalSupply() == amountForAuctionAndDev
+        if (totalSupply() == amountForAuctionAndDev) {
+            endingPrice = publicPrice;
+        }
     }
 
     /**
@@ -195,6 +213,63 @@ contract AvvenireTest is
         // Let's say the current price is .5 ETH and a user sends 1 ETH; this function refunds them the excess that they sent
         if (msg.value > price) {
             payable(msg.sender).transfer(msg.value - price); // pay the user the excess
+        }
+    }
+
+    /**
+     * NOT IDEAL IMPLEMENTATION
+     * Have to wait for all users to call refund() before being able to withdraw funds
+     * PROBLEM: there is no way to iterate through a mapping
+     */
+    function refund() external {
+        uint256 actualCost = endingPrice * numberMinted(msg.sender);
+        int256 reimbursement = int256(totalPaid[msg.sender]) -
+            int256(actualCost);
+        require(reimbursement > 0, "You are not eligible for a refund");
+
+        (bool success, ) = msg.sender.call{value: uint256(reimbursement)}("");
+        require(success, "Refund failed");
+
+        totalPaid[msg.sender] = 0;
+    }
+
+    /**
+     * Could possibly write script to call this repeatedly instead...
+     */
+    function refund(address toRefund) external {
+        uint256 actualCost = endingPrice * numberMinted(toRefund);
+        int256 reimbursement = int256(totalPaid[toRefund]) - int256(actualCost);
+        require(reimbursement > 0, "Not eligible for a refund");
+
+        (bool success, ) = toRefund.call{value: uint256(reimbursement)}("");
+        require(success, "Refund failed");
+
+        totalPaid[toRefund] = 0;
+    }
+
+    // How could you possibly iterate through the
+    function refundAll(address[] memory addresses)
+        external
+        onlyOwner
+        nonReentrant
+    {
+        require(addresses.length > 0, "Not valid array of addresses");
+
+        for (uint256 i = 0; i < addresses.length; i++) {
+            uint256 actualCost = endingPrice * numberMinted(addresses[i]);
+            int256 reimbursement = int256(totalPaid[addresses[i]]) -
+                int256(actualCost);
+
+            if (totalPaid[addresses[i]] > actualCost) {
+                // Send refund
+                (bool success, ) = msg.sender.call{
+                    value: uint256(reimbursement)
+                }("");
+                // Wait for confirmation
+                require(success, "Refund failed");
+                // Reset total payment to 0
+                totalPaid[addresses[i]] = 0;
+            }
         }
     }
 
