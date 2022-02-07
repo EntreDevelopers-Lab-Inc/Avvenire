@@ -24,8 +24,8 @@ contract AvvenireTest is
     uint256 public immutable amountForTeam; // Amount of NFTs for team
     uint256 public immutable amountForAuctionAndDev; // Amount of NFTs for the team and auction
     uint256 public immutable collectionSize; // Total collection size
-    uint256 public immutable maxBatchPublic;
-    uint256 public immutable maxBatchWhiteList;
+    //uint256 public immutable maxBatchPublic;
+    // uint256 public immutable maxBatchWhiteList;
     uint256 public immutable maxPerAddressDuringWhiteList;
 
     address immutable devAddress;
@@ -67,8 +67,8 @@ contract AvvenireTest is
         amountForAuctionAndDev = amountForAuctionAndDev_;
         amountForTeam = amountForTeam_;
         collectionSize = collectionSize_;
-        maxBatchPublic = maxBatchPublic_;
-        maxBatchWhiteList = maxBatchWhiteList_;
+        // maxBatchPublic = maxBatchPublic_;
+        // maxBatchWhiteList = maxBatchWhiteList_;
         maxPerAddressDuringWhiteList = maxBatchWhiteList_;
 
         // Assign dev address and payment
