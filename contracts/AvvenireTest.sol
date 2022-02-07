@@ -1,36 +1,41 @@
 // SPDX-License-Identifier: MIT
-// Creators: TokyoDan
 
-/// @title Avvenire NFT Collection
-/// @author TokyoDan
-
+/**
+ *@title Azuki ERC721 Contract
+ */
 pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import "@chiru-labs/contracts/ERC721A.sol";
-import "@openzeppelin/contracts/utils/Strings.sol";
+// _setOwnersExplicit( ) moved from the ERC721A contract to an extension
 import "@chiru-labs/contracts/extensions/ERC721AOwnersExplicit.sol";
-
-// Do I need to implement ERC721A if I already make Avvenire ERC721AOwnersExplicit?
+import "@openzeppelin/contracts/utils/Strings.sol";
 
 // ERC721AOwnersExplicit already inherits from ERC721A
 // Since it is an abstract contract do I need to make Azuki inherit both?
-contract Azuki is Ownable, ERC721A, ERC721AOwnersExplicit, ReentrancyGuard {
+contract AvvenireTest is
+    Ownable,
+    ERC721A,
+    ERC721AOwnersExplicit,
+    ReentrancyGuard
+{
     uint256 public immutable maxPerAddressDuringMint; // constant for later assignment>?t
-    uint256 public immutable amountForDevs; // Specifiy amount minted for Devs
-    uint256 public immutable amountForAuctionAndDev; // this name should change to just amountForAuction
+    uint256 public immutable amountForTeam; // Amount of NFTs for team
+    uint256 public immutable amountForAuctionAndDev; // Amount of NFTs for the team and auction
+    uint256 public immutable collectionSize; // Total collection size
+    uint256 public immutable maxBatchPublic;
+    uint256 public immutable maxBatchWhiteList;
 
-    // collectionSize and maxBatchSize removed from ERC721A -- Need to add here
-    uint256 public immutable collectionSize;
-    uint256 public immutable maxBatchSize;
+    address immutable devAddress;
+    uint256 immutable paymentToDevs;
 
     struct SaleConfig {
-        uint32 auctionSaleStartTime;
-        uint32 publicSaleStartTime;
-        uint64 mintlistPrice;
-        uint64 publicPrice;
-        uint32 publicSaleKey;
+        uint32 auctionSaleStartTime; //
+        uint32 publicSaleStartTime; //
+        uint64 mintlistPrice; //
+        uint64 publicPrice; // where is this set?
+        uint32 publicSaleKey; //
     }
 
     SaleConfig public saleConfig; // use the struct as a constant (why make it public?)
@@ -41,23 +46,32 @@ contract Azuki is Ownable, ERC721A, ERC721AOwnersExplicit, ReentrancyGuard {
 
     /**
      * @notice Constructor calls on ERC721A constructor and sets the previously defined global variables
-     * @param maxBatchSize_ maxPerAddressDuringMint assigned to this argument
+     * @param maxBatchPublic_ the number for the max batch size and max # of NFTs per address duriing mint
      * @param collectionSize_ used in require statement to make sure that auction is <= collectionSize_
-     * @param amountForDevs_ assigned to amountForDevs
+     * @param amountForTeam_ # of NFTs for the team
      * @param amountForAuctionAndDev_ specifies total amount to auction
+     * @param devAddress_ address of devs
+     * @param paymentToDevs_ payment to devs
      */
     constructor(
-        uint256 maxBatchSize_,
+        uint256 maxBatchPublic_,
+        uint256 maxBatchWhiteList_,
         uint256 collectionSize_,
         uint256 amountForAuctionAndDev_,
-        uint256 amountForDevs_
+        uint256 amountForTeam_,
+        address devAddress_,
+        uint256 paymentToDevs_
     ) ERC721A("Azuki", "AZUKI") {
-        maxPerAddressDuringMint = maxBatchSize_;
-        amountForAuctionAndDev = amountForAuctionAndDev_; // set the amount on constructing the contract
-        amountForDevs = amountForDevs_;
-        // Initialized manually because ERC721A contract was updated
+        maxPerAddressDuringMint = maxBatchPublic_;
+        amountForAuctionAndDev = amountForAuctionAndDev_;
+        amountForTeam = amountForTeam_;
         collectionSize = collectionSize_;
-        maxBatchSize = maxBatchSize_;
+        maxBatchPublic = maxBatchPublic_;
+        maxBatchWhiteList = maxBatchWhiteList_;
+
+        // Assign dev address and payment
+        devAddress = devAddress_;
+        paymentToDevs = paymentToDevs_;
 
         require(
             amountForAuctionAndDev_ <= collectionSize_, // make sure that the collection can handle the size of the auction
@@ -66,7 +80,7 @@ contract Azuki is Ownable, ERC721A, ERC721AOwnersExplicit, ReentrancyGuard {
     }
 
     /**
-      @notice Modifier to make sure that the caller is a user and not another contract 
+      Modifier to make sure that the caller is a user and not another contract 
      */
     modifier callerIsUser() {
         require(tx.origin == msg.sender, "The caller is another contract"); // check that a user is accessing a contract
@@ -78,10 +92,10 @@ contract Azuki is Ownable, ERC721A, ERC721AOwnersExplicit, ReentrancyGuard {
      * @param quantity quantity to mint
      */
     function auctionMint(uint256 quantity) external payable callerIsUser {
-        // set the number to mint to the user within this auction
-        uint256 _saleStartTime = uint256(saleConfig.auctionSaleStartTime); // get the start time out of the configuration/struct
+        uint256 _saleStartTime = uint256(saleConfig.auctionSaleStartTime);
+        // the auction can start at a particular time --> this allows the contract to be deployed ahead of time and activated later
         require(
-            _saleStartTime != 0 && block.timestamp >= _saleStartTime, // the auction can start at a particular time --> this allows the contract to be deployed ahead of time and activated later
+            _saleStartTime != 0 && block.timestamp >= _saleStartTime,
             "sale has not started yet"
         );
         require(
@@ -100,19 +114,22 @@ contract Azuki is Ownable, ERC721A, ERC721AOwnersExplicit, ReentrancyGuard {
 
     /**
      * @notice function to mint for allow list
+     * @param quantity amount to mint for whitelisted users
      */
-    // We should change the implementation so user can mint more than 1
-    // seperate function to mint if the user is on the whitelist
-    function allowlistMint() external payable callerIsUser {
+    function allowlistMint(uint256 quantity) external payable callerIsUser {
         // this should take a quantity argument to allow whitelists to get more
         uint256 price = uint256(saleConfig.mintlistPrice);
         require(price != 0, "allowlist sale has not begun yet");
         require(allowlist[msg.sender] > 0, "not eligible for allowlist mint"); // this also checks the decrement
         // need a require statement to make sure that quantity is less than the limit for each user
-        require(totalSupply() + 1 <= collectionSize, "reached max supply"); // need to change this 1 to the quantity
-        allowlist[msg.sender]--; // need to decrement by more than 1
-        _safeMint(msg.sender, 1); // we should change this to allow for multiple
-        refundIfOver(price); // make sure to refund the excess
+        require(
+            totalSupply() + quantity <= collectionSize,
+            "reached max supply"
+        );
+        allowlist[msg.sender] = allowlist[msg.sender] - quantity;
+        _safeMint(msg.sender, quantity);
+        uint256 totalCost = quantity * price;
+        refundIfOver(totalCost);
     }
 
     /**
@@ -280,19 +297,12 @@ contract Azuki is Ownable, ERC721A, ERC721AOwnersExplicit, ReentrancyGuard {
      * @notice function to mint for the team; Goes to the wallet of whoever deployed the contract
      * @param quantity the quantity to mint
      */
-    function devMint(uint256 quantity) external onlyOwner {
+    function teamMint(uint256 quantity) external onlyOwner {
         require(
-            totalSupply() + quantity <= amountForDevs,
-            "too many already minted before dev mint"
+            totalSupply() + quantity <= amountForTeam,
+            "too many already minted or quantity exceeds amountForTeam"
         );
-        require(
-            quantity % maxBatchSize == 0,
-            "can only mint a multiple of the maxBatchSize"
-        );
-        uint256 numChunks = quantity / maxBatchSize;
-        for (uint256 i = 0; i < numChunks; i++) {
-            _safeMint(msg.sender, maxBatchSize);
-        }
+        _safeMint(msg.sender, maxBatchPublic);
     }
 
     // REVEAL PLACEHOLDER URI
@@ -356,3 +366,7 @@ contract Azuki is Ownable, ERC721A, ERC721AOwnersExplicit, ReentrancyGuard {
         return ownershipOf(tokenId); // get historic ownership
     }
 }
+
+/*
+NOTES
+*/
