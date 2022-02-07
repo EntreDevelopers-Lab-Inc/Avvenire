@@ -302,7 +302,7 @@ contract AvvenireTest is
             totalSupply() + quantity <= amountForTeam,
             "too many already minted or quantity exceeds amountForTeam"
         );
-        _safeMint(msg.sender, maxBatchPublic);
+        _safeMint(msg.sender, quantity);
     }
 
     // REVEAL PLACEHOLDER URI
