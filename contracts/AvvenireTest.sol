@@ -26,6 +26,7 @@ contract AvvenireTest is
     uint256 public immutable collectionSize; // Total collection size
     uint256 public immutable maxBatchPublic;
     uint256 public immutable maxBatchWhiteList;
+    uint256 public immutable maxPerAddressDuringWhiteList;
 
     address immutable devAddress;
     uint256 immutable paymentToDevs;
@@ -68,6 +69,7 @@ contract AvvenireTest is
         collectionSize = collectionSize_;
         maxBatchPublic = maxBatchPublic_;
         maxBatchWhiteList = maxBatchWhiteList_;
+        maxPerAddressDuringWhiteList = maxBatchWhiteList_;
 
         // Assign dev address and payment
         devAddress = devAddress_;
@@ -126,6 +128,11 @@ contract AvvenireTest is
             totalSupply() + quantity <= collectionSize,
             "reached max supply"
         );
+        require(
+            numberMinted(msg.sender) + quantity <= maxPerAddressDuringWhiteList,
+            "can not mint this many"
+        );
+
         allowlist[msg.sender] = allowlist[msg.sender] - quantity;
         _safeMint(msg.sender, quantity);
         uint256 totalCost = quantity * price;
@@ -287,6 +294,10 @@ contract AvvenireTest is
     // we should have a function to clear the allow list
     // Seems like a waste.  Extra gas -- Daniel
 
+    function clearAllowList() external onlyOwner {
+        // Mappings do not have a length
+    }
+
     // another function to remove someone from the allow list (can just set their balance to 0), as we may want to remove people from the whitelist
     // Unsure how to properly remove from mappings.  You're prob right - Daniel
 
@@ -295,6 +306,7 @@ contract AvvenireTest is
      * @param toRemove the public address of the user
      */
     function removeFromAllowList(address toRemove) external onlyOwner {
+        require(allowList[toRemove] > 0, "User already minted");
         allowList[toRemove] = 0;
     }
 
@@ -302,7 +314,7 @@ contract AvvenireTest is
      * @notice function to mint for the team; Goes to the wallet of whoever deployed the contract
      */
     function teamMint() external onlyOwner {
-        require(totalSupply() == 0, "Too many NFTs already minted");
+        require(totalSupply() == 0, "NFTs already minted");
         _safeMint(msg.sender, amountForTeam);
     }
 
