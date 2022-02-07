@@ -291,6 +291,14 @@ contract AvvenireTest is
     // Unsure how to properly remove from mappings.  You're prob right - Daniel
 
     /**
+     * @notice Removes a user from the whitelist
+     * @param toRemove the public address of the user
+     */
+    function removeFromAllowList(address toRemove) external onlyOwner {
+        allowList[toRemove] = 0;
+    }
+
+    /**
      * @notice function to mint for the team; Goes to the wallet of whoever deployed the contract
      */
     function teamMint() external onlyOwner {
