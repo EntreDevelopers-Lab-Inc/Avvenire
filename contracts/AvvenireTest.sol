@@ -44,6 +44,7 @@ contract AvvenireTest is
 
     // Whitelist mapping (address => amount they can mint)
     mapping(address => uint256) public allowlist;
+    mapping(address => uint256) public totalPaid;
 
     /**
      * @notice Constructor calls on ERC721A constructor and sets the previously defined global variables
@@ -112,6 +113,9 @@ contract AvvenireTest is
         uint256 totalCost = getAuctionPrice(_saleStartTime) * quantity; // total amount of ETH needed for the transaction
         _safeMint(msg.sender, quantity); // mint this amount to the sender
         refundIfOver(totalCost); // make sure to refund the excess
+
+        //Add to totalPaid
+        totalPaid[msg.sender] = totalPaid[msg.sender] + totalCost;
     }
 
     /**
@@ -137,6 +141,8 @@ contract AvvenireTest is
         _safeMint(msg.sender, quantity);
         uint256 totalCost = quantity * price;
         refundIfOver(totalCost);
+        //Add to totalPaid mapping
+        totalPaid[msg.sender] = totalPaid[msg.sender] + totalCost;
     }
 
     /**
@@ -173,7 +179,10 @@ contract AvvenireTest is
             "can not mint this many"
         );
         _safeMint(msg.sender, quantity);
-        refundIfOver(publicPrice * quantity); //
+
+        uint256 totalCost = publicPrice * quantity;
+        refundIfOver(totalCost);
+        totalPaid[msg.sender] = totalPaid[msg.sender] + totalCost;
     }
 
     /**
@@ -339,11 +348,9 @@ contract AvvenireTest is
     function withdrawMoney() external onlyOwner nonReentrant {
         // Pay devs
         (bool sent, ) = devAddress.call{value: paymentToDevs}("");
-
+        require(sent, "dev transfer failed");
         // Withdraw rest of the contract
         (bool success, ) = msg.sender.call{value: address(this).balance}("");
-
-        require(sent, "dev transfer failed");
         require(success, "team transfer failed."); // why check the requirement after?
     }
 
@@ -370,8 +377,7 @@ contract AvvenireTest is
     }
 
     /**
-     * @notice takes in a tokenID and returns a TokenOwnership struct, which contains the owner's address
-     * and the time they acquired the token
+     * @notice Returns a struct, which contains a token owner's address and the time they acquired the token
      * @param tokenId the tokenID
      */
     function getOwnershipData(
