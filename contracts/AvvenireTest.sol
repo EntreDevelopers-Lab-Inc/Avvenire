@@ -290,22 +290,22 @@ contract AvvenireTest is
     // another function to remove someone from the allow list (can just set their balance to 0), as we may want to remove people from the whitelist
     // Unsure how to properly remove from mappings.  You're prob right - Daniel
 
-    // We should get rid of this, as i don't think oscar is giving us NFTs
-    // For any part of the team.  Not just for us.  We mint then transfer them to Oscar and his cofounder
-
     /**
      * @notice function to mint for the team; Goes to the wallet of whoever deployed the contract
-     * @param quantity the quantity to mint
      */
-    function teamMint(uint256 quantity) external onlyOwner {
-        require(
-            totalSupply() + quantity <= amountForTeam,
-            "too many already minted or quantity exceeds amountForTeam"
-        );
-        _safeMint(msg.sender, quantity);
+    function teamMint() external onlyOwner {
+        require(totalSupply() == 0, "Too many NFTs already minted");
+        _safeMint(msg.sender, amountForTeam);
     }
 
-    // REVEAL PLACEHOLDER URI
+    // function teamMint(uint256 quantity) external onlyOwner {
+    //     require(
+    //         totalSupply() + quantity <= amountForTeam,
+    //         "too many already minted or quantity exceeds amountForTeam"
+    //     );
+    //     _safeMint(msg.sender, quantity);
+    // }
+
     string private _baseTokenURI;
 
     /**
@@ -358,7 +358,7 @@ contract AvvenireTest is
     /**
      * @notice takes in a tokenID and returns a TokenOwnership struct, which contains the owner's address
      * and the time they acquired the token
-     * @param tokenId intuitive...
+     * @param tokenId the tokenID
      */
     function getOwnershipData(
         uint256 tokenId // storing all the old ownership
