@@ -24,7 +24,8 @@ contract AvvenireTest is
     uint256 public immutable amountForTeam; // Amount of NFTs for team
     uint256 public immutable amountForAuctionAndDev; // Amount of NFTs for the team and auction
     uint256 public immutable collectionSize; // Total collection size
-    uint256 public immutable maxBatchSize;
+    uint256 public immutable maxBatchPublic;
+    uint256 public immutable maxBatchWhiteList;
 
     address immutable devAddress;
     uint256 immutable paymentToDevs;
@@ -45,7 +46,7 @@ contract AvvenireTest is
 
     /**
      * @notice Constructor calls on ERC721A constructor and sets the previously defined global variables
-     * @param maxBatchSize_ the number for the max batch size and max # of NFTs per address duriing mint
+     * @param maxBatchPublic_ the number for the max batch size and max # of NFTs per address duriing mint
      * @param collectionSize_ used in require statement to make sure that auction is <= collectionSize_
      * @param amountForTeam_ # of NFTs for the team
      * @param amountForAuctionAndDev_ specifies total amount to auction
@@ -53,18 +54,20 @@ contract AvvenireTest is
      * @param paymentToDevs_ payment to devs
      */
     constructor(
-        uint256 maxBatchSize_,
+        uint256 maxBatchPublic_,
+        uint256 maxBatchWhiteList_,
         uint256 collectionSize_,
         uint256 amountForAuctionAndDev_,
         uint256 amountForTeam_,
         address devAddress_,
         uint256 paymentToDevs_
     ) ERC721A("Azuki", "AZUKI") {
-        maxPerAddressDuringMint = maxBatchSize_;
+        maxPerAddressDuringMint = maxBatchPublic_;
         amountForAuctionAndDev = amountForAuctionAndDev_;
         amountForTeam = amountForTeam_;
         collectionSize = collectionSize_;
-        maxBatchSize = maxBatchSize_;
+        maxBatchPublic = maxBatchPublic_;
+        maxBatchWhiteList = maxBatchWhiteList_;
 
         // Assign dev address and payment
         devAddress = devAddress_;
@@ -120,13 +123,13 @@ contract AvvenireTest is
         require(allowlist[msg.sender] > 0, "not eligible for allowlist mint"); // this also checks the decrement
         // need a require statement to make sure that quantity is less than the limit for each user
         require(
-            totalSupply() + quanitty <= collectionSize,
+            totalSupply() + quantity <= collectionSize,
             "reached max supply"
         );
-        allowlist[msg.sender] = allowList[msg.sender] - quantity;
+        allowlist[msg.sender] = allowlist[msg.sender] - quantity;
         _safeMint(msg.sender, quantity);
         uint256 totalCost = quantity * price;
-        refundIfOver(totalCost); // make sure to refund the excess
+        refundIfOver(totalCost);
     }
 
     /**
@@ -294,18 +297,18 @@ contract AvvenireTest is
      * @notice function to mint for the team; Goes to the wallet of whoever deployed the contract
      * @param quantity the quantity to mint
      */
-    function devMint(uint256 quantity) external onlyOwner {
+    function teamMint(uint256 quantity) external onlyOwner {
         require(
             totalSupply() + quantity <= amountForTeam,
-            "too many already minted before dev mint"
+            "too many already minted or quantity exceeds amountForTeam"
         );
         require(
-            quantity % maxBatchSize == 0,
-            "can only mint a multiple of the maxBatchSize"
+            quantity % maxBatchPublic == 0,
+            "can only mint a multiple of the maxBatchPublic"
         );
-        uint256 numChunks = quantity / maxBatchSize;
+        uint256 numChunks = quantity / maxBatchPublic;
         for (uint256 i = 0; i < numChunks; i++) {
-            _safeMint(msg.sender, maxBatchSize);
+            _safeMint(msg.sender, maxBatchPublic);
         }
     }
 
