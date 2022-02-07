@@ -14,7 +14,12 @@ import "@openzeppelin/contracts/utils/Strings.sol";
 
 // ERC721AOwnersExplicit already inherits from ERC721A
 // Since it is an abstract contract do I need to make Azuki inherit both?
-contract Azuki is Ownable, ERC721A, ERC721AOwnersExplicit, ReentrancyGuard {
+contract AvvenireTest is
+    Ownable,
+    ERC721A,
+    ERC721AOwnersExplicit,
+    ReentrancyGuard
+{
     uint256 public immutable maxPerAddressDuringMint; // constant for later assignment>?t
     uint256 public immutable amountForDevs; // Specifiy amount minted for Devs
     uint256 public immutable amountForAuctionAndDev; // this name should change to just amountForAuction
