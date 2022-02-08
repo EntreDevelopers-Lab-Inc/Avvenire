@@ -20,7 +20,7 @@ contract AvvenireTest is
     ERC721AOwnersExplicit,
     ReentrancyGuard
 {
-    uint256 public immutable maxPerAddressDuringMint; // constant for later assignment>?t
+    uint256 public immutable maxPerAddressDuringAuction; // constant for later assignment>?t
     uint256 public immutable amountForTeam; // Amount of NFTs for team
     uint256 public immutable amountForAuctionAndDev; // Amount of NFTs for the team and auction
     uint256 public immutable collectionSize; // Total collection size
@@ -40,40 +40,46 @@ contract AvvenireTest is
     }
 
     SaleConfig public saleConfig; // use the struct as a constant (why make it public?)
-    // struct is made public so frontend can query the the current price
+    // struct is made public so frontend can query
 
     // Whitelist mapping (address => amount they can mint)
     mapping(address => uint256) public allowlist;
-    mapping(address => uint256) public totalPaid;
+
+    //Do I need to keep public?
+    // Private or internal?
+    mapping(address => uint256) private totalPaid;
 
     // Assigned at end of dutch auction
     uint256 public endingPrice;
 
     /**
      * @notice Constructor calls on ERC721A constructor and sets the previously defined global variables
-     * @param maxBatchPublic_ the number for the max batch size and max # of NFTs per address duriing mint
-     * @param collectionSize_ used in require statement to make sure that auction is <= collectionSize_
-     * @param amountForTeam_ # of NFTs for the team
+     * @param maxPerAddressDuringAuction_ the number for the max batch size and max # of NFTs per address during the auction
+     * @param maxPerAddressDuringWhiteList_ the number for the max batch size and max # of NFTs per address during the whiteList
+     * @param collectionSize_ the number of NFTs in the collection
+     * @param amountForTeam_ the number of NFTs for the team
      * @param amountForAuctionAndDev_ specifies total amount to auction
      * @param devAddress_ address of devs
      * @param paymentToDevs_ payment to devs
      */
     constructor(
-        uint256 maxBatchPublic_,
-        uint256 maxBatchWhiteList_,
+        uint256 maxPerAddressDuringAuction_,
+        uint256 maxPerAddressDuringWhiteList_,
         uint256 collectionSize_,
         uint256 amountForAuctionAndDev_,
         uint256 amountForTeam_,
         address devAddress_,
         uint256 paymentToDevs_
     ) ERC721A("Azuki", "AZUKI") {
-        maxPerAddressDuringMint = maxBatchPublic_;
+        maxPerAddressDuringAuction = maxPerAddressDuringAuction_;
+        maxPerAddressDuringWhiteList = maxPerAddressDuringWhiteList_;
         amountForAuctionAndDev = amountForAuctionAndDev_;
         amountForTeam = amountForTeam_;
         collectionSize = collectionSize_;
+
+        // Likely do not need these max batch variables
         // maxBatchPublic = maxBatchPublic_;
         // maxBatchWhiteList = maxBatchWhiteList_;
-        maxPerAddressDuringWhiteList = maxBatchWhiteList_;
 
         // Assign dev address and payment
         devAddress = devAddress_;
@@ -109,8 +115,7 @@ contract AvvenireTest is
             "not enough remaining reserved for auction to support desired mint amount"
         );
         require(
-            numberMinted(msg.sender) + quantity <= maxPerAddressDuringMint, // make sure they are not trying to mint too many --> note: this is going to need to be different in our case as the whitelisted users have different mint amounts
-            // the way the whiteList is set below, you can set different mint amounts to a given address - Daniel
+            numberMinted(msg.sender) + quantity <= maxPerAddressDuringAuction, // make sure they are not trying to mint too many --> note: this is going to need to be different in our case as the whitelisted users have different mint amounts
             "can not mint this many"
         );
         uint256 totalCost = getAuctionPrice(_saleStartTime) * quantity; // total amount of ETH needed for the transaction
@@ -130,8 +135,7 @@ contract AvvenireTest is
      * @notice function to mint for allow list
      * @param quantity amount to mint for whitelisted users
      */
-    function allowlistMint(uint256 quantity) external payable callerIsUser {
-        // this should take a quantity argument to allow whitelists to get more
+    function whiteListMint(uint256 quantity) external payable callerIsUser {
         uint256 price = uint256(saleConfig.mintlistPrice);
         require(price != 0, "Allowlist sale has not begun yet");
         require(allowlist[msg.sender] > 0, "not eligible for allowlist mint"); // this also checks the decrement
@@ -188,7 +192,7 @@ contract AvvenireTest is
             "reached max supply"
         );
         require(
-            numberMinted(msg.sender) + quantity <= maxPerAddressDuringMint,
+            numberMinted(msg.sender) + quantity <= maxPerAddressDuringAuction,
             "can not mint this many"
         );
         _safeMint(msg.sender, quantity);
@@ -221,7 +225,7 @@ contract AvvenireTest is
      * Have to wait for all users to call refund() before being able to withdraw funds
      * PROBLEM: there is no way to iterate through a mapping
      */
-    function refund() external {
+    function refundMe() external {
         uint256 actualCost = endingPrice * numberMinted(msg.sender);
         int256 reimbursement = int256(totalPaid[msg.sender]) -
             int256(actualCost);
@@ -459,6 +463,10 @@ contract AvvenireTest is
         uint256 tokenId // storing all the old ownership
     ) external view returns (TokenOwnership memory) {
         return ownershipOf(tokenId); // get historic ownership
+    }
+
+    function getEndingPrice() public view returns (uint256) {
+        return endingPrice;
     }
 }
 
