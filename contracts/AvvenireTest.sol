@@ -21,12 +21,13 @@ contract AvvenireTest is
     ReentrancyGuard
 {
     uint256 public immutable maxPerAddressDuringAuction; // constant for later assignment>?t
+    uint256 public immutable maxPerAddressDuringWhiteList;
+
     uint256 public immutable amountForTeam; // Amount of NFTs for team
     uint256 public immutable amountForAuctionAndDev; // Amount of NFTs for the team and auction
     uint256 public immutable collectionSize; // Total collection size
     //uint256 public immutable maxBatchPublic;
     // uint256 public immutable maxBatchWhiteList;
-    uint256 public immutable maxPerAddressDuringWhiteList;
 
     address immutable devAddress;
     uint256 immutable paymentToDevs;
@@ -58,7 +59,7 @@ contract AvvenireTest is
      * @param maxPerAddressDuringWhiteList_ the number for the max batch size and max # of NFTs per address during the whiteList
      * @param collectionSize_ the number of NFTs in the collection
      * @param amountForTeam_ the number of NFTs for the team
-     * @param amountForAuctionAndDev_ specifies total amount to auction
+     * @param amountForAuctionAndTeam_ specifies total amount to auction + the total amount for the team
      * @param devAddress_ address of devs
      * @param paymentToDevs_ payment to devs
      */
@@ -66,14 +67,16 @@ contract AvvenireTest is
         uint256 maxPerAddressDuringAuction_,
         uint256 maxPerAddressDuringWhiteList_,
         uint256 collectionSize_,
-        uint256 amountForAuctionAndDev_,
+        uint256 amountForAuctionAndTeam_,
         uint256 amountForTeam_,
         address devAddress_,
         uint256 paymentToDevs_
     ) ERC721A("Azuki", "AZUKI") {
         maxPerAddressDuringAuction = maxPerAddressDuringAuction_;
         maxPerAddressDuringWhiteList = maxPerAddressDuringWhiteList_;
-        amountForAuctionAndDev = amountForAuctionAndDev_;
+        maxPerAddressDuringMint = maxPerAddressDuringMint_;
+
+        amountForAuctionAndTeam = amountForAuctionAndTeam_;
         amountForTeam = amountForTeam_;
         collectionSize = collectionSize_;
 
@@ -86,7 +89,7 @@ contract AvvenireTest is
         paymentToDevs = paymentToDevs_;
 
         require(
-            amountForAuctionAndDev_ <= collectionSize_, // make sure that the collection can handle the size of the auction
+            amountForAuctionAndTeam_ <= collectionSize_, // make sure that the collection can handle the size of the auction
             "larger collection size needed"
         );
     }
@@ -111,7 +114,7 @@ contract AvvenireTest is
             "sale has not started yet"
         );
         require(
-            totalSupply() + quantity <= amountForAuctionAndDev, // supply left and quantity minted is less than the limit
+            totalSupply() + quantity <= amountForAuctionAndTeam,
             "not enough remaining reserved for auction to support desired mint amount"
         );
         require(
@@ -136,6 +139,7 @@ contract AvvenireTest is
      * @param quantity amount to mint for whitelisted users
      */
     function whiteListMint(uint256 quantity) external payable callerIsUser {
+        // Sets the price to the mintlistPrice, which was set by endAuctionAndSetupNonAuctionSaleInfo(...)
         uint256 price = uint256(saleConfig.mintlistPrice);
 
         require(price != 0, "Allowlist sale has not begun yet");
@@ -159,9 +163,6 @@ contract AvvenireTest is
         uint256 totalCost = quantity * price;
 
         refundIfOver(totalCost);
-
-        //Add to totalPaid mapping
-        totalPaid[msg.sender] = totalPaid[msg.sender] + totalCost;
     }
 
     /**
@@ -179,9 +180,9 @@ contract AvvenireTest is
         uint256 publicPrice = uint256(config.publicPrice); // get the price configuration
         uint256 publicSaleStartTime = uint256(config.publicSaleStartTime);
         require(
-            publicSaleKey == callerPublicSaleKey, // wouldn't this be publicly available because the struct is public?
-            // likely; any variable is technically public on the blockchain.  private just means it can't be used by other contracts
-            // publicSaleKey is likely the password used to be able to mint??? Unsure to be honest
+            publicSaleKey == callerPublicSaleKey,
+            // publicSaleKey is likely the password used to be able to mint???
+            // we can just set our struct to internal...
             "called with incorrect public sale key"
         );
 
@@ -194,14 +195,13 @@ contract AvvenireTest is
             "reached max supply"
         );
         require(
-            numberMinted(msg.sender) + quantity <= maxPerAddressDuringAuction,
+            numberMinted(msg.sender) + quantity <= maxPerAddressDuringMint,
             "can not mint this many"
         );
         _safeMint(msg.sender, quantity);
 
         uint256 totalCost = publicPrice * quantity;
         refundIfOver(totalCost);
-        totalPaid[msg.sender] = totalPaid[msg.sender] + totalCost;
 
         // Update ending price if totalSupply() == amountForAuctionAndDev
         if (totalSupply() == amountForAuctionAndDev) {
@@ -252,32 +252,6 @@ contract AvvenireTest is
         require(success, "Refund failed");
 
         totalPaid[toRefund] = 0;
-    }
-
-    // How could you possibly iterate through the
-    function refundAll(address[] memory addresses)
-        external
-        onlyOwner
-        nonReentrant
-    {
-        require(addresses.length > 0, "Not valid array of addresses");
-
-        for (uint256 i = 0; i < addresses.length; i++) {
-            uint256 actualCost = endingPrice * numberMinted(addresses[i]);
-            int256 reimbursement = int256(totalPaid[addresses[i]]) -
-                int256(actualCost);
-
-            if (totalPaid[addresses[i]] > actualCost) {
-                // Send refund
-                (bool success, ) = msg.sender.call{
-                    value: uint256(reimbursement)
-                }("");
-                // Wait for confirmation
-                require(success, "Refund failed");
-                // Reset total payment to 0
-                totalPaid[addresses[i]] = 0;
-            }
-        }
     }
 
     /**
