@@ -137,7 +137,9 @@ contract AvvenireTest is
      */
     function whiteListMint(uint256 quantity) external payable callerIsUser {
         uint256 price = uint256(saleConfig.mintlistPrice);
+
         require(price != 0, "Allowlist sale has not begun yet");
+
         require(allowlist[msg.sender] > 0, "not eligible for allowlist mint"); // this also checks the decrement
         // need a require statement to make sure that quantity is less than the limit for each user
         require(
@@ -150,16 +152,16 @@ contract AvvenireTest is
         );
 
         allowlist[msg.sender] = allowlist[msg.sender] - quantity;
+
         _safeMint(msg.sender, quantity);
+
+        // Give a 30% discount compared to the dutch auction
         uint256 totalCost = quantity * price;
+
         refundIfOver(totalCost);
+
         //Add to totalPaid mapping
         totalPaid[msg.sender] = totalPaid[msg.sender] + totalCost;
-
-        // Update ending price if totalSupply() == amountForAuctionAndDev
-        if (totalSupply() == amountForAuctionAndDev) {
-            endingPrice = price;
-        }
     }
 
     /**
@@ -238,7 +240,8 @@ contract AvvenireTest is
     }
 
     /**
-     * Could possibly write script to call this repeatedly instead...
+     * @notice function to refund all users on the price they paid
+     * @param toRefund the address to refund
      */
     function refund(address toRefund) external {
         uint256 actualCost = endingPrice * numberMinted(toRefund);
@@ -365,17 +368,9 @@ contract AvvenireTest is
      * @param addresses the whitelist addresses
      * @param numSlots the respective number of NFTs that they can mint
      */
-    function seedAllowlist(
-        address[] memory addresses,
-        uint256[] memory numSlots
-    ) external onlyOwner {
-        require(
-            addresses.length == numSlots.length,
-            "addresses does not match numSlots length"
-        );
+    function seedWhitelist(address[] memory addresses) external onlyOwner {
         for (uint256 i = 0; i < addresses.length; i++) {
-            allowlist[addresses[i]] = numSlots[i]; // why not just set all of them to the same number?
-            // Likely wanted to give some people (maybe even themselves) the ability to mint more @ whitelist - Daniel
+            allowlist[addresses[i]] = maxPerAddressDuringWhiteList;
         }
     }
 
@@ -465,6 +460,9 @@ contract AvvenireTest is
         return ownershipOf(tokenId); // get historic ownership
     }
 
+    /**
+     * @notice function needs to be deleted during deployment
+     */
     function getEndingPrice() public view returns (uint256) {
         return endingPrice;
     }
