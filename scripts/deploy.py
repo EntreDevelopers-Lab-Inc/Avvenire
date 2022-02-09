@@ -1,31 +1,36 @@
-from brownie import accounts, Avvenire, network
+from brownie import AvvenireTest
+from scripts.helpful_scripts import get_account, get_dev_account
+from web3 import Web3
 
 
 def deploy_avvenire():
-    # Gets the appropiate account
     account = get_account()
-    avvenire_contract = Avvenire.deploy("Avvenire", "AVV", {"from": account})
+
+    # Parameters for Avvenire contract:
+    # uint256 maxPerAddressDuringAuction_, uint256 maxPerAddressDuringWhiteList_,
+    # uint256 collectionSize_, uint256 amountForAuctionAndTeam_,
+    # uint256 amountForTeam_, address devAddress_, uint256 paymentToDevs_
+
+    maxPerAddressDuringAuction = 3
+    maxPerAddressDuringWhiteList = 2
+    collectionSize = 20
+    amountForAuctionAndTeam = 15
+    amountForTeam = 5
+    devAddress = get_dev_account()
+    paymentToDevs = Web3.toWei(2, "ether")
+
+    avvenire_contract = AvvenireTest.deploy(
+        maxPerAddressDuringAuction,
+        maxPerAddressDuringWhiteList,
+        collectionSize,
+        amountForAuctionAndTeam,
+        amountForTeam,
+        devAddress,
+        paymentToDevs,
+        {"from": account},
+    )
+
     print(f"Contract deployed to {avvenire_contract.address}")
-
-    transaction1 = avvenire_contract.setMintStatus(True)
-    transaction1.wait(1)
-
-    transaction2 = avvenire_contract.safeMint(
-        "0x851582A0BC7B2F73F9D3D8AA78AAA43E91AC84D7", 10
-    )
-    transaction2.wait(1)
-
-    number_minted = avvenire_contract.numberMinted(
-        "0x851582A0BC7B2F73F9D3D8AA78AAA43E91AC84D7"
-    )
-    print(number_minted)
-
-
-def get_account():
-    if network.show_active() == "development":
-        return accounts[0]
-    else:
-        return accounts.load("testNetworkAccount")
 
 
 def main():

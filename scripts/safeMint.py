@@ -1,14 +1,14 @@
-from brownie import Avvenire, accounts
+from brownie import AvvenireTest, accounts
 
 
 def safe_mint(x):
     # Avvenire[-1] returns the most recent deployment
-    avvenire_contract = Avvenire[-1]
+    avvenire_contract = AvvenireTest[-1]
     # ABI
 
     # Address
-    print(avvenire_contract.safeMint(x))
+    avvenire_contract.safeMint(x)
 
 
 def main():
-    safe_mint()
+    safe_mint(5)
