@@ -24,7 +24,7 @@ contract AvvenireTest is
     uint256 public immutable maxPerAddressDuringWhiteList;
 
     uint256 public immutable amountForTeam; // Amount of NFTs for team
-    uint256 public immutable amountForAuctionAndDev; // Amount of NFTs for the team and auction
+    uint256 public immutable amountForAuctionAndTeam; // Amount of NFTs for the team and auction
     uint256 public immutable collectionSize; // Total collection size
     //uint256 public immutable maxBatchPublic;
     // uint256 public immutable maxBatchWhiteList;
@@ -50,9 +50,6 @@ contract AvvenireTest is
     // Private or internal?
     mapping(address => uint256) private totalPaid;
 
-    // Assigned at end of dutch auction
-    uint256 public endingPrice;
-
     /**
      * @notice Constructor calls on ERC721A constructor and sets the previously defined global variables
      * @param maxPerAddressDuringAuction_ the number for the max batch size and max # of NFTs per address during the auction
@@ -74,7 +71,6 @@ contract AvvenireTest is
     ) ERC721A("Azuki", "AZUKI") {
         maxPerAddressDuringAuction = maxPerAddressDuringAuction_;
         maxPerAddressDuringWhiteList = maxPerAddressDuringWhiteList_;
-        maxPerAddressDuringMint = maxPerAddressDuringMint_;
 
         amountForAuctionAndTeam = amountForAuctionAndTeam_;
         amountForTeam = amountForTeam_;
@@ -109,6 +105,7 @@ contract AvvenireTest is
     function auctionMint(uint256 quantity) external payable callerIsUser {
         uint256 _saleStartTime = uint256(saleConfig.auctionSaleStartTime);
         // the auction can start at a particular time --> this allows the contract to be deployed ahead of time and activated later
+
         require(
             _saleStartTime != 0 && block.timestamp >= _saleStartTime,
             "sale has not started yet"
@@ -127,11 +124,6 @@ contract AvvenireTest is
 
         //Add to totalPaid
         totalPaid[msg.sender] = totalPaid[msg.sender] + totalCost;
-
-        // Update ending price if totalSupply() == amountForAuctionAndDev
-        if (totalSupply() == amountForAuctionAndDev) {
-            endingPrice = getAuctionPrice(_saleStartTime);
-        }
     }
 
     /**
@@ -194,19 +186,14 @@ contract AvvenireTest is
             totalSupply() + quantity <= collectionSize,
             "reached max supply"
         );
-        require(
-            numberMinted(msg.sender) + quantity <= maxPerAddressDuringMint,
-            "can not mint this many"
-        );
+        // require(
+        //     numberMinted(msg.sender) + quantity <= maxPerAddressDuringMint,
+        //     "can not mint this many"
+        // );
         _safeMint(msg.sender, quantity);
 
         uint256 totalCost = publicPrice * quantity;
         refundIfOver(totalCost);
-
-        // Update ending price if totalSupply() == amountForAuctionAndDev
-        if (totalSupply() == amountForAuctionAndDev) {
-            endingPrice = publicPrice;
-        }
     }
 
     /**
@@ -228,6 +215,7 @@ contract AvvenireTest is
      * PROBLEM: there is no way to iterate through a mapping
      */
     function refundMe() external {
+        uint256 endingPrice = saleConfig.publicPrice;
         uint256 actualCost = endingPrice * numberMinted(msg.sender);
         int256 reimbursement = int256(totalPaid[msg.sender]) -
             int256(actualCost);
@@ -240,10 +228,11 @@ contract AvvenireTest is
     }
 
     /**
-     * @notice function to refund all users on the price they paid
+     * @notice function to refund user on the price they paid
      * @param toRefund the address to refund
      */
-    function refund(address toRefund) external {
+    function refund(address toRefund) external onlyOwner {
+        uint256 endingPrice = saleConfig.publicPrice;
         uint256 actualCost = endingPrice * numberMinted(toRefund);
         int256 reimbursement = int256(totalPaid[toRefund]) - int256(actualCost);
         require(reimbursement > 0, "Not eligible for a refund");
@@ -340,7 +329,6 @@ contract AvvenireTest is
      * @notice sets the whitelist w/ the respective amount of number of NFTs that each address can mint
      * Requires that the addresses[] and numSlots[] are the same length
      * @param addresses the whitelist addresses
-     * @param numSlots the respective number of NFTs that they can mint
      */
     function seedWhitelist(address[] memory addresses) external onlyOwner {
         for (uint256 i = 0; i < addresses.length; i++) {
@@ -432,13 +420,6 @@ contract AvvenireTest is
         uint256 tokenId // storing all the old ownership
     ) external view returns (TokenOwnership memory) {
         return ownershipOf(tokenId); // get historic ownership
-    }
-
-    /**
-     * @notice function needs to be deleted during deployment
-     */
-    function getEndingPrice() public view returns (uint256) {
-        return endingPrice;
     }
 }
 
