@@ -19,6 +19,8 @@ def deploy_avvenire():
     devAddress = get_dev_account()
     paymentToDevs = Web3.toWei(2, "ether")
 
+    # if not Web3.isAddress(devAddress):
+
     avvenire_contract = AvvenireTest.deploy(
         maxPerAddressDuringAuction,
         maxPerAddressDuringWhiteList,
