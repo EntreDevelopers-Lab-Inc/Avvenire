@@ -56,6 +56,12 @@ def team_mint():
     avvenire_contract.teamMint({"from": account})
 
 
+def auction_mint(quantity):
+    avvenire_contract = AvvenireTest[-1]
+    account = get_account()
+    avvenire_contract.auctionMint(quantity)
+
+
 # All queryable, view functions*
 
 
