@@ -85,7 +85,7 @@ def end_auction(ending_auction_price, time_from_epoch):
     if not isinstance(ending_auction_price, int):
         raise ValueError("ending_auction_price isn't an int")
     if not isinstance(time_from_epoch, int):
-        raise ValueError("public_sale_start_time isn't an int")
+        raise ValueError("time_from_epoch isn't an int")
     avvenire_contract = AvvenireTest[-1]
     account = get_account()
     whitelist_price = int(WHITELIST_DISCOUNT * ending_auction_price)
@@ -199,9 +199,20 @@ def is_public_sale_on(public_price_eth, public_sale_key, public_start_time):
     )
 
 
-def get_auction_price(time):
+def get_auction_price(time_from_epoch):
+    if not isinstance(time_from_epoch, int):
+        raise ValueError("time_from_epoch isn't an int")
+
     avvenire_contract = AvvenireTest[-1]
-    return avvenire_contract.getAuctionPrice(time)
+    start_time = None
+
+    if network.show_active() in LOCAL_BLOCKCHAIN_ENVIRONMENTS:
+        start_time = chain.time() + time_from_epoch
+    else:
+        most_recent_block = Web3.eth.get_block("latest")
+        start_time = most_recent_block["timestamp"] + time_from_epoch
+
+    return avvenire_contract.getAuctionPrice(start_time)
 
 
 def get_base_uri():

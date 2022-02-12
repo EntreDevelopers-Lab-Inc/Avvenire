@@ -267,8 +267,8 @@ contract AvvenireTest is
 
     uint256 public constant AUCTION_START_PRICE = 1 ether; // start price
     uint256 public constant AUCTION_END_PRICE = 0.2 ether; // floor price
-    uint256 public constant AUCTION_PRICE_CURVE_LENGTH = 340 minutes; // total time of the auction
-    uint256 public constant AUCTION_DROP_INTERVAL = 20 minutes; // after 20 minutes, drop one time block
+    uint256 public constant AUCTION_PRICE_CURVE_LENGTH = 60 minutes; // total time of the auction
+    uint256 public constant AUCTION_DROP_INTERVAL = 7.5 minutes; 
     uint256 public constant AUCTION_DROP_PER_STEP =
         (AUCTION_START_PRICE - AUCTION_END_PRICE) /
             (AUCTION_PRICE_CURVE_LENGTH / AUCTION_DROP_INTERVAL); // how much the auction will drop the price per unit of time
