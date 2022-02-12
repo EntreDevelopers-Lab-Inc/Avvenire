@@ -1,5 +1,9 @@
-from brownie import AvvenireTest, chain
-from scripts.helpful_scripts import get_account, get_dev_account
+from brownie import AvvenireTest, chain, network
+from scripts.helpful_scripts import (
+    get_account,
+    get_dev_account,
+    LOCAL_BLOCKCHAIN_ENVIRONMENTS,
+)
 from web3 import Web3
 
 WHITELIST_DISCOUNT = 0.7
@@ -51,10 +55,16 @@ def set_auction_start_time(time_from_epoch):
         raise ValueError("Start time isn't an int")
     avvenire_contract = AvvenireTest[-1]
     account = get_account()
-    start_time = chain.time() + time_from_epoch
-    avvenire_contract.setAuctionSaleStartTime(start_time, {"from": account})
 
-    # setPublicSaleKey
+    start_time = None
+
+    if network.show_active() in LOCAL_BLOCKCHAIN_ENVIRONMENTS:
+        start_time = chain.time() + time_from_epoch
+    else:
+        most_recent_block = Web3.eth.get_block("latest")
+        start_time = most_recent_block["timestamp"]
+
+    avvenire_contract.setAuctionSaleStartTime(start_time, {"from": account})
 
 
 def set_public_sale_key(public_key):
@@ -80,7 +90,13 @@ def end_auction(ending_auction_price, time_from_epoch):
     account = get_account()
     whitelist_price = int(WHITELIST_DISCOUNT * ending_auction_price)
 
-    public_sale_start_time = chain.time() + time_from_epoch
+    public_sale_start_time = None
+
+    if network.show_active() in LOCAL_BLOCKCHAIN_ENVIRONMENTS:
+        public_sale_start_time = chain.time() + time_from_epoch
+    else:
+        most_recent_block = Web3.eth.get_block("latest")
+        public_sale_start_time = most_recent_block["timestamp"]
 
     avvenire_contract.endAuctionAndSetupNonAuctionSaleInfo(
         whitelist_price, ending_auction_price, public_sale_start_time, {"from": account}
