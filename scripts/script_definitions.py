@@ -1,4 +1,4 @@
-from brownie import AvvenireTest
+from brownie import AvvenireTest, chain
 from scripts.helpful_scripts import get_account, get_dev_account
 from web3 import Web3
 
@@ -46,11 +46,12 @@ def deploy_contract():
 
 
 # Might be better to get the current time_stamp then add to start_time
-def set_auction_start_time(start_time):
-    if not isinstance(start_time, int):
+def set_auction_start_time(time_from_epoch):
+    if not isinstance(time_from_epoch, int):
         raise ValueError("Start time isn't an int")
     avvenire_contract = AvvenireTest[-1]
     account = get_account()
+    start_time = chain.time() + time_from_epoch
     avvenire_contract.setAuctionSaleStartTime(start_time, {"from": account})
 
     # setPublicSaleKey
@@ -70,14 +71,16 @@ def set_base_uri(baseURI):
     avvenire_contract.setBaseURI(baseURI, {"from": account})
 
 
-def end_auction(ending_auction_price, public_sale_start_time):
+def end_auction(ending_auction_price, time_from_epoch):
     if not isinstance(ending_auction_price, int):
         raise ValueError("ending_auction_price isn't an int")
-    if not isinstance(public_sale_start_time, int):
+    if not isinstance(time_from_epoch, int):
         raise ValueError("public_sale_start_time isn't an int")
     avvenire_contract = AvvenireTest[-1]
     account = get_account()
     whitelist_price = int(WHITELIST_DISCOUNT * ending_auction_price)
+
+    public_sale_start_time = chain.time() + time_from_epoch
 
     avvenire_contract.endAuctionAndSetupNonAuctionSaleInfo(
         whitelist_price, ending_auction_price, public_sale_start_time, {"from": account}
