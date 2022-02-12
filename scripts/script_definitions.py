@@ -47,7 +47,8 @@ def deploy_contract():
 
 # Might be better to get the current time_stamp then add to start_time
 def set_auction_start_time(start_time):
-    assert isinstance(start_time, int)
+    if not isinstance(start_time, int):
+        raise ValueError("Start time isn't an int")
     avvenire_contract = AvvenireTest[-1]
     account = get_account()
     avvenire_contract.setAuctionSaleStartTime(start_time, {"from": account})
@@ -56,7 +57,8 @@ def set_auction_start_time(start_time):
 
 
 def set_public_sale_key(public_key):
-    assert isinstance(public_key, int)
+    if not isinstance(public_key, int):
+        raise ValueError("Public key isn't an int")
     avvenire_contract = AvvenireTest[-1]
     account = get_account()
     avvenire_contract.setPublicSaleKey(public_key, {"from": account})
@@ -69,8 +71,10 @@ def set_base_uri(baseURI):
 
 
 def end_auction(ending_auction_price, public_sale_start_time):
-    assert isinstance(ending_auction_price, int)
-    assert isinstance(public_sale_start_time, int)
+    if not isinstance(ending_auction_price, int):
+        raise ValueError("ending_auction_price isn't an int")
+    if not isinstance(public_sale_start_time, int):
+        raise ValueError("public_sale_start_time isn't an int")
     avvenire_contract = AvvenireTest[-1]
     account = get_account()
     whitelist_price = int(WHITELIST_DISCOUNT * ending_auction_price)
@@ -114,10 +118,12 @@ def public_mint(quantity, sale_key):
 
 
 def seed_whitelist(whitelist):
-    assert isinstance(whitelist, list)
+    if not isinstance(whitelist, list):
+        raise ValueError("whitelist argument is not a list")
 
-    for address_ in whitelist:
-        assert Web3.isAddress(address_)
+    for index, address_ in enumerate(whitelist):
+        if not Web3.isAddress(address_):
+            raise ValueError(f"Address #{index} is invalid in whitelist")
 
     avvenire_contract = AvvenireTest[-1]
     account = get_account()
@@ -125,7 +131,8 @@ def seed_whitelist(whitelist):
 
 
 def remove_from_whitelist(to_remove):
-    assert Web3.isAddress(to_remove)
+    if not Web3.isAddress(to_remove):
+        raise ValueError("to_remove is not a valid address")
     avvenire_contract = AvvenireTest[-1]
     account = get_account()
     avvenire_contract.removeFromWhitelist(to_remove, {"from": account})
@@ -134,13 +141,15 @@ def remove_from_whitelist(to_remove):
 # Refund all function
 # @param the list/array that contains the addresses to refund
 def refund_all(refund_list):
-    assert isinstance(refund_list, list)
+    if not isinstance(refund_list, list):
+        raise ValueError("refund_list is not a list")
     avvenire_contract = AvvenireTest[-1]
     account = get_account()
 
-    for to_refund in refund_list:
+    for index, to_refund in enumerate(refund_list):
         # Throws error if to_refund is not an address
-        assert Web3.isAddress(to_refund)
+        if not Web3.isAddress(to_refund):
+            raise ValueError(f"Address #{index} is invalid in refund_list")
         avvenire_contract.refund(to_refund, {"from": account})
 
 
