@@ -62,7 +62,7 @@ def set_auction_start_time(time_from_epoch):
         start_time = chain.time() + time_from_epoch
     else:
         most_recent_block = Web3.eth.get_block("latest")
-        start_time = most_recent_block["timestamp"]
+        start_time = most_recent_block["timestamp"] + time_from_epoch
 
     avvenire_contract.setAuctionSaleStartTime(start_time, {"from": account})
 
@@ -96,7 +96,7 @@ def end_auction(ending_auction_price, time_from_epoch):
         public_sale_start_time = chain.time() + time_from_epoch
     else:
         most_recent_block = Web3.eth.get_block("latest")
-        public_sale_start_time = most_recent_block["timestamp"]
+        public_sale_start_time = most_recent_block["timestamp"] + time_from_epoch
 
     avvenire_contract.endAuctionAndSetupNonAuctionSaleInfo(
         whitelist_price, ending_auction_price, public_sale_start_time, {"from": account}
