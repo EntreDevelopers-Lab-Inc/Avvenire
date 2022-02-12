@@ -216,6 +216,7 @@ contract AvvenireTest is
      * NOT IDEAL IMPLEMENTATION
      * Have to wait for all users to call refund() before being able to withdraw funds
      * PROBLEM: there is no way to iterate through a mapping
+     * SUSCEPTIBLE TO HACKS 
      */
     function refundMe() external {
         uint256 endingPrice = saleConfig.publicPrice;
@@ -343,13 +344,13 @@ contract AvvenireTest is
      * @notice Removes a user from the whitelist
      * @param toRemove the public address of the user
      */
-    function removeFromAllowList(address toRemove) external onlyOwner {
+    function removeFromWhitelist(address toRemove) external onlyOwner {
         require(allowlist[toRemove] > 0, "User already minted");
         allowlist[toRemove] = 0;
     }
 
     /**
-     * @notice function to mint for the team; Goes to the wallet of whoever deployed the contract
+     * @notice function to mint for the team
      */
     function teamMint() external onlyOwner {
         require(totalSupply() == 0, "NFTs already minted");
