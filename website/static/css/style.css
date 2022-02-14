@@ -6373,6 +6373,19 @@ ul li:nth-of-type(2) {
 ul li:nth-of-type(3) {
     animation-delay: 1s;
 }
+
+ul li:nth-of-type(4) {
+    animation-delay: 1.25s;
+}
+
+ul li:nth-of-type(5) {
+    animation-delay: 1.50s;
+}
+
+ul li:nth-of-type(6) {
+    animation-delay: 1.75s;
+}
+
 ul li:last-of-type {
     padding-bottom: 0;
 }
