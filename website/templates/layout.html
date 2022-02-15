@@ -62,10 +62,9 @@
        </a>
       </li>
       <li class="nav-item">
-       <a class="nav-link" href="{{url_for('home')}}#faq">
+       <a class="nav-link" href="{{url_for('home')}}#art">
         FAQ
        </a>
-      </li>
       </li>
       <li class="nav-item">
        <a class="nav-link" href="{{url_for('home')}}#team">
@@ -74,7 +73,7 @@
       </li>
       {% if logged_in %}
       <li class="nav-item">
-       <a class="nav-link" href="{{url_for('logout')}}">
+       <a class="nav-link nav-link--custom" href="{{url_for('logout')}}">
         Disconnect Wallet
        </a>
       </li>

@@ -1,3 +1,4 @@
+eth-brownie
 pillow
 flask
 flask-restful
@@ -8,4 +9,3 @@ phonenumbers
 flask-jwt-extended
 eth-account
 web3
-PyJWT
