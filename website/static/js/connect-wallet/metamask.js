@@ -1,35 +1,10 @@
-let provider;
-let accounts;
-
-let accountAddress = "";
-let signer;
-
-async function connect()
-{
-    ethereum.request({ method: 'eth_requestAccounts' });
-
+// set the chain
+async function setChain() {
     try {
       await ethereum.request({
         method: 'wallet_switchEthereumChain',
-        params: [{ chainId: '0x1' }],
+        params: [{ chainId: CHAIN_ID }],
       });
-
-    fetch('login', {
-    method: 'post',
-    headers: {'Content-Type': 'application/json'},
-    body: JSON.stringify([ethereum.selectedAddress])
-  }).then((response) => {
-    return response.json();
-  })
-  .then((data) => {
-    // assign the cookie
-    if (data['token'] != null)
-    {
-        document.cookie = 'token=' + data['token'];
-        location.href = '/';
-    }
-
-  });
 
     } catch (switchError) {
       // This error code indicates that the chain has not been added to MetaMask.
@@ -39,7 +14,7 @@ async function connect()
             method: 'wallet_addEthereumChain',
             params: [
               {
-                chainId: '0xf00',
+                chainId: CHAIN_ID,
                 chainName: '...',
                 rpcUrls: ['https://...'] /* ... */,
               },
@@ -53,79 +28,33 @@ async function connect()
     }
 }
 
-/*
-function login()
+async function connect()
 {
+    ethereum.request({ method: 'eth_requestAccounts' });
 
-rightnow = (Date.now()/1000).toFixed(0)
-sortanow = rightnow-(rightnow%600)
+    // reload the page
+    window.location.reload();
 
-signer.signMessage("Signing in to Avvenire at "+sortanow, accountAddress, "")
-            .then((signature) => {               handleAuth(accountAddress, signature)
-            });
+
+    setChain();
 }
 
-function handleAuth(accountAddress, signature)
-{
-  fetch('login', {
-    method: 'post',
-    headers: {'Content-Type': 'application/json'},
-    body: JSON.stringify([accountAddress,signature])
-  }).then((response) => {
-    return response.json();
-  })
-  .then((data) => {
-    // assign the cookie
-    document.cookie = 'token=' + data['token'];
 
-    location.href = '/';
-  });
+// account change listener
+ethereum.on('accountsChanged', function (accounts) {
+    // set the correct chain
+    setChain();
+});
 
+// make a document load function
+function loadDocument() {
+    // remove the conenct wallet button if the user is already logged in
+    if (ethereum.selectedAddress != null)
+    {
+        $('#connect-btn').remove();
+    }
 }
 
-async function connect() {
-    ethereum.request({method: 'eth_requestAccounts'}).then(function () {
 
-        provider = new ethers.providers.Web3Provider(web3.currentProvider);
-
-
-        provider.getNetwork().then(function (result) {
-            if (result['chainId'] != 1) {  // chain ID remains the same regardless of the network choices of users (1 is always mainnet)
-                alert('Switch to Mainnet!');
-
-            } else { // okay, confirmed we're on mainnet
-
-                provider.listAccounts().then(function (result) {
-                    // accountAddress = result[0]; // figure out the user's Eth address
-
-                    // get a signer object so we can do things that need signing
-                    signer = provider.getSigner();
-
-                    // log the user in
-                    login();
-
-                    // redirect to home
-                })
-            }
-        })
-    })
-
-}
-*/
-// connect by default (disabled)
-// connect();
-
-/*
-web3.eth.getAccounts()
-        .then((response) => {
-            const publicAddressResponse = response[0];
-
-            if (!(typeof publicAddressResponse === "undefined")) {
-                setPublicAddress(publicAddressResponse);
-                getNonce(publicAddressResponse);
-            }
-        })
-        .catch((e) => {
-            console.error(e);
-        });
-*/
+// call the load document function
+loadDocument();
