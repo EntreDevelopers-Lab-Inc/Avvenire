@@ -21,36 +21,18 @@ def connect_wallet():
     return render_template('connect-wallet.html')
 
 
+# this just gets rid of the connect wallet page, not actually using the backend for contract interaction (can just pass the selected account's address directly if necessary)
 @app.route('/login', methods=['POST'])
 def login():
-
-    print("[+] creating session")
-
     public_address = request.json[0]
-    signature = request.json[1]
 
-    test_string = "Avvenire"
-
-    rightnow = int(time.time())
-    sortanow = rightnow - rightnow % 600
-
-    original_message = 'Signing in to {} at {}'.format(test_string, sortanow)
-    message_hash = defunct_hash_message(text=original_message)
-    signer = w3.eth.account.recoverHash(message_hash, signature=signature)
-
-    if signer == public_address:
-        print("[+] this is fine " + str(signer))
-        # account.nonce = account.generate_nonce()
-        # db.session.commit()
+    if public_address:
+        access_token = create_token({'identity': public_address})
     else:
-        abort(401, 'could not authenticate signature')
-
-    print("[+] OMG looks good")
-
-    access_token = create_token({'identity': public_address})
-    print(access_token)
+        access_token = None
 
     resp = jsonify({'login': True, 'token': access_token})
+
     return resp, 200
 
 
