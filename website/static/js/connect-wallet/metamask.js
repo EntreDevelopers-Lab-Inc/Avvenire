@@ -3,7 +3,7 @@ async function setChain() {
     try {
       await ethereum.request({
         method: 'wallet_switchEthereumChain',
-        params: [{ chainId: CHAIN_ID }],
+        params: [{ chainId: CHAIN_ID_STR }],
       });
 
     } catch (switchError) {
@@ -14,7 +14,7 @@ async function setChain() {
             method: 'wallet_addEthereumChain',
             params: [
               {
-                chainId: CHAIN_ID,
+                chainId: CHAIN_ID_STR,
                 chainName: '...',
                 rpcUrls: ['https://...'] /* ... */,
               },

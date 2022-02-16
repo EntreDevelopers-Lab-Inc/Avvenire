@@ -1,1 +1,1 @@
-// make a web3 instance
+// get everything (including the contract from contract.js)
