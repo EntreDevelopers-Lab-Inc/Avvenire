@@ -199,20 +199,9 @@ def is_public_sale_on(public_price_eth, public_sale_key, public_start_time):
     )
 
 
-def get_auction_price(time_from_epoch):
-    if not isinstance(time_from_epoch, int):
-        raise ValueError("time_from_epoch isn't an int")
-
+def get_auction_price():
     avvenire_contract = AvvenireTest[-1]
-    start_time = None
-
-    if network.show_active() in LOCAL_BLOCKCHAIN_ENVIRONMENTS:
-        start_time = chain.time() + time_from_epoch
-    else:
-        most_recent_block = Web3.eth.get_block("latest")
-        start_time = most_recent_block["timestamp"] + time_from_epoch
-
-    return avvenire_contract.getAuctionPrice(start_time)
+    return avvenire_contract.getAuctionPrice()
 
 
 def get_base_uri():
