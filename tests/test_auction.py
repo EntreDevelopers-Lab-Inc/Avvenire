@@ -7,7 +7,7 @@ from web3 import Web3
 from scripts.script_definitions import *
 from scripts.helpful_scripts import *
 
-SALE_START_TIME = 1
+SALE_START_TIME = 100
 
 
 @pytest.fixture(autouse=True)
@@ -37,77 +37,22 @@ def test_all_prices():
 
     # Initial price special case...
     if network.show_active() in LOCAL_BLOCKCHAIN_ENVIRONMENTS:
-        chain.mine(SALE_START_TIME + 5)
+        chain.sleep(SALE_START_TIME)
+        chain.mine(1)
     else:
         time.sleep(SALE_START_TIME + 5)
 
     assert Web3.fromWei(get_auction_price(), "ether") == 1
 
     for drops in range(1, 8):
-        # Add one when initial
-        drop_time = chain.time() + int(drops * 60 * 7.5)
+        drop_time = int(60 * 7.5)
         if network.show_active() in LOCAL_BLOCKCHAIN_ENVIRONMENTS:
-            chain.sleep(int(60 * 7.5))
-            chain.mine(1, drop_time + 100)
+            chain.sleep(drop_time)
+            chain.mine(1)
         else:
             time.sleep(60 * 7.5)
-        assert float(Web3.fromWei(get_auction_price(), "ether")) == (1 - 0.1 * drops)
-
-
-def test_first_drop():
-    # drop starts from epich + start_time + interval
-    drops = 1
-    drop_start = chain.time() + SALE_START_TIME + int(drops * 60 * 7.5)
-
-    if network.show_active() in LOCAL_BLOCKCHAIN_ENVIRONMENTS:
-        # chain.sleep(second_drop_start)
-        chain.mine(1, drop_start)
-    else:
-        time.sleep(drop_start + 5)
-
-    assert float(Web3.fromWei(get_auction_price(), "ether")) == 0.9
-
-
-def test_second_drop():
-    # drop starts from epich + start_time + interval
-    drops = 2
-    drop_start = chain.time() + SALE_START_TIME + int(drops * 60 * 7.5)
-
-    if network.show_active() in LOCAL_BLOCKCHAIN_ENVIRONMENTS:
-        # chain.sleep(second_drop_start)
-        chain.mine(1, drop_start)
-    else:
-        time.sleep(drop_start + 5)
-
-    assert float(Web3.fromWei(get_auction_price(), "ether")) == 0.8
-
-
-def test_third_drop():
-    # drop starts from epich + start_time + interval
-    drops = 3
-    drop_start = chain.time() + SALE_START_TIME + int(drops * 60 * 7.5)
-
-    if network.show_active() in LOCAL_BLOCKCHAIN_ENVIRONMENTS:
-        # chain.sleep(second_drop_start)
-        chain.mine(1, drop_start)
-    else:
-        time.sleep(drop_start + 5)
-
-    assert float(Web3.fromWei(get_auction_price(), "ether")) == 0.7
-
-
-def test_fifth_drop():
-    # drop starts from epich + start_time + interval
-    drops = 5
-    drop_start = chain.time() + SALE_START_TIME + int(drops * 60 * 7.5)
-
-    if network.show_active() in LOCAL_BLOCKCHAIN_ENVIRONMENTS:
-        # chain.sleep(second_drop_start)
-        chain.mine(1, drop_start)
-    else:
-        time.sleep(drop_start + 5)
-
-    assert float(Web3.fromWei(get_auction_price(), "ether")) == 0.5
+        implied_price = round(1 - (0.1 * drops), 1)
+        assert float(Web3.fromWei(get_auction_price(), "ether")) == implied_price
 
 
 def test_auction_mint():
