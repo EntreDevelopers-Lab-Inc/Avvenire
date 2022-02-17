@@ -30,7 +30,7 @@ contract AvvenireTestV2 is
     // uint256 public immutable maxBatchWhiteList;
 
     address immutable devAddress;
-    uint256 immutable paymentToDevs;
+    uint256 paymentToDevs;
 
     struct SaleConfig {
         uint32 auctionSaleStartTime; //
@@ -386,12 +386,33 @@ contract AvvenireTestV2 is
      * @notice function to withdraw the money from the contract. Only callable by the owner
      */
     function withdrawMoney() external onlyOwner nonReentrant {
-        // Pay devs
-        (bool sent, ) = devAddress.call{value: paymentToDevs}("");
-        require(sent, "dev transfer failed");
-        // Withdraw rest of the contract
-        (bool success, ) = msg.sender.call{value: address(this).balance}("");
-        require(success, "team transfer failed."); // why check the requirement after?
+        // Pay devs flat fee
+        _balance = address(this).balance;
+
+        // Devs still need to get paid; _balance is greater than payment
+        if (paymentToDevs > 0 && _balance > paymentToDevs) {
+            (bool sent, ) = devAddress.call{value: paymentToDevs}("");
+            require(sent, "dev transfer failed");
+            paymentToDevs = 0;
+
+            //Transfer remaining balance to owner / msg.sender
+            (bool success, ) = msg.sender.call{value: address(this).balance}(
+                ""
+            );
+            require(success, "team transfer failed."); // why check the requirement after?
+        }
+        // Devs still need to get paid; _balance is less than payment
+        else if (paymentToDevs > 0 && _balance < paymentToDevs) {
+            (bool sent, ) = devAddress.call{value: _balance}("");
+            require(sent, "dev transfer failed");
+            paymentToDevs = paymentToDevs - _balance;
+        }
+        // Devs have already been paid
+        else {
+            (bool success, ) = msg.sender.call{value: address(this).balance}(
+                ""
+            );
+        }
     }
 
     /**
