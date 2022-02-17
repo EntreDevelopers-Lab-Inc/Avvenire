@@ -387,7 +387,7 @@ contract AvvenireTestV2 is
      */
     function withdrawMoney() external onlyOwner nonReentrant {
         // Pay devs flat fee
-        _balance = address(this).balance;
+        uint256 _balance = address(this).balance;
 
         // Devs still need to get paid; _balance is greater than payment
         if (paymentToDevs > 0 && _balance > paymentToDevs) {
