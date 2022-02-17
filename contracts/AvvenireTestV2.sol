@@ -20,17 +20,17 @@ contract AvvenireTestV2 is
     ERC721AOwnersExplicit,
     ReentrancyGuard
 {
-    uint256 public immutable maxPerAddressDuringAuction; // constant for later assignment>?t
+    uint256 public immutable maxPerAddressDuringAuction;
     uint256 public immutable maxPerAddressDuringWhiteList;
-
-    uint256 public immutable amountForTeam; // Amount of NFTs for team
-    uint256 public immutable amountForAuctionAndTeam; // Amount of NFTs for the team and auction
     uint256 public immutable collectionSize; // Total collection size
+
+    uint256 public amountForTeam; // Amount of NFTs for team
+    uint256 public amountForAuction; // Amount of NFTs for the team and auction
     //uint256 public immutable maxBatchPublic;
     // uint256 public immutable maxBatchWhiteList;
 
     address immutable devAddress;
-    uint256 paymentToDevs;
+    uint256 internal paymentToDevs;
 
     struct SaleConfig {
         uint32 auctionSaleStartTime; //
@@ -56,7 +56,7 @@ contract AvvenireTestV2 is
      * @param maxPerAddressDuringWhiteList_ the number for the max batch size and max # of NFTs per address during the whiteList
      * @param collectionSize_ the number of NFTs in the collection
      * @param amountForTeam_ the number of NFTs for the team
-     * @param amountForAuctionAndTeam_ specifies total amount to auction + the total amount for the team
+     * @param amountForAuction_ specifies total amount to auction + the total amount for the team
      * @param devAddress_ address of devs
      * @param paymentToDevs_ payment to devs
      */
@@ -64,15 +64,15 @@ contract AvvenireTestV2 is
         uint256 maxPerAddressDuringAuction_,
         uint256 maxPerAddressDuringWhiteList_,
         uint256 collectionSize_,
-        uint256 amountForAuctionAndTeam_,
+        uint256 amountForAuction_,
         uint256 amountForTeam_,
         address devAddress_,
         uint256 paymentToDevs_
-    ) ERC721A("Avvenire", "AVVENIRE") {
+    ) ERC721A("AvvenireTestV2", "AVVENIRETESTV2") {
         maxPerAddressDuringAuction = maxPerAddressDuringAuction_;
         maxPerAddressDuringWhiteList = maxPerAddressDuringWhiteList_;
 
-        amountForAuctionAndTeam = amountForAuctionAndTeam_;
+        amountForAuction = amountForAuction_;
         amountForTeam = amountForTeam_;
         collectionSize = collectionSize_;
 
@@ -85,7 +85,7 @@ contract AvvenireTestV2 is
         paymentToDevs = paymentToDevs_;
 
         require(
-            amountForAuctionAndTeam_ <= collectionSize_, // make sure that the collection can handle the size of the auction
+            (amountForAuction_ + amountForTeam_) <= collectionSize_, // make sure that the collection can handle the size of the auction
             "larger collection size needed"
         );
     }
@@ -111,7 +111,7 @@ contract AvvenireTestV2 is
             "sale has not started yet"
         );
         require(
-            totalSupply() + quantity <= amountForAuctionAndTeam,
+            totalSupply() + quantity <= amountForAuction,
             "not enough remaining reserved for auction to support desired mint amount"
         );
         require(
@@ -314,11 +314,21 @@ contract AvvenireTestV2 is
 
     /**
      * @notice Sets the auction's starting time
-     * @param timestamp the starting time
+     * @param _saleStartTime starting time of the auctioin
+     * @param _amountToAuction the amount of NFTs to auction
      */
-    function setAuctionSaleStartTime(uint32 timestamp) external onlyOwner {
+    function startAuction(uint32 _saleStartTime, uint256 _amountToAuction)
+        external
+        onlyOwner
+    {
         // set the start time
-        saleConfig.auctionSaleStartTime = timestamp;
+        require(
+            collectionSize >=
+                (totalSupply() + amountForTeam + amountForAuction),
+            "amountToAuction is too large"
+        );
+        amountForAuction = _amountToAuction;
+        saleConfig.auctionSaleStartTime = _saleStartTime;
     }
 
     /**
@@ -352,9 +362,12 @@ contract AvvenireTestV2 is
     /**
      * @notice function to mint for the team
      */
+    // Alternatively could implment w/ quantity instead of minting full amount
+    // Do I need to add a nonReentrancy gaurd?
     function teamMint() external onlyOwner {
-        require(totalSupply() == 0, "NFTs already minted");
+        require(amountForTeam > 0, "NFTs already minted");
         _safeMint(msg.sender, amountForTeam);
+        amountForTeam = 0;
     }
 
     // function teamMint(uint256 quantity) external onlyOwner {
@@ -409,9 +422,7 @@ contract AvvenireTestV2 is
         }
         // Devs have already been paid
         else {
-            (bool success, ) = msg.sender.call{value: address(this).balance}(
-                ""
-            );
+            (bool success, ) = msg.sender.call{value: _balance}("");
         }
     }
 

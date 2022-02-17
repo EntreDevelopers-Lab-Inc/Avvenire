@@ -14,32 +14,28 @@ WHITELIST_DISCOUNT = 0.7
 
 # Deployment Script
 # Implementation can be changed so that specifications are passed as params instead of intiialized within the function
-def deploy_contract():
+def deploy_contract(
+    max_per_address_during_auctioin,
+    max_per_address_during_whitelist,
+    collection_size,
+    amount_for_auction_and_team,
+    amount_for_team,
+    dev_address,
+    payment_to_devs,
+):
     account = get_account()
-
-    # Parameters for Avvenire contract:
-    # uint256 maxPerAddressDuringAuction_, uint256 maxPerAddressDuringWhiteList_,
-    # uint256 collectionSize_, uint256 amountForAuctionAndTeam_,
-    # uint256 amountForTeam_, address devAddress_, uint256 paymentToDevs_
-
-    maxPerAddressDuringAuction = 3
-    maxPerAddressDuringWhiteList = 2
-    collectionSize = 20
-    amountForAuctionAndTeam = 15
-    amountForTeam = 5
-    devAddress = get_dev_account()
-    paymentToDevs = Web3.toWei(2, "ether")
+    payment_to_devs_ETH = Web3.toWei(payment_to_devs, "ether")
 
     # if not Web3.isAddress(devAddress):
 
     avvenire_contract = AvvenireTest.deploy(
-        maxPerAddressDuringAuction,
-        maxPerAddressDuringWhiteList,
-        collectionSize,
-        amountForAuctionAndTeam,
-        amountForTeam,
-        devAddress,
-        paymentToDevs,
+        max_per_address_during_auctioin,
+        max_per_address_during_whitelist,
+        collection_size,
+        amount_for_auction_and_team,
+        amount_for_team,
+        dev_address,
+        payment_to_devs_ETH,
         {"from": account},
     )
 
