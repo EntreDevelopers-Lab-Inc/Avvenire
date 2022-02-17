@@ -11,7 +11,9 @@ SALE_START_TIME = 100
 
 @pytest.fixture(autouse=True)
 def auction_set(fn_isolation):
-    deploy_contract()
+
+    dev_address = get_dev_account()
+    deploy_contract(3, 2, 20, 15, 5, dev_address, 2)
     avvenire_contract = AvvenireTest[-1]
     account = get_account()
     avvenire_contract.setBaseURI(
