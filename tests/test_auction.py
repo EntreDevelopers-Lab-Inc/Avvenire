@@ -30,7 +30,7 @@ def test_mint_before_start():
     # account = get_dev_account()
     with brownie.reverts():
         # Should throw a VirtualMachineError
-        auction_mint(2)
+        auction_mint(1)
 
 
 def test_all_prices():
@@ -50,7 +50,7 @@ def test_all_prices():
             chain.sleep(drop_time)
             chain.mine(1)
         else:
-            time.sleep(60 * 7.5)
+            time.sleep(drop_time)
         implied_price = round(1 - (0.1 * drops), 1)
         assert float(Web3.fromWei(get_auction_price(), "ether")) == implied_price
 
@@ -70,18 +70,29 @@ def test_auction_mint():
         time.sleep(drop_start + 5)
 
     balance_before_mint = account.balance()
+
+    # Test refund if over...
     avvenire_contract.auctionMint(
         2, {"from": account, "value": Web3.toWei(1.1, "ether")}
     )
+
     balance_after_mint = account.balance()
 
     balance_difference = balance_before_mint - balance_after_mint
     print(f"Balance Difference: {balance_difference}")
 
+    # Assertions on behavior
     assert Web3.fromWei(balance_difference, "ether") == 1
+
     if network.show_active() in LOCAL_BLOCKCHAIN_ENVIRONMENTS:
         assert avvenire_contract.balanceOf(account) == 2
+
     assert (
         avvenire_contract.tokenURI(1)
         == "https://ipfs.io/ipfs/QmUizisYNzj824jNxuiPTQ1ykBSEjmkp42wMZ7DVFvfZiK/1"
     )
+
+
+def test_refund():
+    avvenire_contract = AvvenireTest[-1]
+    account = get_dev_account()
