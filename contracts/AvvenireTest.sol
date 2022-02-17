@@ -118,7 +118,7 @@ contract AvvenireTest is
             numberMinted(msg.sender) + quantity <= maxPerAddressDuringAuction, // make sure they are not trying to mint too many --> note: this is going to need to be different in our case as the whitelisted users have different mint amounts
             "can not mint this many"
         );
-        uint256 totalCost = getAuctionPrice(_saleStartTime) * quantity; // total amount of ETH needed for the transaction
+        uint256 totalCost = getAuctionPrice() * quantity; // total amount of ETH needed for the transaction
         _safeMint(msg.sender, quantity); // mint this amount to the sender
         refundIfOver(totalCost); // make sure to refund the excess
 
@@ -216,7 +216,7 @@ contract AvvenireTest is
      * NOT IDEAL IMPLEMENTATION
      * Have to wait for all users to call refund() before being able to withdraw funds
      * PROBLEM: there is no way to iterate through a mapping
-     * SUSCEPTIBLE TO HACKS 
+     * SUSCEPTIBLE TO HACKS
      */
     function refundMe() external {
         uint256 endingPrice = saleConfig.publicPrice;
@@ -268,7 +268,7 @@ contract AvvenireTest is
     uint256 public constant AUCTION_START_PRICE = 1 ether; // start price
     uint256 public constant AUCTION_END_PRICE = 0.2 ether; // floor price
     uint256 public constant AUCTION_PRICE_CURVE_LENGTH = 60 minutes; // total time of the auction
-    uint256 public constant AUCTION_DROP_INTERVAL = 7.5 minutes; 
+    uint256 public constant AUCTION_DROP_INTERVAL = 7.5 minutes;
     // Should be 0.1 ether with the current setup...
     uint256 public constant AUCTION_DROP_PER_STEP =
         (AUCTION_START_PRICE - AUCTION_END_PRICE) /
@@ -276,19 +276,18 @@ contract AvvenireTest is
 
     /**
      * @notice Returns the current auction price. Uses block.timestamp to properly calculate price
-     * @param _saleStartTime the starting time of the auction
      */
-    function getAuctionPrice(
-        uint256 _saleStartTime // get the price of the dutch auction
-    ) public view returns (uint256) {
+    function getAuctionPrice() public view returns (uint256) {
+        uint256 _saleStartTime = uint256(saleConfig.auctionSaleStartTime);
+        require(_saleStartTime != 0, "auction has not started");
         if (block.timestamp < _saleStartTime) {
             return AUCTION_START_PRICE; // if the timestamp is less than the start of the sale, no discount
         }
         if (block.timestamp - _saleStartTime >= AUCTION_PRICE_CURVE_LENGTH) {
             return AUCTION_END_PRICE; // lower limit of the auction
         } else {
-            uint256 steps = (block.timestamp - _saleStartTime) / // this is continuous, not a step function
-                AUCTION_DROP_INTERVAL; // time dependent discount
+            uint256 steps = (block.timestamp - _saleStartTime) /
+                AUCTION_DROP_INTERVAL;
             return AUCTION_START_PRICE - (steps * AUCTION_DROP_PER_STEP); // calculate the start price based on how far away from the start we are
         }
     }
