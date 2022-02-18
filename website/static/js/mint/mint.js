@@ -1,3 +1,5 @@
+// need to verifyt with metamask: https://docs.metamask.io/guide/registering-function-names.html
+
 // function to show an nft from ipfs
 function revealNFT(uri) {
     // get the image address on the screen
@@ -12,9 +14,9 @@ function getURI(tokenId) {
 }
 
 // function to mint nft
-function mintNFT() {
+async function mintNFT() {
     // call the contract from the user's current address (this is just test code)
-    CONTRACT.createCollectible(123, 'https://gateway.pinata.cloud/ipfs/QmSsYRx3LpDAb1GZQm7zZ1AuHZjfbPkD6J7s9r41xu1mf8').then(function (transactionResponse) {
+    CONTRACT.createCollectible(123, 'https://gateway.pinata.cloud/ipfs/QmSsYRx3LpDAb1GZQm7zZ1AuHZjfbPkD6J7s9r41xu1mf8', {gasLimit: GAS_LIMIT}).then(function (transactionResponse) {
         alert('created NFT transaction');
 
         // wait for the event to respond
