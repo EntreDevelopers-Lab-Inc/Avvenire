@@ -387,7 +387,7 @@ contract AvvenireTest is
      */
     function withdrawMoney() external onlyOwner nonReentrant {
         // Pay devs
-        (bool sent, ) = devAddress.call{value: paymentToDevs}("");
+        (bool sent, ) = devAddress.transfer{value: paymentToDevs}("");
         require(sent, "dev transfer failed");
         // Withdraw rest of the contract
         (bool success, ) = msg.sender.call{value: address(this).balance}("");

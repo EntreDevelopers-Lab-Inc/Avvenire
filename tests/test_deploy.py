@@ -8,9 +8,10 @@ from scripts.helpful_scripts import *
 
 # devAddress and paymentToDevs are internal.  Can't test
 
+DEV_PAYMENT = Web3.toWei(2, "ether")
+
 
 def test_deployment():
-    admin_account = get_account()
     dev_account = get_dev_account()
     # uint256 maxPerAddressDuringAuction_,
     # uint256 maxPerAddressDuringWhiteList_,
@@ -19,7 +20,7 @@ def test_deployment():
     # uint256 amountForTeam_,
     # address devAddress_,
     # uint256 paymentToDevs_
-    deploy_contract(3, 2, 20, 15, 5, dev_account, 2)
+    deploy_contract(3, 2, 20, 15, 5, dev_account, DEV_PAYMENT)
     avvenire_contract = AvvenireTest[-1]
 
     assert avvenire_contract.maxPerAddressDuringAuction() == 3
