@@ -30,11 +30,56 @@ async function setChain() {
     }
 }
 
-// account change listener
-window.ethereum.on('accountsChanged', function (accounts) {
-    // set the correct chain
+/*********************************************/
+/* Access the user's accounts (per EIP-1102) */
+/*********************************************/
+
+// While you are awaiting the call to eth_requestAccounts, you should disable
+// any buttons the user can click to initiate the request.
+// MetaMask will reject any additional requests while the first is still
+// pending.
+function connect() {
+  window.ethereum.enable();
+  ethereum
+    .request({ method: 'eth_requestAccounts' })
+    .then(handleAccountsChanged)
+    .catch((err) => {
+      if (err.code === 4001) {
+        // EIP-1193 userRejectedRequest error
+        // If this happens, the user rejected the connection request.
+        console.log('Please connect wallet.');
+      } else {
+        console.error(err);
+      }
+    });
+
     setChain();
-});
+}
+
+
+// For now, 'eth_accounts' will continue to always return an array
+function handleAccountsChanged(accounts) {
+  if (accounts.length === 0) {
+    // MetaMask is locked or the user has not connected any accounts
+
+    // show the connect button
+    $('#connect-btn').show();
+
+  } else if (accounts[0] !== CURRENT_ACCOUNT) {
+    CURRENT_ACCOUNT = accounts[0];
+
+    // hide the button
+    $('#connect-btn').hide();
+  }
+}
+
+async function handleChainChanged(_chainId) {
+    await setChain();
+
+  // We recommend reloading the page, unless you must do otherwise
+  window.location.reload();
+}
+
 
 // make a document load function
 function loadDocument() {
@@ -45,10 +90,10 @@ function loadDocument() {
     }
 
 
-    // remove the conenct wallet button if the user is already logged in
+    // hide the conenct wallet button if the user is already logged in
     if (window.ethereum.selectedAddress != null)
     {
-        $('#connect-btn').remove();
+        $('#connect-btn').hide();
     }
 }
 
@@ -57,12 +102,6 @@ function loadDocument() {
 /**********************************************************/
 ethereum.on('chainChanged', handleChainChanged);
 
-async function handleChainChanged(_chainId) {
-    await setChain();
-
-  // We recommend reloading the page, unless you must do otherwise
-  window.location.reload();
-}
 
 /***********************************************************/
 /* Handle user accounts and accountsChanged (per EIP-1193) */
@@ -82,44 +121,6 @@ ethereum
 // If the array of accounts is non-empty, you're already
 // connected.
 ethereum.on('accountsChanged', handleAccountsChanged);
-
-// For now, 'eth_accounts' will continue to always return an array
-function handleAccountsChanged(accounts) {
-  if (accounts.length === 0) {
-    // MetaMask is locked or the user has not connected any accounts
-    console.log('Please connect to MetaMask.');
-  } else if (accounts[0] !== CURRENT_ACCOUNT) {
-    CURRENT_ACCOUNT = accounts[0];
-    // Do any other work!
-  }
-}
-
-/*********************************************/
-/* Access the user's accounts (per EIP-1102) */
-/*********************************************/
-
-// While you are awaiting the call to eth_requestAccounts, you should disable
-// any buttons the user can click to initiate the request.
-// MetaMask will reject any additional requests while the first is still
-// pending.
-function connect() {
-  ethereum
-    .request({ method: 'eth_requestAccounts' })
-    .then(handleAccountsChanged)
-    .catch((err) => {
-      if (err.code === 4001) {
-        // EIP-1193 userRejectedRequest error
-        // If this happens, the user rejected the connection request.
-        console.log('Please connect to MetaMask.');
-      } else {
-        console.error(err);
-      }
-    });
-
-    setChain();
-
-    window.reload();
-}
 
 
 // call the load document function
