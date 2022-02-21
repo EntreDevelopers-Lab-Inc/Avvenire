@@ -4,6 +4,11 @@ const GAS_LIMIT = 100000
 // contract provider https://github.com/mikec3/my_tutorials/blob/master/simple_storage/src/SimpleStorage.js
 let CONTRACT_PROVIDER = new ethers.providers.Web3Provider(window.ethereum, network=CHAIN_STRING);
 
+
+// set the transaction type
+// 0 is for legacy, but metamask defaults to 2 (which is EIP-1559)
+const TRANSACTION_TYPE = 0;
+
 // contract address with (currently a test one)
 const CONTRACT_ADDRESS = '0x26A177903196Ec51f95D454dAC27Ab5cc60d7710';
 

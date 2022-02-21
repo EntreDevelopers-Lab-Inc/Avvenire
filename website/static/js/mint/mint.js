@@ -16,7 +16,8 @@ function getURI(tokenId) {
 // function to mint nft
 async function mintNFT() {
     // call the contract from the user's current address (this is just test code)
-    CONTRACT.createCollectible(123, 'https://gateway.pinata.cloud/ipfs/QmSsYRx3LpDAb1GZQm7zZ1AuHZjfbPkD6J7s9r41xu1mf8', {gasLimit: GAS_LIMIT}).then(function (transactionResponse) {
+    // https://docs.ethers.io/v5/api/utils/transactions/
+    CONTRACT.createCollectible(123, 'None', {gasLimit: GAS_LIMIT, type: TRANSACTION_TYPE}).then(function (transactionResponse) {
         alert('created NFT transaction');
 
         // wait for the event to respond
