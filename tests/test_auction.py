@@ -80,6 +80,14 @@ def test_auction_mint():
     )
 
 
+def test_below_cost_mint():
+    account = get_dev_account()
+    value = Web3.toWei(0.5, "ether")
+    avvenire_contract = AvvenireTest[-1]
+    with brownie.reverts():
+        avvenire_contract.auctionMint(1, {"from": account, "value": value})
+
+
 def test_all_prices():
 
     # Initial price special case...
