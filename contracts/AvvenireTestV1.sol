@@ -20,17 +20,17 @@ contract AvvenireTest is
     ERC721AOwnersExplicit,
     ReentrancyGuard
 {
-    uint256 public immutable maxPerAddressDuringAuction; // constant for later assignment>?t
-    uint256 public immutable maxPerAddressDuringWhiteList;
+    uint256 public maxPerAddressDuringAuction; // constant for later assignment>?t
+    uint256 public maxPerAddressDuringWhiteList;
 
-    uint256 public immutable amountForTeam; // Amount of NFTs for team
-    uint256 public immutable amountForAuctionAndTeam; // Amount of NFTs for the team and auction
-    uint256 public immutable collectionSize; // Total collection size
+    uint256 public amountForTeam; // Amount of NFTs for team
+    uint256 public amountForAuctionAndTeam; // Amount of NFTs for the team and auction
+    uint256 public collectionSize; // Total collection size
     //uint256 public immutable maxBatchPublic;
     // uint256 public immutable maxBatchWhiteList;
 
-    address immutable devAddress;
-    uint256 immutable paymentToDevs;
+    address devAddress;
+    uint256 paymentToDevs;
 
     struct SaleConfig {
         uint32 auctionSaleStartTime; //
