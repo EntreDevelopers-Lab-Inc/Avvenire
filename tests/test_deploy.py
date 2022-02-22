@@ -1,6 +1,4 @@
-import pytest, brownie, time
-
-from brownie import AvvenireTest, chain, network
+from brownie import AvvenireTest
 from web3 import Web3
 
 from scripts.script_definitions import *
@@ -9,6 +7,7 @@ from scripts.helpful_scripts import *
 # devAddress and paymentToDevs are internal.  Can't test
 
 DEV_PAYMENT = Web3.toWei(2, "ether")
+PUBLIC_SALE_START_TIME = 240
 
 
 def test_deployment():
