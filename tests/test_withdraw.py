@@ -38,7 +38,11 @@ def drop_interval(number_of_drops):
         time.sleep(drop_time)
 
 
-def test_withdraw():
+# May need to refactor...
+# Unit test is way too bloated
+
+
+def test_withdraw(auction_set):
     # Initializations
     avvenire_contract = AvvenireTest[-1]
     admin_account = get_account()
