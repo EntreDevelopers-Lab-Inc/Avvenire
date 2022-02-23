@@ -87,4 +87,4 @@ def test_set_explicit():
         assert total_balance == avvenire_contract.balance()
 
     total_supply = avvenire_contract.totalSupply()
-    avvenire_contract.setOwnersExplicit(total_supply)
+    avvenire_contract.setOwnersExplicit(total_supply, {"from:": admin_account})

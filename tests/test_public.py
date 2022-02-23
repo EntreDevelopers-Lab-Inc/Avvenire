@@ -46,14 +46,6 @@ def test_public_mint():
     public_sale_price_wei = Web3.toWei(PUBLIC_SALE_PRICE_ETH, "ether")
     mint_quantity = 2
     mint_cost = public_sale_price_wei * mint_quantity
-
-    print(chain.time())
-    with brownie.reverts():
-        # Should throw a VirtualMachineError
-        avvenire_contract.publicSaleMint(
-            mint_quantity, PUBLIC_SALE_KEY, {"from": accounts[2], "value": mint_cost}
-        )
-
     chain.sleep(PUBLIC_SALE_START_TIME_FROM_EPOCH + 1)
     chain.mine()
 
@@ -72,3 +64,89 @@ def test_public_mint():
 
         assert total_paid == Web3.toWei(1, "ether")
         assert avvenire_contract.numberMinted(account) == 2
+        assert avvenire_contract.balanceOf(account) == 2
+
+
+def test_mint_before_start_time():
+    avvenire_contract = AvvenireTest[-1]
+    public_sale_price_wei = Web3.toWei(PUBLIC_SALE_PRICE_ETH, "ether")
+    mint_quantity = 2
+    mint_cost = public_sale_price_wei * mint_quantity
+
+    # Try to mint before public-sale start time
+    print(chain.time())
+    with brownie.reverts():
+        # Should throw a VirtualMachineError
+        avvenire_contract.publicSaleMint(
+            mint_quantity, PUBLIC_SALE_KEY, {"from": accounts[2], "value": mint_cost}
+        )
+
+
+def test_mint_incorrect_public_key():
+    avvenire_contract = AvvenireTest[-1]
+    public_sale_price_wei = Web3.toWei(PUBLIC_SALE_PRICE_ETH, "ether")
+    mint_quantity = 2
+    mint_cost = public_sale_price_wei * mint_quantity
+
+    incorrect_key = 890123
+
+    # Try to mint before public-sale start time
+    with brownie.reverts():
+        # Should throw a VirtualMachineError
+        avvenire_contract.publicSaleMint(
+            mint_quantity, incorrect_key, {"from": accounts[2], "value": mint_cost}
+        )
+
+
+def test_public_mint_past_collection_size():
+    avvenire_contract = AvvenireTest[-1]
+    public_sale_price_wei = Web3.toWei(PUBLIC_SALE_PRICE_ETH, "ether")
+    mint_quantity = 5
+    total_balance = 0
+    mint_cost = public_sale_price_wei * mint_quantity
+    chain.sleep(PUBLIC_SALE_START_TIME_FROM_EPOCH + 1)
+    chain.mine()
+
+    # Mint all 20 NFTs in the collection
+    for count in range(1, 5):
+        avvenire_contract.publicSaleMint(
+            mint_quantity,
+            PUBLIC_SALE_KEY,
+            {"from": accounts[count], "value": mint_cost},
+        )
+        total_balance = total_balance + mint_cost
+        assert avvenire_contract.numberMinted(accounts[count]) == 5
+
+    assert avvenire_contract.totalSupply() == 20
+
+    # Testing mint after...
+    with brownie.reverts():
+        avvenire_contract.publicSaleMint(
+            2, PUBLIC_SALE_KEY, {"from": accounts[0], "value": mint_cost}
+        )
+
+
+def test_team_mint_past_collection_size():
+    avvenire_contract = AvvenireTest[-1]
+    public_sale_price_wei = Web3.toWei(PUBLIC_SALE_PRICE_ETH, "ether")
+    admin_account = get_account()
+    mint_quantity = 5
+    total_balance = 0
+    mint_cost = public_sale_price_wei * mint_quantity
+    chain.sleep(PUBLIC_SALE_START_TIME_FROM_EPOCH + 1)
+    chain.mine()
+
+    # Mint all 20 NFTs in the collection
+    for count in range(1, 5):
+        avvenire_contract.publicSaleMint(
+            mint_quantity,
+            PUBLIC_SALE_KEY,
+            {"from": accounts[count], "value": mint_cost},
+        )
+        assert avvenire_contract.numberMinted(accounts[count]) == 5
+
+    assert avvenire_contract.totalSupply() == 20
+
+    # Testing team mint after...
+    with brownie.reverts():
+        avvenire_contract.teamMint({"from": admin_account})

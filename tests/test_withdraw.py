@@ -39,21 +39,22 @@ def drop_interval(number_of_drops):
 
 
 def test_withdraw():
+    # Initializations
     avvenire_contract = AvvenireTest[-1]
     admin_account = get_account()
     dev_account = get_dev_account()
     avvenire_contract.teamMint({"from": admin_account})
     total_balance = 0
+    cost = Web3.toWei(1, "ether")
 
-    # Initial price special case...
+    # Move to the auction start time...
     if network.show_active() in LOCAL_BLOCKCHAIN_ENVIRONMENTS:
         chain.sleep(SALE_START_TIME)
         chain.mine(1)
     else:
         time.sleep(SALE_START_TIME + 5)
 
-    cost = Web3.toWei(1, "ether")
-
+    # Mint an NFT at every interval...
     for count in range(1, 9):
         avvenire_contract.auctionMint(1, {"from": accounts[count], "value": cost})
         drop_interval(1)
@@ -64,12 +65,13 @@ def test_withdraw():
         assert avvenire_contract.numberMinted(accounts[count]) == 1
 
     # 9 auction mints and 5 team mint = 14 minted total for 5.4 ETH
-    # 6 left in collection
 
+    # 6 left in collection
     public_price_wei = Web3.toWei(0.2, "ether")
     whitelist_discount = 0.3
     whitelist_price_wei = public_price_wei * whitelist_discount
 
+    # Set up public auction
     avvenire_contract.endAuctionAndSetupNonAuctionSaleInfo(
         whitelist_price_wei, public_price_wei, PUBLIC_SALE_START_TIME
     )

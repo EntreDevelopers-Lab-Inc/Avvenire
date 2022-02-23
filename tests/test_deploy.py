@@ -1,3 +1,5 @@
+import brownie
+
 from brownie import AvvenireTest
 from web3 import Web3
 
@@ -7,7 +9,6 @@ from scripts.helpful_scripts import *
 # devAddress and paymentToDevs are internal.  Can't test
 
 DEV_PAYMENT = Web3.toWei(2, "ether")
-PUBLIC_SALE_START_TIME = 240
 
 
 def test_deployment():
@@ -27,3 +28,15 @@ def test_deployment():
     assert avvenire_contract.collectionSize() == 20
     assert avvenire_contract.amountForAuctionAndTeam() == 15
     assert avvenire_contract.amountForTeam() == 5
+
+    # Try to get auction price before auction is set...
+    with brownie.reverts():
+        assert avvenire_contract.getAuctionPrice()
+
+    # Try to mint before start of auction...
+    eth = Web3.toWei(1, "ether")
+    with brownie.reverts():
+        assert avvenire_contract.whiteListMint(1, {"from": dev_account, "value": eth})
+
+    with brownie.reverts():
+        assert avvenire_contract.auctionMint(1, {"from": dev_account, "value": eth})

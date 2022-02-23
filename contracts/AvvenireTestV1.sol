@@ -142,10 +142,7 @@ contract AvvenireTest is
             totalSupply() + quantity <= collectionSize,
             "Reached max supply"
         );
-        require(
-            numberMinted(msg.sender) + quantity <= maxPerAddressDuringWhiteList,
-            "Can not mint this many"
-        );
+        require(quantity <= allowlist[msg.sender], "Can not mint this many");
 
         allowlist[msg.sender] = allowlist[msg.sender] - quantity;
 

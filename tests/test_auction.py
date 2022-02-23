@@ -20,13 +20,13 @@ def drop_interval(number_of_drops):
 
 @pytest.fixture(autouse=True)
 def auction_set(fn_isolation):
-    account = get_account()
+    admin_account = get_account()
     dev_account = get_dev_account()
     deploy_contract(3, 2, 20, 15, 5, dev_account, 2)
     avvenire_contract = AvvenireTest[-1]
     avvenire_contract.setBaseURI(
         "https://ipfs.io/ipfs/QmUizisYNzj824jNxuiPTQ1ykBSEjmkp42wMZ7DVFvfZiK/",
-        {"from": account},
+        {"from": admin_account},
     )
 
     # Don't need to pass in chain.time()...
@@ -79,8 +79,17 @@ def test_auction_mint():
         == "https://ipfs.io/ipfs/QmUizisYNzj824jNxuiPTQ1ykBSEjmkp42wMZ7DVFvfZiK/1"
     )
 
+    assert avvenire_contract.numberMinted(account) == 2
+    assert avvenire_contract.balanceOf(account) == 2
 
-def test_below_cost_mint():
+
+def test_below_mint_cost():
+    if network.show_active() in LOCAL_BLOCKCHAIN_ENVIRONMENTS:
+        chain.sleep(SALE_START_TIME)
+        chain.mine(1)
+    else:
+        time.sleep(SALE_START_TIME + 5)
+
     account = get_dev_account()
     value = Web3.toWei(0.5, "ether")
     avvenire_contract = AvvenireTest[-1]
@@ -88,8 +97,27 @@ def test_below_cost_mint():
         avvenire_contract.auctionMint(1, {"from": account, "value": value})
 
 
-def test_all_prices():
+def test_mint_too_many():
+    if network.show_active() in LOCAL_BLOCKCHAIN_ENVIRONMENTS:
+        chain.sleep(SALE_START_TIME)
+        chain.mine(1)
+    else:
+        time.sleep(SALE_START_TIME + 5)
 
+    avvenire_contract = AvvenireTest[-1]
+    eth = Web3.toWei(1, "ether")
+    account = accounts[1]
+
+    # Mint 1
+    avvenire_contract.auctionMint(1, {"from": account, "value": eth})
+
+    three_eth = eth * 3
+    # Mint 3 more
+    with brownie.reverts():
+        avvenire_contract.auctionMint(3, {"from": account, "value": three_eth})
+
+
+def test_all_prices():
     # Initial price special case...
     if network.show_active() in LOCAL_BLOCKCHAIN_ENVIRONMENTS:
         chain.sleep(SALE_START_TIME)
@@ -109,6 +137,31 @@ def test_all_prices():
         drop_interval(1)
         implied_price = round(1 - (0.1 * drops), 1)
         assert float(Web3.fromWei(get_auction_price(), "ether")) == implied_price
+
+
+def test_mint_after_auction_amount():
+    avvenire_contract = AvvenireTest[-1]
+    auction_sale_price_wei = Web3.toWei(1, "ether")
+    mint_quantity = 3
+    mint_cost = auction_sale_price_wei * mint_quantity
+    chain.sleep(SALE_START_TIME + 1)
+    chain.mine()
+
+    # Mint all 20 NFTs in the collection
+    for count in range(1, 6):
+        avvenire_contract.auctionMint(
+            mint_quantity,
+            {"from": accounts[count], "value": mint_cost},
+        )
+        assert avvenire_contract.numberMinted(accounts[count]) == 3
+
+    assert avvenire_contract.totalSupply() == 15
+
+    with brownie.reverts():
+        avvenire_contract.auctionMint(
+            mint_quantity,
+            {"from": accounts[0], "value": mint_cost},
+        )
 
 
 # Only testable in local environment...
