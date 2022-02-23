@@ -215,7 +215,7 @@ contract AvvenireTest is
      * PROBLEM: there is no way to iterate through a mapping
      * SUSCEPTIBLE TO HACKS
      */
-    function refundMe() external {
+    function refundMe() external nonReentrant {
         uint256 endingPrice = saleConfig.publicPrice;
         uint256 actualCost = endingPrice * numberMinted(msg.sender);
         int256 reimbursement = int256(totalPaid[msg.sender]) -
@@ -232,7 +232,7 @@ contract AvvenireTest is
      * @notice function to refund user on the price they paid
      * @param toRefund the address to refund
      */
-    function refund(address toRefund) external onlyOwner {
+    function refund(address toRefund) external onlyOwner nonReentrant {
         uint256 endingPrice = saleConfig.publicPrice;
         uint256 actualCost = endingPrice * numberMinted(toRefund);
         int256 reimbursement = int256(totalPaid[toRefund]) - int256(actualCost);
@@ -389,7 +389,7 @@ contract AvvenireTest is
         require(sent, "dev transfer failed");
         // Withdraw rest of the contract
         (bool success, ) = msg.sender.call{value: address(this).balance}("");
-        require(success, "team transfer failed."); // why check the requirement after?
+        require(success, "team transfer failed.");
     }
 
     /**
