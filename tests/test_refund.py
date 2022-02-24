@@ -72,7 +72,7 @@ def test_refund():
     admin_account = get_account()
     auction_end_price_wei = avvenire_contract.AUCTION_END_PRICE()
 
-    i = 1
+    i = 0
     while avvenire_contract.numberMinted(accounts[i]) > 0:
         total_paid = avvenire_contract.totalPaid(accounts[i])
         balance_before_refund = accounts[i].balance()
@@ -83,12 +83,17 @@ def test_refund():
         if total_paid > actual_cost:
             avvenire_contract.refund(accounts[i], {"from": admin_account})
             balance_after_refund = accounts[i].balance()
-            assert Web3.fromWei(
-                (balance_after_refund - balance_before_refund), "ether"
-            ) == Web3.fromWei((total_paid - actual_cost), "ether")
+            assert balance_after_refund - balance_before_refund == (
+                total_paid - actual_cost
+            )
+
+            # Make sure you can't refund a 2nd time...
+            with brownie.reverts():
+                avvenire_contract.refund(accounts[i], {"from": admin_account})
         else:
             with brownie.reverts():
-                avvenire_contract.refund(accounts[i])
+                avvenire_contract.refund(accounts[i], {"from": admin_account})
+
         i = i + 1
 
 
