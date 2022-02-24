@@ -16,15 +16,11 @@ function getURI(tokenId) {
 // function to mint nft
 async function mintNFTs(amount) {
     // get the gas price
-    /*
     var feeData = await CONTRACT_PROVIDER.getFeeData();  // may need to update to ethers 5.4 for this --> will see
     var maxFeePerGas = parseInt(ethers.utils.formatUnits(feeData.maxFeePerGas, "gwei"));
-    */
-    var gasPrice = await CONTRACT_PROVIDER.getGasPrice();
-    gasPrice = parseInt(ethers.utils.formatUnits(gasPrice, "gwei"));
 
     // get the total cost
-    var totalCost = (PRICE * amount) + (GAS_LIMIT * gasPrice);
+    var totalCost = (PRICE * amount) + (GAS_LIMIT * maxFeePerGas);
 
     // call the contract from the user's current address (this is just test code)
     // https://docs.ethers.io/v5/api/utils/transactions/
