@@ -134,6 +134,9 @@ coverage
 coverage.json
 typechain
 
+# Mac Binaries
+.DS_Store
+
 #Hardhat files
 cache
 artifacts
