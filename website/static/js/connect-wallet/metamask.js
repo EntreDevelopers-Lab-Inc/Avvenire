@@ -39,7 +39,7 @@ async function setChain() {
 // MetaMask will reject any additional requests while the first is still
 // pending.
 function connect() {
-  window.ethereum.enable();
+  // window.ethereum.enable();
   ethereum
     .request({ method: 'eth_requestAccounts' })
     .then(handleAccountsChanged)
@@ -89,11 +89,16 @@ function loadDocument() {
       connect();
     }
 
-
     // hide the conenct wallet button if the user is already logged in
     if (window.ethereum.selectedAddress != null)
     {
         $('#connect-btn').hide();
+    }
+
+    // prompt the user to change their chain if it is incorrect
+    if (window.ethereum.chainId != CHAIN_STRING)
+    {
+      setChain();
     }
 }
 

@@ -1,5 +1,7 @@
+const GWEI_PER_ETH = 1000000000;
+
 // set the price --> converted to gwei
-const PRICE = 0.01 * 1000000000;
+const PRICE = 0.01;
 
 // set the gas limit
 const GAS_LIMIT = 100000

@@ -14,17 +14,21 @@ function getURI(tokenId) {
 }
 
 // function to mint nft
-async function mintNFTs(amount) {
+async function mintNFTs(amount, gasLimit=GAS_LIMIT) {
     // get the gas price
     var feeData = await CONTRACT_PROVIDER.getFeeData();  // may need to update to ethers 5.4 for this --> will see
     var maxFeePerGas = parseInt(ethers.utils.formatUnits(feeData.maxFeePerGas, "gwei"));
 
-    // get the total cost
-    var totalCost = (PRICE * amount) + (GAS_LIMIT * maxFeePerGas);
+    // get the total cost = price * amount purchased + allowable gas cost in ETH
+    var totalCost = (PRICE * amount) + (maxFeePerGas * gasLimit / GWEI_PER_ETH);
+
+    // make the total cost a string for the parse ether utilty
+    totalCost = totalCost.toString();
 
     // call the contract from the user's current address (this is just test code)
     // https://docs.ethers.io/v5/api/utils/transactions/
-    CONTRACT.mintNFTs(2, {value: totalCost, gasLimit: GAS_LIMIT, type: TRANSACTION_TYPE}).then(function (transactionResponse) {
+    // https://stackoverflow.com/questions/68198724/how-would-i-send-an-eth-value-to-specific-smart-contract-function-that-is-payabl
+    CONTRACT.mintNFTs(2, {value: ethers.utils.parseEther(totalCost), gasLimit: GAS_LIMIT, type: TRANSACTION_TYPE}).then(function (transactionResponse) {
         alert('created NFT transaction');
 
         // wait for the event to respond
@@ -39,3 +43,10 @@ async function mintNFTs(amount) {
 
 
 // listen for event: https://docs.ethers.io/v5/api/contract/contract/#Contract--events
+
+/*
+NOTES
+- where should we allow the user to set the gas limit?
+- what should we do on a transaction success?
+- what should we do on a transaction failure?
+*/
