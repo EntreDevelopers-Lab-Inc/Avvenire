@@ -1,4 +1,4 @@
-import pytest, time
+import pytest, time, brownie
 
 from brownie import AvvenireTest, chain, network
 from web3 import Web3
@@ -36,6 +36,14 @@ def drop_interval(number_of_drops):
         chain.mine(1)
     else:
         time.sleep(drop_time)
+
+
+def test_explicit_no_supply():
+    avvenire_contract = AvvenireTest[-1]
+    admin_account = get_account()
+    total_supply = avvenire_contract.totalSupply()
+    with brownie.reverts():
+        avvenire_contract.setOwnersExplicit(total_supply, {"from:": admin_account})
 
 
 def test_set_explicit():

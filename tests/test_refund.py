@@ -57,8 +57,13 @@ def post_auction(fn_isolation):
             1, {"from": accounts[drops], "value": implied_price}
         )
 
-    public_price_wei = avvenire_contract.AUCTION_END_PRICE()
 
+@pytest.fixture()
+def public_auction_set():
+    avvenire_contract = AvvenireTest[-1]
+    admin_account = get_account()
+    auction_end_price_wei = avvenire_contract.AUCTION_END_PRICE()
+    public_price_wei = avvenire_contract.AUCTION_END_PRICE()
     whitelist_price_wei = (1 - WHITELIST_DISCOUNT) * public_price_wei
 
     public_sale_start_time = chain.time() + PUBLIC_SALE_START_TIME_FROM_EPOCH
@@ -67,7 +72,22 @@ def post_auction(fn_isolation):
     )
 
 
-def test_refund():
+def test_refund_before_public_price_set():
+    avvenire_contract = AvvenireTest[-1]
+    admin_account = get_account()
+
+    with brownie.reverts():
+        avvenire_contract.refund(accounts[1], {"from": admin_account})
+
+
+def test_refund_me_before_public_price_set():
+    avvenire_contract = AvvenireTest[-1]
+
+    with brownie.reverts():
+        avvenire_contract.refundMe({"from": accounts[1]})
+
+
+def test_refund(public_auction_set):
     avvenire_contract = AvvenireTest[-1]
     admin_account = get_account()
     auction_end_price_wei = avvenire_contract.AUCTION_END_PRICE()
@@ -97,5 +117,31 @@ def test_refund():
         i = i + 1
 
 
-def test_refund_me():
-    pass
+def test_refund_me(public_auction_set):
+    avvenire_contract = AvvenireTest[-1]
+    admin_account = get_account()
+    auction_end_price_wei = avvenire_contract.AUCTION_END_PRICE()
+
+    i = 0
+    while avvenire_contract.numberMinted(accounts[i]) > 0:
+        total_paid = avvenire_contract.totalPaid(accounts[i])
+        balance_before_refund = accounts[i].balance()
+        number_minted = avvenire_contract.numberMinted(accounts[i])
+        actual_cost = number_minted * auction_end_price_wei
+
+        # If total_paid is greater than what they should've paid, refund.  Else, expect exception
+        if total_paid > actual_cost:
+            avvenire_contract.refundMe({"from": accounts[i]})
+            balance_after_refund = accounts[i].balance()
+            assert balance_after_refund - balance_before_refund == (
+                total_paid - actual_cost
+            )
+
+            # Make sure you can't refund a 2nd time...
+            with brownie.reverts():
+                avvenire_contract.refundMe({"from": accounts[i]})
+        else:
+            with brownie.reverts():
+                avvenire_contract.refundMe({"from": accounts[i]})
+
+        i = i + 1
