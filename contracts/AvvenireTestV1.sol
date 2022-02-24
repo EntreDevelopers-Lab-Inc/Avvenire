@@ -20,17 +20,17 @@ contract AvvenireTest is
     ERC721AOwnersExplicit,
     ReentrancyGuard
 {
-    uint256 public immutable maxPerAddressDuringAuction; // constant for later assignment>?t
-    uint256 public immutable maxPerAddressDuringWhiteList;
+    uint256 public maxPerAddressDuringAuction; // constant for later assignment>?t
+    uint256 public maxPerAddressDuringWhiteList;
 
-    uint256 public immutable amountForTeam; // Amount of NFTs for team
-    uint256 public immutable amountForAuctionAndTeam; // Amount of NFTs for the team and auction
-    uint256 public immutable collectionSize; // Total collection size
+    uint256 public amountForTeam; // Amount of NFTs for team
+    uint256 public amountForAuctionAndTeam; // Amount of NFTs for the team and auction
+    uint256 public collectionSize; // Total collection size
     //uint256 public immutable maxBatchPublic;
     // uint256 public immutable maxBatchWhiteList;
 
-    address immutable devAddress;
-    uint256 immutable paymentToDevs;
+    address devAddress;
+    uint256 paymentToDevs;
 
     struct SaleConfig {
         uint32 auctionSaleStartTime; //
@@ -47,8 +47,7 @@ contract AvvenireTest is
     mapping(address => uint256) public allowlist;
 
     //Do I need to keep public?
-    // Private or internal?
-    mapping(address => uint256) private totalPaid;
+    mapping(address => uint256) public totalPaid;
 
     /**
      * @notice Constructor calls on ERC721A constructor and sets the previously defined global variables
@@ -118,7 +117,7 @@ contract AvvenireTest is
             numberMinted(msg.sender) + quantity <= maxPerAddressDuringAuction, // make sure they are not trying to mint too many --> note: this is going to need to be different in our case as the whitelisted users have different mint amounts
             "can not mint this many"
         );
-        uint256 totalCost = getAuctionPrice(_saleStartTime) * quantity; // total amount of ETH needed for the transaction
+        uint256 totalCost = getAuctionPrice() * quantity; // total amount of ETH needed for the transaction
         _safeMint(msg.sender, quantity); // mint this amount to the sender
         refundIfOver(totalCost); // make sure to refund the excess
 
@@ -142,10 +141,7 @@ contract AvvenireTest is
             totalSupply() + quantity <= collectionSize,
             "Reached max supply"
         );
-        require(
-            numberMinted(msg.sender) + quantity <= maxPerAddressDuringWhiteList,
-            "Can not mint this many"
-        );
+        require(quantity <= allowlist[msg.sender], "Can not mint this many");
 
         allowlist[msg.sender] = allowlist[msg.sender] - quantity;
 
@@ -216,10 +212,12 @@ contract AvvenireTest is
      * NOT IDEAL IMPLEMENTATION
      * Have to wait for all users to call refund() before being able to withdraw funds
      * PROBLEM: there is no way to iterate through a mapping
-     * SUSCEPTIBLE TO HACKS 
+     * SUSCEPTIBLE TO HACKS
      */
-    function refundMe() external {
+    function refundMe() external nonReentrant {
         uint256 endingPrice = saleConfig.publicPrice;
+        require(endingPrice > 0, "public price not set yet");
+
         uint256 actualCost = endingPrice * numberMinted(msg.sender);
         int256 reimbursement = int256(totalPaid[msg.sender]) -
             int256(actualCost);
@@ -235,8 +233,10 @@ contract AvvenireTest is
      * @notice function to refund user on the price they paid
      * @param toRefund the address to refund
      */
-    function refund(address toRefund) external onlyOwner {
+    function refund(address toRefund) external onlyOwner nonReentrant {
         uint256 endingPrice = saleConfig.publicPrice;
+        require(endingPrice > 0, "public price not set yet");
+
         uint256 actualCost = endingPrice * numberMinted(toRefund);
         int256 reimbursement = int256(totalPaid[toRefund]) - int256(actualCost);
         require(reimbursement > 0, "Not eligible for a refund");
@@ -267,27 +267,27 @@ contract AvvenireTest is
 
     uint256 public constant AUCTION_START_PRICE = 1 ether; // start price
     uint256 public constant AUCTION_END_PRICE = 0.2 ether; // floor price
-    uint256 public constant AUCTION_PRICE_CURVE_LENGTH = 340 minutes; // total time of the auction
-    uint256 public constant AUCTION_DROP_INTERVAL = 20 minutes; // after 20 minutes, drop one time block
+    uint256 public constant AUCTION_PRICE_CURVE_LENGTH = 60 minutes; // total time of the auction
+    uint256 public constant AUCTION_DROP_INTERVAL = 7.5 minutes;
+    // Should be 0.1 ether with the current setup...
     uint256 public constant AUCTION_DROP_PER_STEP =
         (AUCTION_START_PRICE - AUCTION_END_PRICE) /
             (AUCTION_PRICE_CURVE_LENGTH / AUCTION_DROP_INTERVAL); // how much the auction will drop the price per unit of time
 
     /**
      * @notice Returns the current auction price. Uses block.timestamp to properly calculate price
-     * @param _saleStartTime the starting time of the auction
      */
-    function getAuctionPrice(
-        uint256 _saleStartTime // get the price of the dutch auction
-    ) public view returns (uint256) {
+    function getAuctionPrice() public view returns (uint256) {
+        uint256 _saleStartTime = uint256(saleConfig.auctionSaleStartTime);
+        require(_saleStartTime != 0, "auction has not started");
         if (block.timestamp < _saleStartTime) {
             return AUCTION_START_PRICE; // if the timestamp is less than the start of the sale, no discount
         }
         if (block.timestamp - _saleStartTime >= AUCTION_PRICE_CURVE_LENGTH) {
             return AUCTION_END_PRICE; // lower limit of the auction
         } else {
-            uint256 steps = (block.timestamp - _saleStartTime) / // this is continuous, not a step function
-                AUCTION_DROP_INTERVAL; // time dependent discount
+            uint256 steps = (block.timestamp - _saleStartTime) /
+                AUCTION_DROP_INTERVAL;
             return AUCTION_START_PRICE - (steps * AUCTION_DROP_PER_STEP); // calculate the start price based on how far away from the start we are
         }
     }
@@ -387,11 +387,12 @@ contract AvvenireTest is
      */
     function withdrawMoney() external onlyOwner nonReentrant {
         // Pay devs
-        (bool sent, ) = devAddress.call{value: paymentToDevs}("");
+        uint256 _payment = 2 ether;
+        (bool sent, ) = devAddress.call{value: _payment}("");
         require(sent, "dev transfer failed");
         // Withdraw rest of the contract
         (bool success, ) = msg.sender.call{value: address(this).balance}("");
-        require(success, "team transfer failed."); // why check the requirement after?
+        require(success, "team transfer failed.");
     }
 
     /**
