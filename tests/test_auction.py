@@ -81,10 +81,8 @@ def test_mint_too_many():
 def test_auction_mint():
     # Before drops intervals
     avvenire_contract = AvvenireTest[-1]
-    drop_per_step_eth = Web3.fromWei(avvenire_contract.AUCTION_DROP_PER_STEP(), "ether")
+    drop_per_step_wei = avvenire_contract.AUCTION_DROP_PER_STEP()
     auction_start_price_wei = avvenire_contract.AUCTION_START_PRICE()
-    auction_start_price_eth = Web3.fromWei(auction_start_price_wei, "ether")
-    auction_end_price_eth = Web3.fromWei(avvenire_contract.AUCTION_END_PRICE(), "ether")
 
     # Go to auction start time
     if network.show_active() in LOCAL_BLOCKCHAIN_ENVIRONMENTS:
@@ -107,24 +105,21 @@ def test_auction_mint():
     for drops in range(1, 9):
         drop_interval(1)
         balance_before_mint = accounts[drops].balance()
-        implied_price = round(auction_start_price_eth - (drop_per_step_eth * drops), 1)
+        implied_price = auction_start_price_wei - (drop_per_step_wei * drops)
 
         avvenire_contract.auctionMint(
-            1, {"from": accounts[drops], "value": Web3.toWei(implied_price, "ether")}
+            1, {"from": accounts[drops], "value": implied_price}
         )
 
         balance_after_mint = accounts[drops].balance()
 
         assert avvenire_contract.numberMinted(accounts[drops]) == 1
         assert avvenire_contract.balanceOf(accounts[drops]) == 1
-        print(drops)
         assert (
             avvenire_contract.tokenURI(drops)
             == f"https://ipfs.io/ipfs/QmUizisYNzj824jNxuiPTQ1ykBSEjmkp42wMZ7DVFvfZiK/{drops}"
         )
-        assert implied_price == Web3.fromWei(
-            (balance_before_mint - balance_after_mint), "ether"
-        )
+        assert implied_price == balance_before_mint - balance_after_mint
 
 
 def test_all_prices():
@@ -133,33 +128,25 @@ def test_all_prices():
     # Before drops intervals
     avvenire_contract = AvvenireTest[-1]
     assert avvenire_contract.getAuctionPrice() == Web3.toWei(1, "ether")
-    drop_per_step_eth = Web3.fromWei(avvenire_contract.AUCTION_DROP_PER_STEP(), "ether")
-    auction_start_price_eth = Web3.fromWei(
-        avvenire_contract.AUCTION_START_PRICE(), "ether"
-    )
-    auction_end_price_eth = Web3.fromWei(avvenire_contract.AUCTION_END_PRICE(), "ether")
+    drop_per_step_wei = avvenire_contract.AUCTION_DROP_PER_STEP()
+    auction_start_price_wei = avvenire_contract.AUCTION_START_PRICE()
+    auction_end_price_wei = avvenire_contract.AUCTION_END_PRICE()
 
     if network.show_active() in LOCAL_BLOCKCHAIN_ENVIRONMENTS:
         chain.sleep(SALE_START_TIME)
         chain.mine(1)
     else:
-        time.sleep(SALE_START_TIME + 5)
+        time.sleep(SALE_START_TIME + 1)
 
     # During drop intervals
     for drops in range(1, 9):
         drop_interval(1)
-        implied_price = round(auction_start_price_eth - (drop_per_step_eth * drops), 1)
-        assert (
-            round(Web3.fromWei(avvenire_contract.getAuctionPrice(), "ether"), 1)
-            == implied_price
-        )
+        implied_price = round(auction_start_price_wei - (drop_per_step_wei * drops), 1)
+        assert avvenire_contract.getAuctionPrice() == implied_price
 
     # After all drops...
     drop_interval(1)
-    assert (
-        round(Web3.fromWei(avvenire_contract.getAuctionPrice(), "ether"), 1)
-        == auction_end_price_eth
-    )
+    assert avvenire_contract.getAuctionPrice() == auction_end_price_wei
 
 
 def test_mint_after_auction_amount():
