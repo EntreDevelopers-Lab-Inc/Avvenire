@@ -47,8 +47,7 @@ contract AvvenireTest is
     mapping(address => uint256) public allowlist;
 
     //Do I need to keep public?
-    // Private or internal?
-    mapping(address => uint256) private totalPaid;
+    mapping(address => uint256) public totalPaid;
 
     /**
      * @notice Constructor calls on ERC721A constructor and sets the previously defined global variables
@@ -234,6 +233,8 @@ contract AvvenireTest is
      */
     function refund(address toRefund) external onlyOwner nonReentrant {
         uint256 endingPrice = saleConfig.publicPrice;
+        require(endingPrice != 0, "public price not set yet");
+
         uint256 actualCost = endingPrice * numberMinted(toRefund);
         int256 reimbursement = int256(totalPaid[toRefund]) - int256(actualCost);
         require(reimbursement > 0, "Not eligible for a refund");
