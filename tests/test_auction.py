@@ -10,7 +10,9 @@ SALE_START_TIME = 100
 
 
 def drop_interval(number_of_drops):
-    drop_time = int(60 * 7.5 * number_of_drops)
+    avvenire_contract = AvvenireTest[-1]
+    drop_interval = avvenire_contract.AUCTION_DROP_INTERVAL()
+    drop_time = int(drop_interval * number_of_drops)
     if network.show_active() in LOCAL_BLOCKCHAIN_ENVIRONMENTS:
         chain.sleep(drop_time)
         chain.mine(1)
@@ -40,47 +42,6 @@ def test_mint_before_start():
     with brownie.reverts():
         # Should throw a VirtualMachineError
         auction_mint(1)
-
-
-def test_auction_mint():
-    avvenire_contract = AvvenireTest[-1]
-    account = get_dev_account()
-
-    # Set Dutch Auction price to 0.5
-    drops = 5
-    drop_start = chain.time() + SALE_START_TIME + int(drops * 60 * 7.5)
-
-    if network.show_active() in LOCAL_BLOCKCHAIN_ENVIRONMENTS:
-        # chain.sleep(second_drop_start)
-        chain.mine(1, drop_start)
-    else:
-        time.sleep(drop_start + 5)
-
-    balance_before_mint = account.balance()
-
-    # Tests refundIfOver modifier
-    avvenire_contract.auctionMint(
-        2, {"from": account, "value": Web3.toWei(1.1, "ether")}
-    )
-
-    balance_after_mint = account.balance()
-
-    balance_difference = balance_before_mint - balance_after_mint
-    print(f"Balance Difference: {balance_difference}")
-
-    # Assertions on behavior
-    assert Web3.fromWei(balance_difference, "ether") == 1
-
-    if network.show_active() in LOCAL_BLOCKCHAIN_ENVIRONMENTS:
-        assert avvenire_contract.balanceOf(account) == 2
-
-    assert (
-        avvenire_contract.tokenURI(1)
-        == "https://ipfs.io/ipfs/QmUizisYNzj824jNxuiPTQ1ykBSEjmkp42wMZ7DVFvfZiK/1"
-    )
-
-    assert avvenire_contract.numberMinted(account) == 2
-    assert avvenire_contract.balanceOf(account) == 2
 
 
 def test_below_mint_cost():
@@ -117,6 +78,55 @@ def test_mint_too_many():
         avvenire_contract.auctionMint(3, {"from": account, "value": three_eth})
 
 
+def test_auction_mint():
+    # Before drops intervals
+    avvenire_contract = AvvenireTest[-1]
+    drop_per_step_eth = Web3.fromWei(avvenire_contract.AUCTION_DROP_PER_STEP(), "ether")
+    auction_start_price_wei = avvenire_contract.AUCTION_START_PRICE()
+    auction_start_price_eth = Web3.fromWei(auction_start_price_wei, "ether")
+    auction_end_price_eth = Web3.fromWei(avvenire_contract.AUCTION_END_PRICE(), "ether")
+
+    # Go to auction start time
+    if network.show_active() in LOCAL_BLOCKCHAIN_ENVIRONMENTS:
+        chain.sleep(SALE_START_TIME)
+        chain.mine(1)
+    else:
+        time.sleep(SALE_START_TIME + 1)
+
+    avvenire_contract.auctionMint(
+        1, {"from": accounts[0], "value": auction_start_price_wei}
+    )
+    assert avvenire_contract.numberMinted(accounts[0]) == 1
+    assert avvenire_contract.balanceOf(accounts[0]) == 1
+    assert (
+        avvenire_contract.tokenURI(0)
+        == f"https://ipfs.io/ipfs/QmUizisYNzj824jNxuiPTQ1ykBSEjmkp42wMZ7DVFvfZiK/0"
+    )
+
+    # During drop intervals
+    for drops in range(1, 9):
+        drop_interval(1)
+        balance_before_mint = accounts[drops].balance()
+        implied_price = round(auction_start_price_eth - (drop_per_step_eth * drops), 1)
+
+        avvenire_contract.auctionMint(
+            1, {"from": accounts[drops], "value": Web3.toWei(implied_price, "ether")}
+        )
+
+        balance_after_mint = accounts[drops].balance()
+
+        assert avvenire_contract.numberMinted(accounts[drops]) == 1
+        assert avvenire_contract.balanceOf(accounts[drops]) == 1
+        print(drops)
+        assert (
+            avvenire_contract.tokenURI(drops)
+            == f"https://ipfs.io/ipfs/QmUizisYNzj824jNxuiPTQ1ykBSEjmkp42wMZ7DVFvfZiK/{drops}"
+        )
+        assert implied_price == Web3.fromWei(
+            (balance_before_mint - balance_after_mint), "ether"
+        )
+
+
 def test_all_prices():
     # Initial price special case...
 
@@ -136,7 +146,7 @@ def test_all_prices():
         time.sleep(SALE_START_TIME + 5)
 
     # During drop intervals
-    for drops in range(1, 8):
+    for drops in range(1, 9):
         drop_interval(1)
         implied_price = round(auction_start_price_eth - (drop_per_step_eth * drops), 1)
         assert (
@@ -144,7 +154,7 @@ def test_all_prices():
             == implied_price
         )
 
-    # After drop interval
+    # After all drops...
     drop_interval(1)
     assert (
         round(Web3.fromWei(avvenire_contract.getAuctionPrice(), "ether"), 1)
@@ -167,6 +177,7 @@ def test_mint_after_auction_amount():
             {"from": accounts[count], "value": mint_cost},
         )
         assert avvenire_contract.numberMinted(accounts[count]) == 3
+        assert avvenire_contract.balanceOf(accounts[count]) == 3
 
     assert avvenire_contract.totalSupply() == 15
 
