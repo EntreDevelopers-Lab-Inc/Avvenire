@@ -1,4 +1,4 @@
-pragma solidity ^0.8.0;
+// SPDX-License-Identifier: MIT
 
 pragma solidity ^0.8.0;
 
@@ -17,18 +17,28 @@ contract SimpleMint is
     ERC721AOwnersExplicit,
     ReentrancyGuard
 {
-    uint256 price = 0.01;  // set a price to 0.01 ETH to allow easy testing
+    uint256 price = 0.01 ether;  // set a price to 0.01 ETH to allow easy testing
+    uint256 collectionSize;
     string _baseTokenURI;
 
     // make a constructor (doesn't need to do much)
-    constructor(baseURI) ERC721A("SimpleMint", "SM") {
+    constructor(string memory baseURI_, uint256 collectionSize_) ERC721A("SimpleMint", "SM") {
         // set the folder base uri
-        _baseTokenURI = baseURI;
+        _baseTokenURI = baseURI_;
+
+        // set the total supply
+        collectionSize = collectionSize_;
 
     }
 
-    // make a functiont to mint nfts to an address
+    // make a function to mint nfts to an address
     function mintNFTs(uint256 quantity) external payable callerIsUser {
+        // require that we haven't exceeded the total supply
+        require((totalSupply() + quantity) < collectionSize, "All NFTs have already been minted");
+
+        // require that the user has provided enough eth to pay for it
+        require(msg.value > (quantity * price), "You did not send the required funds for this transaction");
+
         // mint the nfts
         _safeMint(msg.sender, quantity);
     }
@@ -38,5 +48,13 @@ contract SimpleMint is
      */
     function _baseURI() internal view virtual override returns (string memory) {
         return _baseTokenURI;
+    }
+
+    /**
+      Modifier to make sure that the caller is a user and not another contract
+     */
+    modifier callerIsUser() {
+        require(tx.origin == msg.sender, "The caller is another contract"); // check that a user is accessing a contract
+        _;
     }
 }
