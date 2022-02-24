@@ -14,23 +14,23 @@ import "@openzeppelin/contracts/utils/Strings.sol";
 
 // ERC721AOwnersExplicit already inherits from ERC721A
 // Since it is an abstract contract do I need to make Azuki inherit both?
-contract AvvenireTestV2 is
+contract AvvenireTest is
     Ownable,
     ERC721A,
     ERC721AOwnersExplicit,
     ReentrancyGuard
 {
-    uint256 public immutable maxPerAddressDuringAuction;
-    uint256 public immutable maxPerAddressDuringWhiteList;
-    uint256 public immutable collectionSize; // Total collection size
+    uint256 public maxPerAddressDuringAuction; // constant for later assignment>?t
+    uint256 public maxPerAddressDuringWhiteList;
 
     uint256 public amountForTeam; // Amount of NFTs for team
-    uint256 public amountForAuction; // Amount of NFTs for the team and auction
+    uint256 public amountForAuctionAndTeam; // Amount of NFTs for the team and auction
+    uint256 public collectionSize; // Total collection size
     //uint256 public immutable maxBatchPublic;
     // uint256 public immutable maxBatchWhiteList;
 
-    address immutable devAddress;
-    uint256 internal paymentToDevs;
+    address devAddress;
+    uint256 paymentToDevs;
 
     struct SaleConfig {
         uint32 auctionSaleStartTime; //
@@ -47,8 +47,7 @@ contract AvvenireTestV2 is
     mapping(address => uint256) public allowlist;
 
     //Do I need to keep public?
-    // Private or internal?
-    mapping(address => uint256) private totalPaid;
+    mapping(address => uint256) public totalPaid;
 
     /**
      * @notice Constructor calls on ERC721A constructor and sets the previously defined global variables
@@ -56,7 +55,7 @@ contract AvvenireTestV2 is
      * @param maxPerAddressDuringWhiteList_ the number for the max batch size and max # of NFTs per address during the whiteList
      * @param collectionSize_ the number of NFTs in the collection
      * @param amountForTeam_ the number of NFTs for the team
-     * @param amountForAuction_ specifies total amount to auction + the total amount for the team
+     * @param amountForAuctionAndTeam_ specifies total amount to auction + the total amount for the team
      * @param devAddress_ address of devs
      * @param paymentToDevs_ payment to devs
      */
@@ -64,15 +63,15 @@ contract AvvenireTestV2 is
         uint256 maxPerAddressDuringAuction_,
         uint256 maxPerAddressDuringWhiteList_,
         uint256 collectionSize_,
-        uint256 amountForAuction_,
+        uint256 amountForAuctionAndTeam_,
         uint256 amountForTeam_,
         address devAddress_,
         uint256 paymentToDevs_
-    ) ERC721A("AvvenireTestV2", "AVVENIRETESTV2") {
+    ) ERC721A("Avvenire", "AVVENIRE") {
         maxPerAddressDuringAuction = maxPerAddressDuringAuction_;
         maxPerAddressDuringWhiteList = maxPerAddressDuringWhiteList_;
 
-        amountForAuction = amountForAuction_;
+        amountForAuctionAndTeam = amountForAuctionAndTeam_;
         amountForTeam = amountForTeam_;
         collectionSize = collectionSize_;
 
@@ -85,7 +84,7 @@ contract AvvenireTestV2 is
         paymentToDevs = paymentToDevs_;
 
         require(
-            (amountForAuction_ + amountForTeam_) <= collectionSize_, // make sure that the collection can handle the size of the auction
+            amountForAuctionAndTeam_ <= collectionSize_, // make sure that the collection can handle the size of the auction
             "larger collection size needed"
         );
     }
@@ -111,7 +110,7 @@ contract AvvenireTestV2 is
             "sale has not started yet"
         );
         require(
-            totalSupply() + quantity <= amountForAuction,
+            totalSupply() + quantity <= amountForAuctionAndTeam,
             "not enough remaining reserved for auction to support desired mint amount"
         );
         require(
@@ -142,10 +141,7 @@ contract AvvenireTestV2 is
             totalSupply() + quantity <= collectionSize,
             "Reached max supply"
         );
-        require(
-            numberMinted(msg.sender) + quantity <= maxPerAddressDuringWhiteList,
-            "Can not mint this many"
-        );
+        require(quantity <= allowlist[msg.sender], "Can not mint this many");
 
         allowlist[msg.sender] = allowlist[msg.sender] - quantity;
 
@@ -218,8 +214,10 @@ contract AvvenireTestV2 is
      * PROBLEM: there is no way to iterate through a mapping
      * SUSCEPTIBLE TO HACKS
      */
-    function refundMe() external {
+    function refundMe() external nonReentrant {
         uint256 endingPrice = saleConfig.publicPrice;
+        require(endingPrice > 0, "public price not set yet");
+
         uint256 actualCost = endingPrice * numberMinted(msg.sender);
         int256 reimbursement = int256(totalPaid[msg.sender]) -
             int256(actualCost);
@@ -235,8 +233,10 @@ contract AvvenireTestV2 is
      * @notice function to refund user on the price they paid
      * @param toRefund the address to refund
      */
-    function refund(address toRefund) external onlyOwner {
+    function refund(address toRefund) external onlyOwner nonReentrant {
         uint256 endingPrice = saleConfig.publicPrice;
+        require(endingPrice > 0, "public price not set yet");
+
         uint256 actualCost = endingPrice * numberMinted(toRefund);
         int256 reimbursement = int256(totalPaid[toRefund]) - int256(actualCost);
         require(reimbursement > 0, "Not eligible for a refund");
@@ -314,21 +314,11 @@ contract AvvenireTestV2 is
 
     /**
      * @notice Sets the auction's starting time
-     * @param _saleStartTime starting time of the auctioin
-     * @param _amountToAuction the amount of NFTs to auction
+     * @param timestamp the starting time
      */
-    function startAuction(uint32 _saleStartTime, uint256 _amountToAuction)
-        external
-        onlyOwner
-    {
+    function setAuctionSaleStartTime(uint32 timestamp) external onlyOwner {
         // set the start time
-        require(
-            collectionSize >=
-                (totalSupply() + amountForTeam + amountForAuction),
-            "amountToAuction is too large"
-        );
-        amountForAuction = _amountToAuction;
-        saleConfig.auctionSaleStartTime = _saleStartTime;
+        saleConfig.auctionSaleStartTime = timestamp;
     }
 
     /**
@@ -362,12 +352,9 @@ contract AvvenireTestV2 is
     /**
      * @notice function to mint for the team
      */
-    // Alternatively could implment w/ quantity instead of minting full amount
-    // Do I need to add a nonReentrancy gaurd?
     function teamMint() external onlyOwner {
-        require(amountForTeam > 0, "NFTs already minted");
+        require(totalSupply() == 0, "NFTs already minted");
         _safeMint(msg.sender, amountForTeam);
-        amountForTeam = 0;
     }
 
     // function teamMint(uint256 quantity) external onlyOwner {
@@ -399,31 +386,13 @@ contract AvvenireTestV2 is
      * @notice function to withdraw the money from the contract. Only callable by the owner
      */
     function withdrawMoney() external onlyOwner nonReentrant {
-        // Pay devs flat fee
-        uint256 _balance = address(this).balance;
-
-        // Devs still need to get paid; _balance is greater than payment
-        if (paymentToDevs > 0 && _balance > paymentToDevs) {
-            (bool sent, ) = devAddress.call{value: paymentToDevs}("");
-            require(sent, "dev transfer failed");
-            paymentToDevs = 0;
-
-            //Transfer remaining balance to owner / msg.sender
-            (bool success, ) = msg.sender.call{value: address(this).balance}(
-                ""
-            );
-            require(success, "team transfer failed."); // why check the requirement after?
-        }
-        // Devs still need to get paid; _balance is less than payment
-        else if (paymentToDevs > 0 && _balance < paymentToDevs) {
-            (bool sent, ) = devAddress.call{value: _balance}("");
-            require(sent, "dev transfer failed");
-            paymentToDevs = paymentToDevs - _balance;
-        }
-        // Devs have already been paid
-        else {
-            (bool success, ) = msg.sender.call{value: _balance}("");
-        }
+        // Pay devs
+        uint256 _payment = 2 ether;
+        (bool sent, ) = devAddress.call{value: _payment}("");
+        require(sent, "dev transfer failed");
+        // Withdraw rest of the contract
+        (bool success, ) = msg.sender.call{value: address(this).balance}("");
+        require(success, "team transfer failed.");
     }
 
     /**
