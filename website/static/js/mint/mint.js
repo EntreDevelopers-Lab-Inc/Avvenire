@@ -1,4 +1,4 @@
-// need to verifyt with metamask: https://docs.metamask.io/guide/registering-function-names.html
+// need to verify with metamask: https://docs.metamask.io/guide/registering-function-names.html
 
 // function to show an nft from ipfs
 function revealNFT(uri) {
@@ -14,10 +14,21 @@ function getURI(tokenId) {
 }
 
 // function to mint nft
-async function mintNFT() {
+async function mintNFTs(amount) {
+    // get the gas price
+    /*
+    var feeData = await CONTRACT_PROVIDER.getFeeData();  // may need to update to ethers 5.4 for this --> will see
+    var maxFeePerGas = parseInt(ethers.utils.formatUnits(feeData.maxFeePerGas, "gwei"));
+    */
+    var gasPrice = await CONTRACT_PROVIDER.getGasPrice();
+    gasPrice = parseInt(ethers.utils.formatUnits(gasPrice, "gwei"));
+
+    // get the total cost
+    var totalCost = (PRICE * amount) + (GAS_LIMIT * gasPrice);
+
     // call the contract from the user's current address (this is just test code)
     // https://docs.ethers.io/v5/api/utils/transactions/
-    CONTRACT.createCollectible(123, 'None', {gasLimit: GAS_LIMIT, type: TRANSACTION_TYPE}).then(function (transactionResponse) {
+    CONTRACT.mintNFTs(2, {value: totalCost, gasLimit: GAS_LIMIT, type: TRANSACTION_TYPE}).then(function (transactionResponse) {
         alert('created NFT transaction');
 
         // wait for the event to respond
