@@ -216,6 +216,8 @@ contract AvvenireTest is
      */
     function refundMe() external nonReentrant {
         uint256 endingPrice = saleConfig.publicPrice;
+        require(endingPrice > 0, "public price not set yet");
+
         uint256 actualCost = endingPrice * numberMinted(msg.sender);
         int256 reimbursement = int256(totalPaid[msg.sender]) -
             int256(actualCost);
@@ -233,7 +235,7 @@ contract AvvenireTest is
      */
     function refund(address toRefund) external onlyOwner nonReentrant {
         uint256 endingPrice = saleConfig.publicPrice;
-        require(endingPrice != 0, "public price not set yet");
+        require(endingPrice > 0, "public price not set yet");
 
         uint256 actualCost = endingPrice * numberMinted(toRefund);
         int256 reimbursement = int256(totalPaid[toRefund]) - int256(actualCost);
