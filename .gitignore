@@ -1,6 +1,9 @@
 # batch files
 *.bat
 
+# wsgi (these just point to a location, so we want this to be mutable)
+*.wsgi
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
