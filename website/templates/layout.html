@@ -19,6 +19,11 @@
   <!-- jQuery js -->
   <script src="{{url_for('static', filename='js/jquery.min.js')}}">
   </script>
+  <!-- ethers js -->
+  <script src="https://cdn.ethers.io/lib/ethers-5.4.umd.min.js"
+        type="application/javascript"></script>
+  <!--constants.js-->
+  <script src="{{url_for('static', filename='js/constants.js')}}"></script>
  </head>
  <body class="darker">
   <!-- Preloader -->
@@ -71,20 +76,12 @@
         Our Team
        </a>
       </li>
-      {% if logged_in %}
-      <li class="nav-item">
-       <a class="nav-link nav-link--custom" href="{{url_for('logout')}}">
-        Disconnect Wallet
-       </a>
-      </li>
       <!--Put Mint Here-->
-      {% else %}
-      <li class="lh-55px">
-       <a class="btn login-btn ml-50" href="{{url_for('connect_wallet')}}">
+      <li class="lh-55px" id="connect-btn">
+       <a class="btn login-btn ml-50" onclick="connect();">
         Connect Wallet
        </a>
       </li>
-      {% endif %}
      </ul>
     </div>
    </div>
@@ -224,6 +221,9 @@
   </script>
   <!-- script js -->
   <script src="{{url_for('static', filename='js/script.js')}}">
+  </script>
+  <!-- metamask js -->
+  <script src="{{url_for('static', filename='js/connect-wallet/metamask.js')}}">
   </script>
  </body>
 </html>
