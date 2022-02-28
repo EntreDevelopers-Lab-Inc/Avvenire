@@ -1,25 +1,23 @@
 // SPDX-License-Identifier: MIT
 
 /**
- *@title Azuki ERC721 Contract
+ *@title Avvenire ERC721 Contract
  */
 pragma solidity ^0.8.0;
 
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
-import "@chiru-labs/contracts/ERC721A.sol";
 // _setOwnersExplicit( ) moved from the ERC721A contract to an extension
-import "@chiru-labs/contracts/extensions/ERC721AOwnersExplicit.sol";
 import "@openzeppelin/contracts/utils/Strings.sol";
 
 // ERC721AOwnersExplicit already inherits from ERC721A
 // Since it is an abstract contract do I need to make Azuki inherit both?
 contract AvvenireTest is
     Ownable,
-    ERC721A,
-    ERC721AOwnersExplicit,
+    TokenMutator,
     ReentrancyGuard
 {
+    // mint information
     uint256 public maxPerAddressDuringAuction; // constant for later assignment>?t
     uint256 public maxPerAddressDuringWhiteList;
 
@@ -28,9 +26,6 @@ contract AvvenireTest is
     uint256 public collectionSize; // Total collection size
     //uint256 public immutable maxBatchPublic;
     // uint256 public immutable maxBatchWhiteList;
-
-    address devAddress;
-    uint256 paymentToDevs;
 
     struct SaleConfig {
         uint32 auctionSaleStartTime; //
@@ -48,6 +43,10 @@ contract AvvenireTest is
 
     //Do I need to keep public?
     mapping(address => uint256) public totalPaid;
+
+    // dev payment information
+    address devAddress;
+    uint256 paymentToDevs;  // can decrement this to 0 after being paid
 
     /**
      * @notice Constructor calls on ERC721A constructor and sets the previously defined global variables
@@ -67,7 +66,7 @@ contract AvvenireTest is
         uint256 amountForTeam_,
         address devAddress_,
         uint256 paymentToDevs_
-    ) ERC721A("Avvenire", "AVVENIRE") {
+    ) TokenMutator("Avvenire", "AV") {
         maxPerAddressDuringAuction = maxPerAddressDuringAuction_;
         maxPerAddressDuringWhiteList = maxPerAddressDuringWhiteList_;
 
@@ -87,14 +86,6 @@ contract AvvenireTest is
             amountForAuctionAndTeam_ <= collectionSize_, // make sure that the collection can handle the size of the auction
             "larger collection size needed"
         );
-    }
-
-    /**
-      Modifier to make sure that the caller is a user and not another contract 
-     */
-    modifier callerIsUser() {
-        require(tx.origin == msg.sender, "The caller is another contract"); // check that a user is accessing a contract
-        _;
     }
 
     /**
@@ -366,21 +357,6 @@ contract AvvenireTest is
     // }
 
     string private _baseTokenURI;
-
-    /**
-     * @notice returns the baseURI; used in TokenURI
-     */
-    function _baseURI() internal view virtual override returns (string memory) {
-        return _baseTokenURI;
-    }
-
-    /**
-     * @notice sets the baseURI
-     * @param baseURI the base URI
-     */
-    function setBaseURI(string calldata baseURI) external onlyOwner {
-        _baseTokenURI = baseURI;
-    }
 
     /**
      * @notice function to withdraw the money from the contract. Only callable by the owner

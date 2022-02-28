@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 
 /**
- *@title Azuki ERC721 Contract
+ *@title Avvenire ERC721A Contract
  */
 pragma solidity ^0.8.0;
 
@@ -12,7 +12,7 @@ import "@chiru-labs/contracts/extensions/ERC721AOwnersExplicit.sol";
 import "@openzeppelin/contracts/utils/Strings.sol";
 
 // ERC721AOwnersExplicit already inherits from ERC721A
-// Since it is an abstract contract do I need to make Azuki inherit both?
+// Since it is an abstract contract do I need to make Avvenire inherit both?
 contract AvvenireTestV2 is
     Ownable,
     ERC721A,
@@ -20,14 +20,13 @@ contract AvvenireTestV2 is
     ReentrancyGuard
 {
     // Immutable keyword removed for brownies test
+    // mint information
     uint256 public maxPerAddressDuringAuction;
     uint256 public maxPerAddressDuringWhiteList;
     uint256 public amountForTeam;
     uint256 public amountForAuctionAndTeam;
     uint256 public collectionSize;
-
-    address devAddress;
-    uint256 paymentToDevs;
+    string private _baseTokenURI;
 
     struct SaleConfig {
         uint32 auctionSaleStartTime;
@@ -45,6 +44,11 @@ contract AvvenireTestV2 is
     //Do I need to keep public?
     mapping(address => uint256) public totalPaid;
 
+    // dev payment information
+    address devAddress;
+    uint256 paymentToDevs;
+    bool devsPaid = false;  // this will keep us from being paid every time they withdraw money from this contract (necessary for mutability)
+
     /**
      * @notice Constructor calls on ERC721A constructor and sets the previously defined global variables
      * @param maxPerAddressDuringAuction_ the number for the max batch size and max # of NFTs per address during the auction
@@ -61,7 +65,7 @@ contract AvvenireTestV2 is
         uint256 amountForAuctionAndTeam_,
         uint256 amountForTeam_,
         address devAddress_
-    ) ERC721A("Avvenire", "AVVENIRE") {
+    ) ERC721A("Avvenire", "AV") {  // check abbreviation with oscar
         maxPerAddressDuringAuction = maxPerAddressDuringAuction_;
         maxPerAddressDuringWhiteList = maxPerAddressDuringWhiteList_;
 
@@ -343,8 +347,6 @@ contract AvvenireTestV2 is
     //     );
     //     _safeMint(msg.sender, quantity);
     // }
-
-    string private _baseTokenURI;
 
     /**
      * @notice returns the baseURI; used in TokenURI
