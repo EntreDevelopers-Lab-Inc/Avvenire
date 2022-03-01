@@ -9,9 +9,8 @@ import jwt
 # make a constant for how long until timeout
 TOKEN_MINUTES = 120
 
+
 # create a resource for user addition
-
-
 class UserManagementResource(Resource):
     # create users
     def post(self):

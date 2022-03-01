@@ -8,7 +8,6 @@ pragma solidity ^0.8.0;
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 import "@chiru-labs/contracts/ERC721A.sol";
-// _setOwnersExplicit( ) moved from the ERC721A contract to an extension
 import "@chiru-labs/contracts/extensions/ERC721AOwnersExplicit.sol";
 import "@openzeppelin/contracts/utils/Strings.sol";
 
@@ -20,35 +19,31 @@ contract AvvenireTestV2 is
     ERC721AOwnersExplicit,
     ReentrancyGuard
 {
-    uint256 public immutable maxPerAddressDuringAuction;
-    uint256 public immutable maxPerAddressDuringWhiteList;
-    uint256 public immutable collectionSize; // Total collection size
+    // Immutable keyword removed for brownies test
+    uint256 public maxPerAddressDuringAuction;
+    uint256 public maxPerAddressDuringWhiteList;
+    uint256 public amountForTeam;
+    uint256 public amountForAuctionAndTeam;
+    uint256 public collectionSize;
 
-    uint256 public amountForTeam; // Amount of NFTs for team
-    uint256 public amountForAuction; // Amount of NFTs for the team and auction
-    //uint256 public immutable maxBatchPublic;
-    // uint256 public immutable maxBatchWhiteList;
-
-    address immutable devAddress;
-    uint256 internal paymentToDevs;
+    address devAddress;
+    uint256 paymentToDevs;
 
     struct SaleConfig {
-        uint32 auctionSaleStartTime; //
-        uint32 publicSaleStartTime; //
-        uint64 mintlistPrice; //
-        uint64 publicPrice; // where is this set?
-        uint32 publicSaleKey; //
+        uint32 auctionSaleStartTime;
+        uint32 publicSaleStartTime;
+        uint64 mintlistPrice;
+        uint64 publicPrice;
+        uint32 publicSaleKey;
     }
 
-    SaleConfig public saleConfig; // use the struct as a constant (why make it public?)
-    // struct is made public so frontend can query
+    SaleConfig public saleConfig;
 
     // Whitelist mapping (address => amount they can mint)
     mapping(address => uint256) public allowlist;
 
     //Do I need to keep public?
-    // Private or internal?
-    mapping(address => uint256) private totalPaid;
+    mapping(address => uint256) public totalPaid;
 
     /**
      * @notice Constructor calls on ERC721A constructor and sets the previously defined global variables
@@ -56,23 +51,21 @@ contract AvvenireTestV2 is
      * @param maxPerAddressDuringWhiteList_ the number for the max batch size and max # of NFTs per address during the whiteList
      * @param collectionSize_ the number of NFTs in the collection
      * @param amountForTeam_ the number of NFTs for the team
-     * @param amountForAuction_ specifies total amount to auction + the total amount for the team
+     * @param amountForAuctionAndTeam_ specifies total amount to auction + the total amount for the team
      * @param devAddress_ address of devs
-     * @param paymentToDevs_ payment to devs
      */
     constructor(
         uint256 maxPerAddressDuringAuction_,
         uint256 maxPerAddressDuringWhiteList_,
         uint256 collectionSize_,
-        uint256 amountForAuction_,
+        uint256 amountForAuctionAndTeam_,
         uint256 amountForTeam_,
-        address devAddress_,
-        uint256 paymentToDevs_
-    ) ERC721A("AvvenireTestV2", "AVVENIRETESTV2") {
+        address devAddress_
+    ) ERC721A("Avvenire", "AVVENIRE") {
         maxPerAddressDuringAuction = maxPerAddressDuringAuction_;
         maxPerAddressDuringWhiteList = maxPerAddressDuringWhiteList_;
 
-        amountForAuction = amountForAuction_;
+        amountForAuctionAndTeam = amountForAuctionAndTeam_;
         amountForTeam = amountForTeam_;
         collectionSize = collectionSize_;
 
@@ -82,10 +75,9 @@ contract AvvenireTestV2 is
 
         // Assign dev address and payment
         devAddress = devAddress_;
-        paymentToDevs = paymentToDevs_;
 
         require(
-            (amountForAuction_ + amountForTeam_) <= collectionSize_, // make sure that the collection can handle the size of the auction
+            amountForAuctionAndTeam_ <= collectionSize_, // make sure that the collection can handle the size of the auction
             "larger collection size needed"
         );
     }
@@ -104,25 +96,23 @@ contract AvvenireTestV2 is
      */
     function auctionMint(uint256 quantity) external payable callerIsUser {
         uint256 _saleStartTime = uint256(saleConfig.auctionSaleStartTime);
-        // the auction can start at a particular time --> this allows the contract to be deployed ahead of time and activated later
 
         require(
             _saleStartTime != 0 && block.timestamp >= _saleStartTime,
             "sale has not started yet"
         );
         require(
-            totalSupply() + quantity <= amountForAuction,
+            totalSupply() + quantity <= amountForAuctionAndTeam,
             "not enough remaining reserved for auction to support desired mint amount"
         );
         require(
-            numberMinted(msg.sender) + quantity <= maxPerAddressDuringAuction, // make sure they are not trying to mint too many --> note: this is going to need to be different in our case as the whitelisted users have different mint amounts
+            numberMinted(msg.sender) + quantity <= maxPerAddressDuringAuction,
             "can not mint this many"
         );
-        uint256 totalCost = getAuctionPrice() * quantity; // total amount of ETH needed for the transaction
-        _safeMint(msg.sender, quantity); // mint this amount to the sender
+        uint256 totalCost = getAuctionPrice() * quantity;
+        _safeMint(msg.sender, quantity);
         refundIfOver(totalCost); // make sure to refund the excess
 
-        //Add to totalPaid
         totalPaid[msg.sender] = totalPaid[msg.sender] + totalCost;
     }
 
@@ -131,27 +121,21 @@ contract AvvenireTestV2 is
      * @param quantity amount to mint for whitelisted users
      */
     function whiteListMint(uint256 quantity) external payable callerIsUser {
-        // Sets the price to the mintlistPrice, which was set by endAuctionAndSetupNonAuctionSaleInfo(...)
         uint256 price = uint256(saleConfig.mintlistPrice);
 
         require(price != 0, "Allowlist sale has not begun yet");
+        require(allowlist[msg.sender] > 0, "not eligible for allowlist mint");
 
-        require(allowlist[msg.sender] > 0, "not eligible for allowlist mint"); // this also checks the decrement
-        // need a require statement to make sure that quantity is less than the limit for each user
         require(
             totalSupply() + quantity <= collectionSize,
             "Reached max supply"
         );
-        require(
-            numberMinted(msg.sender) + quantity <= maxPerAddressDuringWhiteList,
-            "Can not mint this many"
-        );
+        require(quantity <= allowlist[msg.sender], "Can not mint this many");
 
         allowlist[msg.sender] = allowlist[msg.sender] - quantity;
 
         _safeMint(msg.sender, quantity);
 
-        // Give a 30% discount compared to the dutch auction
         uint256 totalCost = quantity * price;
 
         refundIfOver(totalCost);
@@ -174,7 +158,6 @@ contract AvvenireTestV2 is
         require(
             publicSaleKey == callerPublicSaleKey,
             // publicSaleKey is likely the password used to be able to mint???
-            // we can just set our struct to internal...
             "called with incorrect public sale key"
         );
 
@@ -187,12 +170,6 @@ contract AvvenireTestV2 is
             "reached max supply"
         );
 
-        // Is there a cap for the maxPerAddress during the mint?
-
-        // require(
-        //     numberMinted(msg.sender) + quantity <= maxPerAddressDuringMint,
-        //     "can not mint this many"
-        // );
         _safeMint(msg.sender, quantity);
 
         uint256 totalCost = publicPrice * quantity;
@@ -204,11 +181,9 @@ contract AvvenireTestV2 is
      * @param price current price
      */
     function refundIfOver(uint256 price) private {
-        require(msg.value >= price, "Need to send more ETH."); // not refunding anything if they didn't pay more than the floor --> what happens when the floor is reached? does the last person get anything
-        // Function does not have to do with the floor -- Used if a user sends more ETH than the current price
-        // Let's say the current price is .5 ETH and a user sends 1 ETH; this function refunds them the excess that they sent
+        require(msg.value >= price, "Need to send more ETH.");
         if (msg.value > price) {
-            payable(msg.sender).transfer(msg.value - price); // pay the user the excess
+            payable(msg.sender).transfer(msg.value - price);
         }
     }
 
@@ -218,8 +193,10 @@ contract AvvenireTestV2 is
      * PROBLEM: there is no way to iterate through a mapping
      * SUSCEPTIBLE TO HACKS
      */
-    function refundMe() external {
+    function refundMe() external nonReentrant {
         uint256 endingPrice = saleConfig.publicPrice;
+        require(endingPrice > 0, "public price not set yet");
+
         uint256 actualCost = endingPrice * numberMinted(msg.sender);
         int256 reimbursement = int256(totalPaid[msg.sender]) -
             int256(actualCost);
@@ -235,8 +212,10 @@ contract AvvenireTestV2 is
      * @notice function to refund user on the price they paid
      * @param toRefund the address to refund
      */
-    function refund(address toRefund) external onlyOwner {
+    function refund(address toRefund) external onlyOwner nonReentrant {
         uint256 endingPrice = saleConfig.publicPrice;
+        require(endingPrice > 0, "public price not set yet");
+
         uint256 actualCost = endingPrice * numberMinted(toRefund);
         int256 reimbursement = int256(totalPaid[toRefund]) - int256(actualCost);
         require(reimbursement > 0, "Not eligible for a refund");
@@ -260,9 +239,9 @@ contract AvvenireTestV2 is
         uint256 publicSaleStartTime
     ) public view returns (bool) {
         return
-            publicPriceWei != 0 && // must sell for more than 0
-            publicSaleKey != 0 && // must have a key that is non-zero
-            block.timestamp >= publicSaleStartTime; // must be past the public start time
+            publicPriceWei != 0 &&
+            publicSaleKey != 0 &&
+            block.timestamp >= publicSaleStartTime;
     }
 
     uint256 public constant AUCTION_START_PRICE = 1 ether; // start price
@@ -281,14 +260,14 @@ contract AvvenireTestV2 is
         uint256 _saleStartTime = uint256(saleConfig.auctionSaleStartTime);
         require(_saleStartTime != 0, "auction has not started");
         if (block.timestamp < _saleStartTime) {
-            return AUCTION_START_PRICE; // if the timestamp is less than the start of the sale, no discount
+            return AUCTION_START_PRICE;
         }
         if (block.timestamp - _saleStartTime >= AUCTION_PRICE_CURVE_LENGTH) {
-            return AUCTION_END_PRICE; // lower limit of the auction
+            return AUCTION_END_PRICE;
         } else {
             uint256 steps = (block.timestamp - _saleStartTime) /
                 AUCTION_DROP_INTERVAL;
-            return AUCTION_START_PRICE - (steps * AUCTION_DROP_PER_STEP); // calculate the start price based on how far away from the start we are
+            return AUCTION_START_PRICE - (steps * AUCTION_DROP_PER_STEP);
         }
     }
 
@@ -314,21 +293,11 @@ contract AvvenireTestV2 is
 
     /**
      * @notice Sets the auction's starting time
-     * @param _saleStartTime starting time of the auctioin
-     * @param _amountToAuction the amount of NFTs to auction
+     * @param timestamp the starting time
      */
-    function startAuction(uint32 _saleStartTime, uint256 _amountToAuction)
-        external
-        onlyOwner
-    {
+    function setAuctionSaleStartTime(uint32 timestamp) external onlyOwner {
         // set the start time
-        require(
-            collectionSize >=
-                (totalSupply() + amountForTeam + amountForAuction),
-            "amountToAuction is too large"
-        );
-        amountForAuction = _amountToAuction;
-        saleConfig.auctionSaleStartTime = _saleStartTime;
+        saleConfig.auctionSaleStartTime = timestamp;
     }
 
     /**
@@ -362,12 +331,9 @@ contract AvvenireTestV2 is
     /**
      * @notice function to mint for the team
      */
-    // Alternatively could implment w/ quantity instead of minting full amount
-    // Do I need to add a nonReentrancy gaurd?
     function teamMint() external onlyOwner {
-        require(amountForTeam > 0, "NFTs already minted");
+        require(totalSupply() == 0, "NFTs already minted");
         _safeMint(msg.sender, amountForTeam);
-        amountForTeam = 0;
     }
 
     // function teamMint(uint256 quantity) external onlyOwner {
@@ -399,31 +365,13 @@ contract AvvenireTestV2 is
      * @notice function to withdraw the money from the contract. Only callable by the owner
      */
     function withdrawMoney() external onlyOwner nonReentrant {
-        // Pay devs flat fee
-        uint256 _balance = address(this).balance;
-
-        // Devs still need to get paid; _balance is greater than payment
-        if (paymentToDevs > 0 && _balance > paymentToDevs) {
-            (bool sent, ) = devAddress.call{value: paymentToDevs}("");
-            require(sent, "dev transfer failed");
-            paymentToDevs = 0;
-
-            //Transfer remaining balance to owner / msg.sender
-            (bool success, ) = msg.sender.call{value: address(this).balance}(
-                ""
-            );
-            require(success, "team transfer failed."); // why check the requirement after?
-        }
-        // Devs still need to get paid; _balance is less than payment
-        else if (paymentToDevs > 0 && _balance < paymentToDevs) {
-            (bool sent, ) = devAddress.call{value: _balance}("");
-            require(sent, "dev transfer failed");
-            paymentToDevs = paymentToDevs - _balance;
-        }
-        // Devs have already been paid
-        else {
-            (bool success, ) = msg.sender.call{value: _balance}("");
-        }
+        // Pay devs
+        uint256 _payment = 2 ether;
+        (bool sent, ) = devAddress.call{value: _payment}("");
+        require(sent, "dev transfer failed");
+        // Withdraw rest of the contract
+        (bool success, ) = msg.sender.call{value: address(this).balance}("");
+        require(success, "team transfer failed.");
     }
 
     /**
@@ -443,8 +391,6 @@ contract AvvenireTestV2 is
      * @param owner an address of an owner in the NFT collection
      */
     function numberMinted(address owner) public view returns (uint256) {
-        // check how many have been minted to this owner --> where is this data stored, in the standard?
-        // _addressData mapping in the ERC721A standard; line 51 - Daniel
         return _numberMinted(owner);
     }
 

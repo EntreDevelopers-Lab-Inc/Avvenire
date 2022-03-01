@@ -1,3 +1,4 @@
+from site_secrets import SECRET_KEY, SQLALCHEMY_DATABASE_URI
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_bcrypt import Bcrypt
@@ -5,8 +6,8 @@ from flask_cors import CORS
 
 app = Flask(__name__)
 
-app.config['SECRET_KEY'] = '45e2b67051014e2ba07df47f533c1f14'
-app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///locovotiv.db'
+app.config['SECRET_KEY'] = SECRET_KEY
+app.config['SQLALCHEMY_DATABASE_URI'] = SQLALCHEMY_DATABASE_URI
 
 db = SQLAlchemy(app)
 bcrypt = Bcrypt(app)
