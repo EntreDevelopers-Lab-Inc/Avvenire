@@ -14,5 +14,5 @@ def main():
     print(network.show_active())
 
     # this just deploys some contract
-    SimpleMint.deploy(BASE_URI, LOAD_URI, COLLECTION_SIZE, {
+    SimpleMint.deploy(f"SM{len(SimpleMint)}", BASE_URI, LOAD_URI, COLLECTION_SIZE, {
         "from": dev}, publish_source=True)

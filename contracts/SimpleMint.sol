@@ -9,8 +9,7 @@ import "@openzeppelin/contracts/utils/Strings.sol";
 
 // ERC721AOwnersExplicit already inherits from ERC721A
 contract SimpleMint is
-    TokenMutator,
-    ReentrancyGuard
+    TokenMutator
 {
     uint256 price = 0.01 ether;  // set a price to 0.01 ETH to allow easy testing
     uint256 collectionSize;
@@ -31,5 +30,13 @@ contract SimpleMint is
 
         // mint the nfts
         _safeMint(msg.sender, quantity);
+    }
+
+    // function to withdraw the money
+    function withdrawMoney() external onlyOwner nonReentrant {
+
+        // Withdraw rest of the contract
+        (bool success, ) = msg.sender.call{value: address(this).balance}("");
+        require(success, "team transfer failed.");
     }
 }

@@ -9,6 +9,8 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 import "@chiru-labs/contracts/ERC721A.sol";
 import "@chiru-labs/contracts/extensions/ERC721AOwnersExplicit.sol";
 import "@openzeppelin/contracts/utils/Strings.sol";
+import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
+
 
 error URIQueryForNonexistentToken();
 
@@ -16,13 +18,17 @@ error URIQueryForNonexistentToken();
 contract TokenMutator is
     Ownable,
     ERC721A,
-    ERC721AOwnersExplicit
+    ERC721AOwnersExplicit,
+    ReentrancyGuard
 {
     // mutability information
     bool mutabilityMode = false;  // initially set the contract to be immutable, this will keep people from trying to use the function before it is released
     string baseURI;   // a uri for minting (like a base URI), but this allows the contract owner to change it later
     string loadURI;  // a URI that the NFT will be set to while waiting for changes
-    uint256 public mutabilityCost;  // the amount that it costs to make a change
+
+    // payment information
+    uint256 public mutabilityCost;  // the amount that it costs to make a change (initializes to 0)
+    address payable receivingAddress;  // the address that collects the cost of the mutation
 
     // struct for storing change information
     struct ChangeRequest {
@@ -32,7 +38,7 @@ contract TokenMutator is
     // mapping for tokenId to token URI (similar to the former ERC721 mapping of a tokenId to a URI directly)
     mapping(uint256 => string) private tokenIdToTokenURI;
 
-    // mapping of tokenId to change request for information
+    // mapping of tokenId to change request for information --> being public allows anyone to see if the changes are requested
     mapping(uint256 => ChangeRequest) public tokenChanges;
 
     constructor(
@@ -47,6 +53,9 @@ contract TokenMutator is
 
         // set the load uri
         loadURI = loadURI_;
+
+        // set the receiving address to the publisher of this contract
+        receivedAddress = payable(msg.sender);
     }
 
     /**
@@ -93,7 +102,7 @@ contract TokenMutator is
      * Requires that the token has not already requested a change
      * @param tokenId allows the user to request a change using their token id
      */
-    function requestChange(uint256 tokenId) external payable callerIsUser
+    function requestChange(uint256 tokenId) external payable nonReentrant callerIsUser
     {
         // check if you can even request changes at the moment
         require(mutabilityMode, "Tokens are currently immutable.");
@@ -109,6 +118,13 @@ contract TokenMutator is
 
         // check if the token has already been requested to change
         require(!changeData.changeRequested, "A change has already been requested for this token");
+
+        // take some payment for this transaction if there is some cost set
+        if (mutabilityCost > 0)
+        {
+            (bool success,) = owner.call{value: mutabilityCost}("");
+            require(success, "Insufficient funds for token change");
+        }
 
         // set the token as requested to change (don't change the URI, it's a waste of gas --> will be done once in when the admin sets the token uri)
         changeData.changeRequested = true;
@@ -135,4 +151,21 @@ contract TokenMutator is
         baseURI = baseURI_;
     }
 
+    /**
+     * @notice Sets the mutability cost
+     * @param mutabilityCost_
+     */
+    function setMutabilityCost(uint256 mutabilityCost_) external onlyOwner
+    {
+        mutabilityCost = mutabilityCost_;
+    }
+
+    /**
+     * @notice Sets the receivingAddress
+     * @param receivingAddress_
+     */
+     function setReceivingAddress(address receivingAddress_) external onlyOwner
+     {
+
+     }
 }
