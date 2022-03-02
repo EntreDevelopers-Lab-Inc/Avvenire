@@ -5,6 +5,7 @@
  */
 pragma solidity ^0.8.0;
 
+import './TokenMutator.sol';
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 // _setOwnersExplicit( ) moved from the ERC721A contract to an extension
@@ -66,7 +67,7 @@ contract AvvenireTest is
         uint256 amountForTeam_,
         address devAddress_,
         uint256 paymentToDevs_
-    ) TokenMutator("Avvenire", "AV") {
+    ) TokenMutator("Avvenire", "AV", "", "") {
         maxPerAddressDuringAuction = maxPerAddressDuringAuction_;
         maxPerAddressDuringWhiteList = maxPerAddressDuringWhiteList_;
 
