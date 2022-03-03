@@ -1,0 +1,12 @@
+{
+    "name": "Number 9",
+    "description": "Picture of number 9",
+    "images": "https://ipfs.io/ipfs/QmXuxG21RtEbga9xk3c2ancUnQv2DppUnyEf6XzEBGd9ZP/9.jpg",
+    "attributes": [
+        {
+            "trait_type": "Rank",
+            "value": 9,
+            "max_value": 30
+        }
+    ]
+}

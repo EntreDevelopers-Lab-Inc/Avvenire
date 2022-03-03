@@ -1,0 +1,12 @@
+{
+    "name": "Number 13",
+    "description": "Picture of number 13",
+    "images": "https://ipfs.io/ipfs/QmXuxG21RtEbga9xk3c2ancUnQv2DppUnyEf6XzEBGd9ZP/13.jpg",
+    "attributes": [
+        {
+            "trait_type": "Rank",
+            "value": 13,
+            "max_value": 30
+        }
+    ]
+}
