@@ -1,0 +1,240 @@
+{% extends "layout.html" %}
+
+{% block content %}
+  <!-- ##### Area Start ##### -->
+  <section class="blog-area section-padding-100">
+   <div class="container">
+    <div class="row">
+     <div class="col-12 col-lg-3">
+      <div class="service_single_content collection-item">
+       <!-- Icon -->
+       <div class="collection_icon">
+        <img id="nft-img" class="center-block" src="{{url_for('static', filename='img/art-work/profile-header.jpg')}}"/>
+       </div>
+       <span class="aut-info">
+        <img alt="" src="{{url_for('static', filename='img/authors/2.png')}}" width="50"/>
+       </span>
+       <div class="collection_info text-center">
+        <h6>
+         Morgan Wright
+        </h6>
+        <p class="w-text mr-5p">
+         Creative NFTs Designer
+         <img alt="" src="{{url_for('static', filename='img/art-work/fire.png')}}" width="20"/>
+        </p>
+        <p class="mt-15">
+         Lorem ipsum dolor sit, amet consectetur adipisicing elit. Eos distinctio labore.
+        </p>
+        <div class="search-widget-area mt-15">
+         <form action="#" method="post">
+          <input id="wallet" name="wallet" type="text" value="Xjo03s-osi6732..."/>
+          <button class="btn">
+           <i class="fa fa-copy">
+           </i>
+          </button>
+         </form>
+        </div>
+        <ul class="social-links mt-30 mb-30">
+         <li>
+          <a href="#">
+           <span class="fa fa-facebook-f">
+           </span>
+          </a>
+         </li>
+         <li>
+          <a href="#">
+           <span class="fa fa-twitter">
+           </span>
+          </a>
+         </li>
+         <li>
+          <a href="#">
+           <span class="fa fa-google-plus">
+           </span>
+          </a>
+         </li>
+         <li>
+          <a href="#">
+           <span class="fa fa-linkedin">
+           </span>
+          </a>
+         </li>
+         <li>
+          <a href="#">
+           <span class="fa fa-instagram">
+           </span>
+          </a>
+         </li>
+        </ul>
+        <a class="more-btn" href="profile.html">
+         Follow
+        </a>
+       </div>
+      </div>
+     </div>
+     <div class="col-12 col-lg-8">
+      <div class="creator-sec dd-bg">
+       <div class="who-we-contant">
+        <div class="dream-dots text-left fadeInUp" data-wow-delay="0.2s">
+         <span class="gradient-text">
+          Create New Item
+         </span>
+        </div>
+        <h4 class="fadeInUp" data-wow-delay="0.3s">
+         Create Item
+        </h4>
+       </div>
+       <div class="contact_form">
+        <form action="#" id="main_contact_form" method="post" novalidate="">
+         <div class="row">
+          <div class="col-12">
+           <div id="success_fail_info">
+           </div>
+          </div>
+          <div class="col-12 col-md-12">
+           <p class="w-text">
+            Upload Item File
+           </p>
+           <div class="group-file">
+            <p class="g-text">
+             PNG, GIF, WEBP, MP4 or MP3. Max 100mb
+            </p>
+            <div class="new_Btn more-btn">
+             Upload File
+            </div>
+            <br/>
+            <input id="upload-btn" name="upload" required="" type="file"/>
+           </div>
+          </div>
+          <div class="col-12 col-md-12">
+           <div class="group">
+            <input id="name" name="name" required="" type="text"/>
+            <span class="highlight">
+            </span>
+            <span class="bar">
+            </span>
+            <label>
+             Item name
+            </label>
+           </div>
+          </div>
+          <div class="col-12 col-md-12">
+           <div class="mb-15">
+            <p>
+             Choose item Category
+            </p>
+            <div class="filers-list">
+             <a class="filter-item" href="">
+              <img alt="" src="{{url_for('static', filename='img/icons/f1.png')}}"/>
+              Art
+             </a>
+             <a class="filter-item" href="">
+              <img alt="" src="{{url_for('static', filename='img/icons/f5.png')}}"/>
+              Virtual Worlds
+             </a>
+             <a class="filter-item" href="">
+              <img alt="" src="{{url_for('static', filename='img/icons/f2.png')}}"/>
+              Purchases
+             </a>
+             <a class="filter-item" href="">
+              <img alt="" src="{{url_for('static', filename='img/icons/f3.png')}}"/>
+              NFT Gifts
+             </a>
+             <a class="filter-item" href="">
+              <img alt="" src="{{url_for('static', filename='img/icons/f4.png')}}"/>
+              Collectibles
+             </a>
+             <a class="filter-item" href="">
+              <img alt="" src="{{url_for('static', filename='img/icons/f6.png')}}"/>
+              Gifts
+             </a>
+             <a class="filter-item" href="">
+              <img alt="" src="{{url_for('static', filename='img/icons/f7.png')}}"/>
+              Trading Cards
+             </a>
+            </div>
+           </div>
+          </div>
+          <div class="col-12">
+           <div class="group">
+            <textarea id="Description" name="Description" required=""></textarea>
+            <span class="highlight">
+            </span>
+            <span class="bar">
+            </span>
+            <label>
+             Item Description
+            </label>
+           </div>
+          </div>
+          <div class="col-12 col-md-12">
+           <div class="group">
+            <input id="Price" name="Price" required="" type="text"/>
+            <span class="highlight">
+            </span>
+            <span class="bar">
+            </span>
+            <label>
+             Item Price in ETH
+            </label>
+           </div>
+          </div>
+          <div class="col-12 col-md-6">
+           <div class="group">
+            <input id="Royalties" name="Royalties" required="" type="text"/>
+            <span class="highlight">
+            </span>
+            <span class="bar">
+            </span>
+            <label>
+             Royalties
+            </label>
+           </div>
+          </div>
+          <div class="col-12 col-md-6">
+           <div class="group">
+            <input id="Size" name="Size" required="" type="text"/>
+            <span class="highlight">
+            </span>
+            <span class="bar">
+            </span>
+            <label>
+             Size
+            </label>
+           </div>
+          </div>
+          <div class="col-12">
+           <div class="group">
+            <input id="copies" name="copies" required="" type="text"/>
+            <span class="highlight">
+            </span>
+            <span class="bar">
+            </span>
+            <label>
+             Number of copies
+            </label>
+           </div>
+          </div>
+          <div class="col-12 text-center">
+           <button class="more-btn mb-15" type="submit">
+            Create Item
+           </button>
+          </div>
+         </div>
+        </form>
+       </div>
+      </div>
+     </div>
+    </div>
+   </div>
+  </section>
+  <!-- ##### Blog Area End ##### -->
+  <!-- contract information -->
+  <script src="{{url_for('static', filename='js/mint/contract.js')}}">
+  </script>
+  <!-- web3 js -->
+  <script src="{{url_for('static', filename='js/node_modules/web3/dist/web3.min.js')}}"></script>
+  <!-- mint js -->
+  <script src="{{url_for('static', filename='js/mint/mint.js')}}">
+  </script>
+{% endblock content %}

@@ -6,15 +6,15 @@ sudo apt-get install apache2 mysql-client mysql-server
 sudo add-apt-repository ppa:deadsnakes/ppa
 sudo apt-get update
 
-# python
-sudo apt-get install python3.9 python3.9-dev
-curl https://bootstrap.pypa.io/get-pip.py | sudo python3.9
+# python is already usually installed on ubuntu, so just install pip
+sudo apt install python3-pip
 
 # wsgi
 sudo apt-get install apache2 apache2-dev
 
 # requirements
-pip3 install -r requirements.txt
+pip3 install -r requirements/local.txt
+pip3 install -r requirements/server.txt
 
 # linux only requirements
 pip3 install mod_wsgi
