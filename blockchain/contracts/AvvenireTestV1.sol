@@ -66,7 +66,7 @@ contract AvvenireTest is
         uint256 amountForTeam_,
         address devAddress_,
         uint256 paymentToDevs_
-    ) TokenMutator("Avvenire", "AV", "", "") {
+    ) TokenMutator("AvvenirePFP", "AV", "", "") {
         maxPerAddressDuringAuction = maxPerAddressDuringAuction_;
         maxPerAddressDuringWhiteList = maxPerAddressDuringWhiteList_;
 

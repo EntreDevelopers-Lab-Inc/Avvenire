@@ -143,12 +143,22 @@ contract TokenMutator is
 
     /**
      * @notice Sets the mint uri
-     * @param baseURI_ represents the new mint uri
+     * @param baseURI_ represents the new base uri
     */
     function setBaseURI(string calldata baseURI_) external onlyOwner
     {
         // set thte global baseURI to this new baseURI_
         baseURI = baseURI_;
+    }
+
+    /**
+     * @notice Sets the load uri
+     * @param loadURI_ represents the new load uri
+    */
+    function setLoadURI(string calldata loadURI_) external onlyOwner
+    {
+        // set thte global loadURI to this new loadURI_
+        loadURI = loadURI_;
     }
 
     /**
