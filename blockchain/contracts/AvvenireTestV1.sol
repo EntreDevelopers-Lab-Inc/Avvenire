@@ -13,9 +13,7 @@ import "@openzeppelin/contracts/utils/Strings.sol";
 
 // ERC721AOwnersExplicit already inherits from ERC721A
 contract AvvenireTest is
-    Ownable,
-    TokenMutator,
-    ReentrancyGuard
+    TokenMutator
 {
     // mint information
     uint256 public maxPerAddressDuringAuction; // constant for later assignment>?t
