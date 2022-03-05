@@ -300,6 +300,20 @@ contract TokenMutator is
     }
 
     /**
+     * @notice internal function for getting the default trait (mostly for creating new characters, waste of compute for creating new traits)
+    */
+    function baseTrait() internal returns (Trait memory)
+    {
+        return Trait({
+            tokenId: 0,  // there will be no traits with tokenId 0, as that must be the first character (cannot have traits without minting the first character)
+            uri: '',
+            empty: false,
+            free: false,
+            exists: true
+            });
+    }
+
+    /**
      * @notice internal function to create a new character
      * @param tokenId (for binding the token id)
     */
@@ -310,13 +324,7 @@ contract TokenMutator is
                     tokenId: tokenId,
                     uri: '',  // keep this blank to keep the user from paying excess gas before decomposition (the tokenURI function will handle for blank URIs)
                     exists: true,
-                    trait1: Trait({
-                        tokenId: 0,  // there will be no traits with tokenId 0, as that must be the first character (cannot have traits without minting the first character)
-                        uri: '',
-                        empty: false,
-                        free: false,
-                        exists: true
-                        })
+                    trait1: baseTrait()  // using this, as it should be used to set the base of other traits as well
                     });
     }
 
