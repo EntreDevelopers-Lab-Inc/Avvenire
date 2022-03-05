@@ -35,8 +35,28 @@ contract TokenMutator is
         bool changeRequested;
     }
 
+    // struct for storing trait data for the character (used ONLY in the character struct)
+    struct Trait {
+        uint256 tokenId;  // for mapping characters to their token traits
+        string uri;  // a uri mapping to the character's trait (must be set)
+        bool empty;  // for checking if there is a trait associated
+    }
+
+    // struct for storing characters
+    struct Character {
+        uint256 tokenId;
+        string uri;
+        Trait trait1;  // you can add as many traits as you want to this, it is just an example for how trait data should be stored within the character
+    }
+
     // mapping for tokenId to token URI (similar to the former ERC721 mapping of a tokenId to a URI directly)
     mapping(uint256 => string) private tokenIdToTokenURI;
+
+    // mapping for tokenId to character
+    mapping(uint256 => Character) public tokenIdToCharacter;
+
+    // mapping for tokenId to trait
+    mapping(uint256 => Trait) public tokenIdToTrait;
 
     // mapping of tokenId to change request for information --> being public allows anyone to see if the changes are requested
     mapping(uint256 => ChangeRequest) public tokenChanges;
@@ -74,15 +94,7 @@ contract TokenMutator is
         // check to make sure that the tokenId exists
         if (!_exists(tokenId)) revert URIQueryForNonexistentToken();  // error from ERC721A
 
-        // check if the token uri is in the mapping
-        string memory uri = tokenIdToTokenURI[tokenId];
-
-        if (bytes(uri).length == 0) // in this case, there is no uri attached to the tokenIdToTokenURI mapping, so the uri should be the mint uri + the token id
-        {
-            uri = string(abi.encodePacked(baseURI, Strings.toString(tokenId)));
-        }
-
-        // else, a change could be requested, in which case you should show the loading URI
+        // a change could be requested, in which case you should show the loading URI
         ChangeRequest memory changeData = tokenChanges[tokenId];
 
         // if a change has been requested, only show the loading URI
@@ -91,8 +103,25 @@ contract TokenMutator is
             return loadURI;
         }
 
-        // else, just return the uri
-        return uri;
+        // check if the token uri is in the character mapping
+        Character character = tokenIdToCharacter[tokenId];
+
+        // if there is a character associated with this token, return the chacter's uri
+        if (bytes(character.uri).length > 0)
+        {
+            return character.uri;
+        }
+
+        // check if the token uri is in the trait mapping
+        Trait trait = tokenIdToTrait[tokenId];
+
+        if (bytes(trait.uri).length > 0)
+        {
+            return trait.uri;
+        }
+
+        // if there is no load uri, character uri, or trait uri, just return the base
+        return string(abi.encodePacked(baseURI, Strings.toString(tokenId)));
     }
 
     /**
@@ -130,6 +159,21 @@ contract TokenMutator is
         changeData.changeRequested = true;
         tokenChanges[tokenId] = changeData;
     }
+
+    /**
+     * @notice set the character data (id, uri, any traits)
+     * @param character allows a contract to set the character's data to new information
+     * @param changeUpdate sets the change data to the correct boolean (allows the option to set the changes to false after something has been updated OR keep it at true if the update isn't done)
+     */
+     function setCharacterData(Character character, bool changeUpdate)
+     {
+        // set the character data
+        tokenIdToCharacter[character.tokenId] = character;
+
+        // set the token change data
+        tokenChanges[character.tokenId] = changeUpdate;
+     }
+
 
     /**
      * @notice Sets the mutability of the contract (whether changes are accepted)
