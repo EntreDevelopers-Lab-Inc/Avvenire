@@ -991,7 +991,6 @@ nav{-webkit-transition: padding-top .3s,padding-bottom .3s;
 /* ##### 3.0 Wellcome Area CSS ##### */
 .hero-section{
     position: relative;
-    min-height: 700px;
     background: url('../img/bg-img/header2.jpg') no-repeat bottom center;
     background-size: cover;
     display: flex;
@@ -1073,7 +1072,7 @@ nav{-webkit-transition: padding-top .3s,padding-bottom .3s;
     bottom: 0;
     left: 0;
     width: 500em;
-    height: 70%;
+    height: 100%;
     opacity: 0.1;
     visibility: inherit;
     background: transparent url(../img/core-img/crypto.png) repeat-x scroll 0 100%;
