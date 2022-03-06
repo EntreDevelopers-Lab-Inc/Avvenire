@@ -13,6 +13,7 @@ import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 
 
 error URIQueryForNonexistentToken();
+error TraitTypeDoesNotExist();
 
 // token mutator changes the way that an ERC721A contract interacts with tokens
 contract TokenMutator is
@@ -36,6 +37,9 @@ contract TokenMutator is
     // trading information
     bool tradeBeforeChange;  // initially set to false, don't want people to tokens that are pending changes
 
+    // make an enumerable for trait types (meant to be overridden with traits from individual project)
+    enum TraitType {NULL, TYPE_1, TYPE_2}
+
     // struct for storing change information
     // want to keep this in a struct, as it will allow other contracts to add data about the change to it
     struct ChangeRequest {
@@ -46,9 +50,9 @@ contract TokenMutator is
     struct Trait {
         uint256 tokenId;  // for mapping characters to their token traits
         string uri;  // a uri mapping to the character's trait (must be set)
-        bool empty;  // for checking if there is a trait associated
         bool free;  // stores if the trait is free from the character (defaults to false)
         bool exists;  // checks existence (for minting vs transferring)
+        TraitType traitType;
     }
 
     // struct for storing characters
@@ -56,6 +60,7 @@ contract TokenMutator is
         uint256 tokenId;
         string uri;
         Trait trait1;  // you can add as many traits as you want to this, it is just an example for how trait data should be stored within the character
+        Trait trait2;
         bool exists;  // checks existence (for minting vs transferring)
     }
 
@@ -302,49 +307,212 @@ contract TokenMutator is
     /**
      * @notice internal function for getting the default trait (mostly for creating new characters, waste of compute for creating new traits)
     */
-    function baseTrait() internal returns (Trait memory)
+    function baseTrait(TraitType traitType) internal returns (Trait memory)
     {
         return Trait({
             tokenId: 0,  // there will be no traits with tokenId 0, as that must be the first character (cannot have traits without minting the first character)
             uri: '',
-            empty: false,
             free: false,
-            exists: true
+            exists: true,
+            traitType: traitType
             });
     }
 
     /**
-     * @notice internal function to create a new character
+     * @notice internal function to create a new character --> this MUST be overridden to include the correct traits, so this is just an example
      * @param tokenId (for binding the token id)
     */
-    function createNewCharacter(uint256 tokenId) internal
+    function createNewCharacter(uint256 tokenId) internal virtual
     {
         // create a new character and put it in the mapping --> just set the token id and that it exists, don't set any of the traits or the URI
         tokenIdToCharacter[tokenId] = Character({
                     tokenId: tokenId,
                     uri: '',  // keep this blank to keep the user from paying excess gas before decomposition (the tokenURI function will handle for blank URIs)
                     exists: true,
-                    trait1: baseTrait()  // using this, as it should be used to set the base of other traits as well
+                    trait1: baseTrait(TraitType.TYPE_1),  // using this, as it should be used to set the base of other traits as well
+                    trait2: baseTrait(TraitType.TYPE_2)
                     });
     }
 
     /**
-     * @notice internal function to create a new trait --> this CAN be overridden if you want to include more data with each trait
+     * @notice internal function to create a new trait (called after token transfer --> in safe mint) --> this CAN be overridden if you want to include more data with each trait
      * @param tokenId (for binding the token id)
     */
-    function createNewTrait(uint256 tokenId) internal
+    function createNewTrait(uint256 tokenId, TraitType traitType) internal virtual
     {
-        // create a new trait and put it in the mapping --> just set the token id, that it exists, that it is empty, and that it is free
+        // create a new trait and put it in the mapping --> just set the token id, that it exists and that it is free
         tokenIdToTrait[tokenId] = Trait({
                     tokenId: tokenId,
                     uri: '',
-                    empty: false,
                     free: true,
-                    exists: true
+                    exists: true,
+                    traitType: traitType
                     });
 
         // everytime a new trait is created, a change must be requested, as there is no data bound to it yet
         _requestChange(tokenId);
+    }
+
+    /**
+     * @notice a function callable by another contract to set a trait back to being free
+     * set to public to allow it to be called both internally and by other contracts
+     * @param tokenId for the token that is being altered
+    */
+    function respawnTrait(uint256 tokenId) public callerIsAllowed
+    {
+        // check if the trait exists
+        require(tokenIdToTrait[tokenId].exists, "This trait does not exist");
+
+        // check if the trait is free
+        require(!tokenIdToTrait[tokenId].free, "This trait is not bound to anything. It cannot be spawned.");
+
+        // set the token's owner to the origin of the contract call
+            // don't want this to be the message sender, as that is likely to be another contract
+        _ownerships[tokenId].addr = tx.origin;
+
+        // set the token to being free
+        tokenIdToTrait[tokenId].free = true;
+    }
+
+    /**
+     * @notice external function spawning traits --> best utilized when minting many at once (using multiple safe mints --> good practice to send one spawn traits for all new traits, and another for respawning all the old ones)
+     * @param tokenIds are an array of token ids that correspond to the traits that must be spawned
+    */
+    function spawnTraits(uint256[] calldata tokenIds) external callerIsAllowed
+    {
+        // make sure that we are in mutability mode --> otherwise, traits should not be spawned, as no changes should occur
+        require(mutabilityMode, "Traits are currently immutable");
+
+        // ensure that all the token Ids are 0 --> iterate over the array
+        bool allNewTokens = true;
+        for (uint i = 0; i < tokenIds.length; i += 1)
+        {
+            if (tokenIds[i] != 0)
+            {
+                // set that all the tokens are NOT new, and break the loop
+                allNewTokens = false;
+                break;
+            }
+        }
+
+        // if they are all new tokens, mint all of them with safeMint
+        if (allNewTokens)
+        {
+            _safeMint(tx.origin, tokenIds.length);
+        }
+        // else, each token must be chosen to be minted or respawned
+        else
+        {
+            for (uint i = 0; i < tokenIds.length; i += 1)
+            {
+                // if the tokenId is 0, safe mint it
+                if (tokenIds[i] == 0)
+                {
+                    _safeMint(tx.origin, 1);
+                }
+                // else, respawn the trait (will fail if the trait does not exist or is already free)
+                else
+                {
+                    respawnTrait(tokenIds[i]);
+                }
+            }
+        }
+    }
+
+    /**
+     * @notice an internal function to get a trait for binding --> only for use within binding and unbinding (want to make it easy for the bind function to be overridden)
+     * @param traitId indicated the trait id that will be bound (can be set to 0 for a non-existend trait that adheres to the type)
+     * @param traitType indicates the type of trait to be bound
+    */
+    function getTraitForBinding(uint256 traitId, TraitType traitType) internal returns(Trait memory)
+    {
+        // store the trait that should be bound
+        if (traitId == 0)
+        {
+            // this trait does not exist, just set it to the default struct
+            Trait memory trait = Trait({
+                    tokenId: traitId,
+                    uri: '',
+                    free: false,
+                    exists: false,
+                    traitType: traitType
+                    });
+
+            return trait;
+        }
+        else
+        {
+            // check the owner of the trait
+            require(ownerOf(traitId) == tx.origin, "The transaction origin does not own the trait");
+
+            // the trait exists and can be found
+            Trait memory trait = tokenIdToTrait[traitId];
+
+            // require that the trait's type is the same type as the trait Id
+            require(trait.traitType == traitType, "Trait type does not match trait associated with this id");
+
+            // disallow trading of the bound trait
+            makeTraitNonTransferrable(traitId);
+
+            return trait;
+        }
+    }
+
+    /**
+     * @notice internal function to make traits transferrable (used when binding traits)
+     * @param traitId indicating which trait to set
+    */
+    function makeTraitTransferable(uint256 traitId) internal
+    {
+        // set the ownership to the transaction origin
+        _ownerships[traitId].addr = tx.origin;
+
+        // set the trait to free (should be tradable combinable)
+        tokenIdToTrait[traitId].free = true;
+    }
+
+    /**
+     * @notice internal function to make traits non-transferrable
+     * @param traitId to indicate which trait to change
+    */
+    function makeTraitNonTransferrable(uint256 traitId) internal
+    {
+        // set the ownership to null
+        _ownerships[traitId].addr = address(0);
+
+        // set the trait to not free (should not be tradable or combinable any longer)
+        tokenIdToTrait[traitId].free = false;
+    }
+
+    /**
+     * @notice a function to bind a tokenId to a character (used in combining)
+     * going to assume that the transaction origin owns the character (this function will be called multiple times)
+     * @param characterId gets the character
+     * @param traitId for the trait
+     * @param traitType for the trait's type
+    */
+    function bind(uint256 characterId, uint256 traitId, TraitType traitType) external virtual callerIsAllowed
+    {
+        // check each of the types and bind them accordingly
+        if (traitType == TraitType.TYPE_1)
+        {
+            // make the old trait transferrable
+            makeTraitTransferable(tokenIdToCharacter[characterId].trait1.tokenId);
+
+            // set the new trait
+            tokenIdToCharacter[characterId].trait1 = getTraitForBinding(traitId, traitType);
+        }
+        else if (traitType == TraitType.TYPE_2)
+        {
+            // make the old trait transferrable
+            makeTraitTransferable(tokenIdToCharacter[characterId].trait2.tokenId);
+            tokenIdToCharacter[characterId].trait2 = getTraitForBinding(traitId, traitType);
+        }
+        else
+        {
+            // return an error that the trait type does not exist
+            revert TraitTypeDoesNotExist();
+        }
     }
 
     /**
@@ -388,12 +556,10 @@ contract TokenMutator is
         // token id end counter
         uint256 endTokenId = startTokenId + quantity;
 
-        // THIS DOES NOT WORK
-            // if it is a trait
         // iterate over all the tokens
         for (uint256 tokenId = startTokenId; tokenId < endTokenId; tokenId += 1)
         {
-            // check if the token exists in the character mapping
+            // check if the token exists in the character or trait mapping
             if ((!tokenIdToCharacter[tokenId].exists) && (!tokenIdToTrait[tokenId].exists))
             {
                 // if the token id does not exist, create a new character or trait
@@ -405,7 +571,7 @@ contract TokenMutator is
                 else
                 {
                     // create a new trait if the character mint is inactive, and there is no trait mapping to the token id
-                    createNewTrait(tokenId);
+                    createNewTrait(tokenId, TraitType.NULL);  // no way to know the trait type on token transferm so just set it to null
                 }
             }
         }
