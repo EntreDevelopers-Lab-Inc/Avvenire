@@ -35,7 +35,7 @@ contract TokenMutator is
     address payable receivingAddress;  // the address that collects the cost of the mutation
 
     // trading information
-    bool tradeBeforeChange;  // initially set to false, don't want people to tokens that are pending changes
+    bool tradeBeforeChange = false;  // initially set to false, don't want people to tokens that are pending changes
 
     // make an enumerable for trait types (meant to be overridden with traits from individual project)
     enum TraitType {NULL, TYPE_1, TYPE_2}
