@@ -1,0 +1,12 @@
+{
+    "name": "Number 11",
+    "description": "Picture of number 11",
+    "images": "https://ipfs.io/ipfs/QmXuxG21RtEbga9xk3c2ancUnQv2DppUnyEf6XzEBGd9ZP/11.jpg",
+    "attributes": [
+        {
+            "trait_type": "Rank",
+            "value": 11,
+            "max_value": 30
+        }
+    ]
+}

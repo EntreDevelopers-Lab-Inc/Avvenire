@@ -7,6 +7,8 @@ website/static/js/constants.js
 # wsgi (these just point to a location, so we want this to be mutable)
 *.wsgi
 
+# secrets files
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]

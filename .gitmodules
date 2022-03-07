@@ -1,0 +1,3 @@
+[submodule "GenerativeArt"]
+	path = GenerativeArt
+	url = https://github.com/naveenailawadi/GenerativeArt.git

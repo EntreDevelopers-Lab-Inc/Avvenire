@@ -1,522 +1,547 @@
 {% extends "layout.html" %}
 
 {% block content %}
-  <!-- ##### Welcome Area Start ##### -->
-  <section class="hero-section moving section-padding" id="home">
-   <div class="moving-bg">
-   </div>
-   <!-- Hero Content -->
-   <div class="hero-section-content">
+<!-- ##### Welcome Area Start ##### -->
+<section class="hero-section moving section-padding" id="home">
+    <div class="moving-bg">
+    </div>
+    <!-- Hero Content -->
+    <div class="hero-section-content">
+        <div class="container">
+            <div class="row align-items-center">
+                <!-- Welcome Content -->
+                <div class="col-12 col-lg-6 col-md-12">
+                </div>
+                <div class="col-12 col-lg-6 col-md-12">
+                    <div class="welcome-content">
+                        <h1 class="fadeInUp" data-wow-delay="0.2s">
+                            Welcome to the
+                            <span class="gradient-text">
+                                Avvenire Project
+                            </span>
+                        </h1>
+                        <p class="w-text fadeInUp" data-wow-delay="0.3s">
+                            Based in the near future, the Avvenire City is a utopia whereby the love for art and
+                            community are in synchronization. You, as a holder of land in Avvenire City are part of an
+                            exclusive community whereby various benefits are given to land holders via airdrops and new
+                            offerings. The world of Avvenire City is expanding, and we want you to be part of the
+                            journey. Let’s build the brand of Avvenire together.
+                        </p>
+                    </div>
+                </div>
+                <div class="col-lg-6">
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+<!-- ##### Welcome Area End ##### -->
+<div class="clearfix">
+</div>
+<!-- ##### Activity Area Start ##### -->
+<section class="blog-area section-padding-100" id="roadmap">
     <div class="container">
-     <div class="row align-items-center">
-      <!-- Welcome Content -->
-      <div class="col-12 col-lg-6 col-md-12">
-       <div class="welcome-content">
-        <div class="promo-section">
-         <h3 class="special-head gradient-text">
-          Own Property in Avvenire City
-         </h3>
+
+        <div class="row" style="align-items: center;">
+            <div class="col-12 col-md-9">
+                <div class="timelineBox">
+                    <div class="timelineHeader">
+                        <h3>Roadmap</h3>
+                    </div>
+                    <div class="timelineBody">
+                        <ul class="timeline">
+                            <!-- Single Timeline -->
+                            <li>
+                                <div class="timelineDot" onclick="toggleRoadMap(1)">
+                                </div>
+                                <div class="timelineWork" id="timelinework_1" style="display: none;">
+                                    <h6>Phase 1: Citizenship Mint</h6>
+                                    <span>Launch of the Avvenire Citizenship Mint (limited to 3,000). Welcome to all
+                                        official founding citizens of Avvenire City. As a founding citizen member,
+                                        you
+                                        are not only part of something extraordinary, but you also have the ability
+                                        to
+                                        contribute to the further development of Avvenire City.</span>
+                                    <br>
+                                    <span>Models are based around various types of commercial real estate in RL:
+                                        Retail
+                                        Shops, Laboratories, Museums, Film Studio, Cafe, Restaurant, Mini Golf
+                                        etc.</span>
+                                </div>
+
+                            </li>
+                            <!-- Single Timeline -->
+                            <li>
+                                <div class="timelineDot" onclick="toggleRoadMap(2)"></div>
+                                <div class="timelineWork" id="timelinework_2" style="display: none;">
+                                    <h6>Phase 2: Avvenire City Parcel Release</h6>
+                                    <span>Founding citizens will be airdropped a part of Avvenire City, called an
+                                        Avvenire Parcel. We’ve uniquely designed the parcel to suit the personality of
+                                        your citizenship. The Avvenire Parcels give access to the Avvenire metaverse
+                                        utility.</span>
+                                </div>
+                            </li>
+                            <!-- Single Timeline -->
+                            <li>
+                                <div class="timelineDot" onclick="toggleRoadMap(3)"></div>
+                                <div class="timelineWork" id="timelinework_3" style="display: none;">
+                                    <h6>Phase 3: Avvenire City Exclusive Clothing Apparel</h6>
+                                    <span>Avvenire City is not only a community of like minded individuals, but also a
+                                        brand. Avvenire Citizens will be given the exclusive opportunity to purchase
+                                        apparel designed and inspired by the Avvenire Citizen collection.</span>
+                                </div>
+                            </li>
+                            <!-- Single Timeline -->
+                            <li>
+                                <div class="timelineDot" onclick="toggleRoadMap(4)"></div>
+                                <div class="timelineWork" id="timelinework_4" style="display: none;">
+                                    <h6>Phase 4: Metaverse Expansion of Avvenire City</h6>
+                                    <span>The most suitable metaverse platform will be chosen for the development of
+                                        Avvenire City in the metaverse. Holders of either the parcel or citizenship nft
+                                        will gain specific access and ownership to the Avvenire City Metaverse.</span>
+                                </div>
+                            </li>
+                            <!-- Single Timeline -->
+                            <li>
+                                <div class="timelineDot" onclick="toggleRoadMap(5)"></div>
+                                <div class="timelineWork" id="timelinework_5" style="display: none;">
+                                    <h6>Phase 5: The future, to be continued...</h6>
+                                    <span>The opportunities are endless for Avvenire, as we expand out into both the
+                                        physical and web3 worlds. From here, we want you to be a part of the decision
+                                        making in what we do next. Whether that be in-real-life parties, apparel brand
+                                        expansion or further airdrops, the future of Avvenire City is in your
+                                        hands.</span>
+                                </div>
+                            </li>
+
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-12 col-md-3">
+                <div class="sidebar-area">
+                    <img id="side_image" alt="" src="{{url_for('static', filename='img/roadmap/1.jpg')}}" />
+                </div>
+            </div>
         </div>
-        <h1 class="fadeInUp" data-wow-delay="0.2s">
-         Welcome to the
-         <span class="gradient-text">
-          Avvenire Project
-         </span>
-        </h1>
-        <p class="w-text fadeInUp" data-wow-delay="0.3s">
-         Lorem ipsum dolor sit amet, consectetur adipisicing elit. Eveniet dolorem blanditiis ad perferendis, labore delectus dolor adipisicing elit sit amet, adipisicing elit. Eveniet adipisicing elit.
-        </p>
-        <div class="dream-btn-group fadeInUp" data-wow-delay="0.4s">
-         <a class="btn more-btn" href="#roadmap">
-          Roadmap
-         </a>
-         <a class="btn more-btn mr-3" href="#art">
-          Explore Avvenire City
-         </a>
-        </div>
-       </div>
-      </div>
-      <div class="col-lg-6">
-      </div>
-     </div>
     </div>
-   </div>
-  </section>
-  <!-- ##### Welcome Area End ##### -->
-  <div class="clearfix">
-  </div>
-  <!-- ##### Activity Area Start ##### -->
-  <section class="blog-area section-padding-100" id="roadmap">
-      <div class="container">
+</section>
+<!-- ##### Activity Area End ##### -->
 
-          <div class="row">
-              <div class="col-12 col-md-9">
-                  <div class="timelineBox">
-                      <div class="timelineHeader">
-                          <h3>Recent Activity</h3>
-                          <span>Business History</span>
-                      </div>
-                      <div class="timelineBody">
-                          <ul class="timeline">
-                              <!-- Single Timeline -->
-                              <li>
-                                  <div class="timelineDot"></div>
-                                  <div class="timelineDate">
-                                      <p><i class="fa fa-calendar mr-5p"></i>6/16/2021</p>
-                                      <p><i class="fa fa-clock-o mr-5p"></i>12:59 AM</p>
-                                  </div>
-                                  <div class="timelineWork">
-                                      <h6>Lucky 4 Leaf Clover (charms)</h6>
-                                      <span>10 editions listed by <a href="profile.html">@Nola_Naser</a> for <span class="w-text">0.23 ETH Each</span></span>
-                                  </div>
-                              </li>
-                              <!-- Single Timeline -->
-                              <li>
-                                  <div class="timelineDot"></div>
-                                  <div class="timelineDate">
-                                      <p><i class="fa fa-calendar mr-5p"></i>6/16/2021</p>
-                                      <p><i class="fa fa-clock-o mr-5p"></i>12:59 AM</p>
-                                  </div>
-                                  <div class="timelineWork">
-                                      <h6>Erotic 35mm and polaroid photography</h6>
-                                      <span>RecentlyLiked by <a href="profile.html">@Nola_Naser</a> </span>
-                                  </div>
-                              </li>
-                              <!-- Single Timeline -->
-                              <li>
-                                  <div class="timelineDot"></div>
-                                  <div class="timelineDate">
-                                      <p><i class="fa fa-calendar mr-5p"></i>6/16/2021</p>
-                                      <p><i class="fa fa-clock-o mr-5p"></i>12:59 AM</p>
-                                  </div>
-                                  <div class="timelineWork">
-                                      <h6>Skrrt Cobain Official</h6>
-                                      <span>Lorem ipsum dolor sit amet, consectetur adipisicing elit.</span>
-                                  </div>
-                              </li>
-                              <!-- Single Timeline -->
-                              <li>
-                                  <div class="timelineDot"></div>
-                                  <div class="timelineDate">
-                                      <p><i class="fa fa-calendar mr-5p"></i>6/16/2021</p>
-                                      <p><i class="fa fa-clock-o mr-5p"></i>12:59 AM</p>
-                                  </div>
-                                  <div class="timelineWork">
-                                      <h6>Reach 1k Sales</h6>
-                                      <span>Lorem ipsum dolor sit amet, consectetur adipisicing elit.</span>
-                                  </div>
-                              </li>
-                              <!-- Single Timeline -->
-                              <li>
-                                  <div class="timelineDot"></div>
-                                  <div class="timelineDate">
-                                      <p><i class="fa fa-calendar mr-5p"></i>6/16/2021</p>
-                                      <p><i class="fa fa-clock-o mr-5p"></i>12:59 AM</p>
-                                  </div>
-                                  <div class="timelineWork">
-                                      <h6>Our Journey Start</h6>
-                                      <span>Lorem ipsum dolor sit amet, consectetur adipisicing elit.</span>
-                                  </div>
-                              </li>
-                              <!-- Single Timeline -->
-                              <li>
-                                  <div class="timelineDot"></div>
-                                  <div class="timelineDate">
-                                      <p><i class="fa fa-calendar mr-5p"></i>6/16/2021</p>
-                                      <p><i class="fa fa-clock-o mr-5p"></i>12:59 AM</p>
-                                  </div>
-                                  <div class="timelineWork">
-                                      <h6>Create A Module</h6>
-                                      <span>Lorem ipsum dolor sit amet, consectetur adipisicing elit.</span>
-                                  </div>
-                              </li>
-                          </ul>
-                      </div>
-                  </div>
-              </div>
+<!-- ##### Top Collections Start ##### -->
 
-              <div class="col-12 col-md-3">
-                  <div class="sidebar-area">
-
-                      <!-- Search Widget -->
-                      <div class="search-widget-area mb-50 wow fadeInUp" data-wow-delay="0.2s">
-                          <form action="#" method="post">
-                              <input type="search" name="search" id="search" placeholder="Search...">
-                              <button type="submit" class="btn"><i class="fa fa-search"></i></button>
-                          </form>
-                      </div>
-
-                      <!-- Don't Miss Widget -->
-                      <div class="donnot-miss-widget mb-50">
-                          <div class="widget-title wow fadeInUp" data-wow-delay="0.3s">
-                              <h5>Filters</h5>
-                          </div>
-                          <div class="filers-list">
-                              <a href="" class="filter-item">
-                                  <img src="img/icons/f1.png" alt="">Listings
-                              </a>
-                              <a href="" class="filter-item">
-                                  <img src="img/icons/f5.png" alt="">Likes
-                              </a>
-                              <a href="" class="filter-item">
-                                  <img src="img/icons/f2.png" alt="">Purchases
-                              </a>
-                              <a href="" class="filter-item">
-                                  <img src="img/icons/f3.png" alt="">Sales
-                              </a>
-                              <a href="" class="filter-item">
-                                  <img src="img/icons/f4.png" alt="">Transfer
-                              </a>
-                              <a href="" class="filter-item">
-                                  <img src="img/icons/f6.png" alt="">Burns
-                              </a>
-                              <a href="" class="filter-item">
-                                  <img src="img/icons/f7.png" alt="">Bids
-                              </a>
-                          </div>
-                      </div>
-
-                      <!-- Subscribe Widget -->
-                      <div class="subscribe-widget mb-0">
-                          <div class="widget-title wow fadeInUp" data-wow-delay="0.9s">
-                              <h5>subscribe</h5>
-                          </div>
-                          <div class="subscribe-form wow fadeInUp" data-wow-delay="1s">
-                              <form action="#">
-                                  <input type="email" name="email" id="subs_email" placeholder="Your Email">
-                                  <button type="submit" class="btn mb-0">subscribe</button>
-                              </form>
-                          </div>
-                      </div>
-                  </div>
-              </div>
-          </div>
-      </div>
-  </section>
-  <!-- ##### Activity Area End ##### -->
-
-  <!-- ##### Top Collections Start ##### -->
-
-  <section class="section-padding-0-70 clearfix" id="art">
-   <div class="container">
-    <div class="section-heading text-center">
-     <div class="dream-dots justify-content-center fadeInUp" data-wow-delay="0.2s">
-     </div>
-     <h2 class="fadeInUp" data-wow-delay="0.3s">
-      Avvenire City
-     </h2>
-     <p class="fadeInUp" data-wow-delay="0.4s">
-      Join us for the mint of 5,000 homes in Avennire City!
-     </p>
+<section class="section-padding-0-70 clearfix" id="art">
+    <div class="container">
+        <div class="section-heading text-center">
+            <div class="dream-dots justify-content-center fadeInUp" data-wow-delay="0.2s">
+            </div>
+            <h2 class="fadeInUp" data-wow-delay="0.3s">
+                Avvenire City
+            </h2>
+            <p class="fadeInUp" data-wow-delay="0.4s">
+                Join us for the mint of 5,000 homes in Avennire City!
+            </p>
+        </div>
+        <div class="row">
+            <div class="col-12 col-md-6 col-lg-3">
+                <!-- Content -->
+                <a class="service_single_content collection-item wow fadeInUp" data-wow-delay="0.2s"
+                    href="discover.html">
+                    <!-- Icon -->
+                    <div class="collection_icon">
+                        <img alt="" src="{{url_for('static', filename='img/art-work/c1.png')}}" />
+                    </div>
+                    <div class="collection_info">
+                        <h6>
+                            Cyberpunk City Art
+                        </h6>
+                    </div>
+                </a>
+            </div>
+            <div class="col-12 col-md-6 col-lg-3">
+                <!-- Content -->
+                <a class="service_single_content collection-item wow fadeInUp" data-wow-delay="0.3s"
+                    href="discover.html">
+                    <!-- Icon -->
+                    <div class="collection_icon">
+                        <img alt="" src="{{url_for('static', filename='img/art-work/c2.png')}}" />
+                    </div>
+                    <div class="collection_info">
+                        <h6>
+                            Murphy the Mutant
+                        </h6>
+                    </div>
+                </a>
+            </div>
+            <div class="col-12 col-md-6 col-lg-3">
+                <!-- Content -->
+                <a class="service_single_content collection-item wow fadeInUp" data-wow-delay="0.4s"
+                    href="discover.html">
+                    <!-- Icon -->
+                    <div class="collection_icon">
+                        <img alt="" src="{{url_for('static', filename='img/art-work/c3.png')}}" />
+                    </div>
+                    <div class="collection_info">
+                        <h6>
+                            Beeple Special Edition
+                        </h6>
+                    </div>
+                </a>
+            </div>
+            <div class="col-12 col-md-6 col-lg-3">
+                <!-- Content -->
+                <a class="service_single_content collection-item wow fadeInUp" data-wow-delay="0.5s"
+                    href="discover.html">
+                    <!-- Icon -->
+                    <div class="collection_icon">
+                        <img alt="" src="{{url_for('static', filename='img/art-work/c4.png')}}" />
+                    </div>
+                    <div class="collection_info">
+                        <h6>
+                            Floyd Mayweather Jr.
+                        </h6>
+                    </div>
+                </a>
+            </div>
+        </div>
     </div>
-    <div class="row">
-     <div class="col-12 col-md-6 col-lg-3">
-      <!-- Content -->
-      <a class="service_single_content collection-item wow fadeInUp" data-wow-delay="0.2s" href="discover.html">
-       <!-- Icon -->
-       <div class="collection_icon">
-        <img alt="" src="{{url_for('static', filename='img/art-work/c1.png')}}"/>
-       </div>
-       <div class="collection_info">
-        <h6>
-         Cyberpunk City Art
-        </h6>
-       </div>
-      </a>
-     </div>
-     <div class="col-12 col-md-6 col-lg-3">
-      <!-- Content -->
-      <a class="service_single_content collection-item wow fadeInUp" data-wow-delay="0.3s" href="discover.html">
-       <!-- Icon -->
-       <div class="collection_icon">
-        <img alt="" src="{{url_for('static', filename='img/art-work/c2.png')}}"/>
-       </div>
-       <div class="collection_info">
-        <h6>
-         Murphy the Mutant
-        </h6>
-       </div>
-      </a>
-     </div>
-     <div class="col-12 col-md-6 col-lg-3">
-      <!-- Content -->
-      <a class="service_single_content collection-item wow fadeInUp" data-wow-delay="0.4s" href="discover.html">
-       <!-- Icon -->
-       <div class="collection_icon">
-        <img alt="" src="{{url_for('static', filename='img/art-work/c3.png')}}"/>
-       </div>
-       <div class="collection_info">
-        <h6>
-         Beeple Special Edition
-        </h6>
-       </div>
-      </a>
-     </div>
-     <div class="col-12 col-md-6 col-lg-3">
-      <!-- Content -->
-      <a class="service_single_content collection-item wow fadeInUp" data-wow-delay="0.5s" href="discover.html">
-       <!-- Icon -->
-       <div class="collection_icon">
-        <img alt="" src="{{url_for('static', filename='img/art-work/c4.png')}}"/>
-       </div>
-       <div class="collection_info">
-        <h6>
-         Floyd Mayweather Jr.
-        </h6>
-       </div>
-      </a>
-     </div>
+</section>
+<section class="features section-padding-0-100" id="team">
+    <div class="container">
+        <div class="section-heading text-center">
+            <!-- Dream Dots -->
+            <h2 class="fadeInUp" data-wow-delay="0.3s">
+                Our Team
+            </h2>
+            <p class="fadeInUp" data-wow-delay="0.4s">
+                Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed quis accumsan nisi Ut ut felis congue nisl
+                hendrerit commodo.
+            </p>
+        </div>
+        <div class="row align-items-center">
+            <div class="col-lg-3 col-sm-6 col-xs-12">
+                <div class="pricing-item">
+                    <div class="wraper">
+                        <a href="item-details.html">
+                            <img alt="" src="{{url_for('static', filename='img/art-work/1.png')}}" />
+                        </a>
+                        <a href="item-details.html">
+                            <h4>
+                                Scarecrow in daylight
+                            </h4>
+                        </a>
+                        <div class="owner-info">
+                            <img alt="" src="{{url_for('static', filename='img/authors/2.png')}}" width="40" />
+                            <a href="profile.html">
+                                <h3>
+                                    @Smith Wright
+                                </h3>
+                            </a>
+                        </div>
+                        <span>
+                            <span class="g-text">
+                                This will be an eventual bio.
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-sm-6 col-xs-12">
+                <div class="pricing-item">
+                    <div class="wraper">
+                        <a href="item-details.html">
+                            <img alt="" src="{{url_for('static', filename='img/art-work/2.png')}}" />
+                        </a>
+                        <a href="item-details.html">
+                            <h4>
+                                Darklight Angel 01
+                            </h4>
+                        </a>
+                        <div class="owner-info">
+                            <img alt="" src="{{url_for('static', filename='img/authors/3.png')}}" width="40" />
+                            <a href="profile.html">
+                                <h3>
+                                    @Smith Wright
+                                </h3>
+                            </a>
+                        </div>
+                        <span>
+                            <span class="g-text">
+                                This will be an eventual bio.
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-sm-6 col-xs-12">
+                <div class="pricing-item">
+                    <div class="wraper">
+                        <a href="item-details.html">
+                            <img alt="" src="{{url_for('static', filename='img/art-work/3.png')}}" />
+                        </a>
+                        <a href="item-details.html">
+                            <h4>
+                                Becoming one with Nature
+                            </h4>
+                        </a>
+                        <div class="owner-info">
+                            <img alt="" src="{{url_for('static', filename='img/authors/8.png')}}" width="40" />
+                            <a href="profile.html">
+                                <h3>
+                                    @Smith Wright
+                                </h3>
+                            </a>
+                        </div>
+                        <span>
+                            <span class="g-text">
+                                This will be an eventual bio.
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-sm-6 col-xs-12">
+                <div class="pricing-item">
+                    <div class="wraper">
+                        <a href="item-details.html">
+                            <img alt="" src="{{url_for('static', filename='img/art-work/4.png')}}" />
+                        </a>
+                        <a href="item-details.html">
+                            <h4>
+                                Twilight Fracture City
+                            </h4>
+                        </a>
+                        <div class="owner-info">
+                            <img alt="" src="{{url_for('static', filename='img/authors/6.png')}}" width="40" />
+                            <a href="profile.html">
+                                <h3>
+                                    @Smith Wright
+                                </h3>
+                            </a>
+                        </div>
+                        <span>
+                            <span class="g-text">
+                                This will be an eventual bio.
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-sm-6 col-xs-12">
+                <div class="pricing-item">
+                    <div class="wraper">
+                        <a href="item-details.html">
+                            <img alt="" src="{{url_for('static', filename='img/art-work/5.png')}}" />
+                        </a>
+                        <a href="item-details.html">
+                            <h4>
+                                Resonate Sanctuary II
+                            </h4>
+                        </a>
+                        <div class="owner-info">
+                            <img alt="" src="{{url_for('static', filename='img/authors/2.png')}}" width="40" />
+                            <a href="profile.html">
+                                <h3>
+                                    @Smith Wright
+                                </h3>
+                            </a>
+                        </div>
+                        <span>
+                            <span class="g-text">
+                                This will be an eventual bio.
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-sm-6 col-xs-12">
+                <div class="pricing-item">
+                    <div class="wraper">
+                        <a href="item-details.html">
+                            <img alt="" src="{{url_for('static', filename='img/art-work/6.png')}}" />
+                        </a>
+                        <a href="item-details.html">
+                            <h4>
+                                Analogue refraction #3
+                            </h4>
+                        </a>
+                        <div class="owner-info">
+                            <img alt="" src="{{url_for('static', filename='img/authors/3.png')}}" width="40" />
+                            <a href="profile.html">
+                                <h3>
+                                    @Smith Wright
+                                </h3>
+                            </a>
+                        </div>
+                        <span>
+                            <span class="g-text">
+                                This will be an eventual bio.
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-sm-6 col-xs-12">
+                <div class="pricing-item">
+                    <div class="wraper">
+                        <a href="item-details.html">
+                            <img alt="" src="{{url_for('static', filename='img/art-work/7.png')}}" />
+                        </a>
+                        <a href="item-details.html">
+                            <h4>
+                                Super-Neumorphism #7
+                            </h4>
+                        </a>
+                        <div class="owner-info">
+                            <img alt="" src="{{url_for('static', filename='img/authors/8.png')}}" width="40" />
+                            <a href="profile.html">
+                                <h3>
+                                    @Smith Wright
+                                </h3>
+                            </a>
+                        </div>
+                        <span>
+                            <span class="g-text">
+                                This will be an eventual bio.
+                    </div>
+                </div>
+            </div>
+            <div class="col-lg-3 col-sm-6 col-xs-12">
+                <div class="pricing-item">
+                    <div class="wraper">
+                        <a href="item-details.html">
+                            <img alt="" src="{{url_for('static', filename='img/art-work/8.png')}}" />
+                        </a>
+                        <a href="item-details.html">
+                            <h4>
+                                Exe Dream Sequence
+                            </h4>
+                        </a>
+                        <div class="owner-info">
+                            <img alt="" src="{{url_for('static', filename='img/authors/6.png')}}" width="40" />
+                            <a href="profile.html">
+                                <h3>
+                                    @Smith Wright
+                                </h3>
+                            </a>
+                        </div>
+                        <span>
+                            <span class="g-text">
+                                This will be an eventual bio.
+                    </div>
+                </div>
+            </div>
+            <div class="col-12 col-lg-12 text-center">
+            </div>
+        </div>
     </div>
-   </div>
-  </section>
-  <section class="features section-padding-0-100" id="team">
-   <div class="container">
-    <div class="section-heading text-center">
-     <!-- Dream Dots -->
-     <h2 class="fadeInUp" data-wow-delay="0.3s">
-      Our Team
-     </h2>
-     <p class="fadeInUp" data-wow-delay="0.4s">
-      Lorem ipsum dolor sit amet, consectetur adipiscing elit. Sed quis accumsan nisi Ut ut felis congue nisl hendrerit commodo.
-     </p>
-    </div>
-    <div class="row align-items-center">
-     <div class="col-lg-3 col-sm-6 col-xs-12">
-      <div class="pricing-item">
-       <div class="wraper">
-        <a href="item-details.html">
-         <img alt="" src="{{url_for('static', filename='img/art-work/1.png')}}"/>
-        </a>
-        <a href="item-details.html">
-         <h4>
-          Scarecrow in daylight
-         </h4>
-        </a>
-        <div class="owner-info">
-         <img alt="" src="{{url_for('static', filename='img/authors/2.png')}}" width="40"/>
-         <a href="profile.html">
-          <h3>
-           @Smith Wright
-          </h3>
-         </a>
-        </div>
-        <span>
-         <span class="g-text">
-          This will be an eventual bio.
-       </div>
-      </div>
-     </div>
-     <div class="col-lg-3 col-sm-6 col-xs-12">
-      <div class="pricing-item">
-       <div class="wraper">
-        <a href="item-details.html">
-         <img alt="" src="{{url_for('static', filename='img/art-work/2.png')}}"/>
-        </a>
-        <a href="item-details.html">
-         <h4>
-          Darklight Angel 01
-         </h4>
-        </a>
-        <div class="owner-info">
-         <img alt="" src="{{url_for('static', filename='img/authors/3.png')}}" width="40"/>
-         <a href="profile.html">
-          <h3>
-           @Smith Wright
-          </h3>
-         </a>
-        </div>
-        <span>
-         <span class="g-text">
-          This will be an eventual bio.
-       </div>
-      </div>
-     </div>
-     <div class="col-lg-3 col-sm-6 col-xs-12">
-      <div class="pricing-item">
-       <div class="wraper">
-        <a href="item-details.html">
-         <img alt="" src="{{url_for('static', filename='img/art-work/3.png')}}"/>
-        </a>
-        <a href="item-details.html">
-         <h4>
-          Becoming one with Nature
-         </h4>
-        </a>
-        <div class="owner-info">
-         <img alt="" src="{{url_for('static', filename='img/authors/8.png')}}" width="40"/>
-         <a href="profile.html">
-          <h3>
-           @Smith Wright
-          </h3>
-         </a>
-        </div>
-        <span>
-         <span class="g-text">
-          This will be an eventual bio.
-       </div>
-      </div>
-     </div>
-     <div class="col-lg-3 col-sm-6 col-xs-12">
-      <div class="pricing-item">
-       <div class="wraper">
-        <a href="item-details.html">
-         <img alt="" src="{{url_for('static', filename='img/art-work/4.png')}}"/>
-        </a>
-        <a href="item-details.html">
-         <h4>
-          Twilight Fracture City
-         </h4>
-        </a>
-        <div class="owner-info">
-         <img alt="" src="{{url_for('static', filename='img/authors/6.png')}}" width="40"/>
-         <a href="profile.html">
-          <h3>
-           @Smith Wright
-          </h3>
-         </a>
-        </div>
-        <span>
-         <span class="g-text">
-          This will be an eventual bio.
-       </div>
-      </div>
-     </div>
-     <div class="col-lg-3 col-sm-6 col-xs-12">
-      <div class="pricing-item">
-       <div class="wraper">
-        <a href="item-details.html">
-         <img alt="" src="{{url_for('static', filename='img/art-work/5.png')}}"/>
-        </a>
-        <a href="item-details.html">
-         <h4>
-          Resonate Sanctuary II
-         </h4>
-        </a>
-        <div class="owner-info">
-         <img alt="" src="{{url_for('static', filename='img/authors/2.png')}}" width="40"/>
-         <a href="profile.html">
-          <h3>
-           @Smith Wright
-          </h3>
-         </a>
-        </div>
-        <span>
-         <span class="g-text">
-          This will be an eventual bio.
-       </div>
-      </div>
-     </div>
-     <div class="col-lg-3 col-sm-6 col-xs-12">
-      <div class="pricing-item">
-       <div class="wraper">
-        <a href="item-details.html">
-         <img alt="" src="{{url_for('static', filename='img/art-work/6.png')}}"/>
-        </a>
-        <a href="item-details.html">
-         <h4>
-          Analogue refraction #3
-         </h4>
-        </a>
-        <div class="owner-info">
-         <img alt="" src="{{url_for('static', filename='img/authors/3.png')}}" width="40"/>
-         <a href="profile.html">
-          <h3>
-           @Smith Wright
-          </h3>
-         </a>
-        </div>
-        <span>
-         <span class="g-text">
-          This will be an eventual bio.
-       </div>
-      </div>
-     </div>
-     <div class="col-lg-3 col-sm-6 col-xs-12">
-      <div class="pricing-item">
-       <div class="wraper">
-        <a href="item-details.html">
-         <img alt="" src="{{url_for('static', filename='img/art-work/7.png')}}"/>
-        </a>
-        <a href="item-details.html">
-         <h4>
-          Super-Neumorphism #7
-         </h4>
-        </a>
-        <div class="owner-info">
-         <img alt="" src="{{url_for('static', filename='img/authors/8.png')}}" width="40"/>
-         <a href="profile.html">
-          <h3>
-           @Smith Wright
-          </h3>
-         </a>
-        </div>
-        <span>
-         <span class="g-text">
-          This will be an eventual bio.
-       </div>
-      </div>
-     </div>
-     <div class="col-lg-3 col-sm-6 col-xs-12">
-      <div class="pricing-item">
-       <div class="wraper">
-        <a href="item-details.html">
-         <img alt="" src="{{url_for('static', filename='img/art-work/8.png')}}"/>
-        </a>
-        <a href="item-details.html">
-         <h4>
-          Exe Dream Sequence
-         </h4>
-        </a>
-        <div class="owner-info">
-         <img alt="" src="{{url_for('static', filename='img/authors/6.png')}}" width="40"/>
-         <a href="profile.html">
-          <h3>
-           @Smith Wright
-          </h3>
-         </a>
-        </div>
-        <span>
-         <span class="g-text">
-          This will be an eventual bio.
-       </div>
-      </div>
-     </div>
-     <div class="col-12 col-lg-12 text-center">
-     </div>
-    </div>
-   </div>
-  </section>
+</section>
 
-  <!-- ##### FAQ Section Start ##### -->
-  <section class="faq-section" id="faq">
-      <div class="container">
-          <div class="section-heading text-center">
-              <!-- Dream Dots -->
-              <h2 class="fadeInUp" data-wow-delay="0.3s">
-                  FAQ
-              </h2>
-          </div>
-          <ul>
-              <li>
-                  <input type="checkbox" checked>
-                  <i></i>
-                  <h5>Languages Used</h5>
-                  <p>Vestibulum gravida, dolor sed fermentum tincidunt, ex odio maximus nisi, sit amet tristique justo purus in ligula. Vivamus tincidunt non risus eu consequat. Nunc gravida tortor ipsum, vel facilisis odio convallis sit amet. Sed ante odio, mattis vel venenatis sit amet, imperdiet eget ante.</p>
-              </li>
-              <li>
-                  <input type="checkbox" checked>
-                  <i></i>
-                  <h5>How it Works</h5>
-                  <p>Sed euismod auctor sollicitudin. Praesent vel dui sed nisl fermentum tristique id sed urna. Fusce sit amet ipsum ultricies, facilisis nisl a, viverra dui. Donec lectus dui, hendrerit eget augue vestibulum,</p>
-              </li>
-              <li>
-                  <input type="checkbox" checked>
-                  <i></i>
-                  <h5
-                  >Points of Interest</h5>
-                  <p>Praesent non metus nec tellus congue viverra ac at lacus. Phasellus et libero eget ante vulputate consequat sit amet id tellus. Mauris vulputate vehicula nisi eu faucibus. Morbi eu felis egestas, dignissim arcu sed, volutpat lorem. Donec tempor sem nec placerat scelerisque. Sed nibh massa, hendrerit sed nulla ut, aliquam ornare justo.</p>
-              </li>
-          </ul>
-      </div>
-  </section>
+<!-- ##### FAQ Section Start ##### -->
+<section class="faq-section" id="faq">
+    <div class="container">
+        <div class="section-heading text-center">
+            <!-- Dream Dots -->
+            <h2 class="fadeInUp" data-wow-delay="0.3s">
+                FAQ
+            </h2>
+        </div>
+        <ul>
+            <li>
+                <input type="checkbox" checked>
+                <i></i>
+                <h5>Blockchain</h5>
+                <p>Ethereum</p>
+            </li>
+            <li>
+                <input type="checkbox" checked>
+                <i></i>
+                <h5>Avvenire City</h5>
+                <p>Sed euismod auctor sollicitudin. Praesent vel dui sed nisl fermentum tristique id sed urna. Fusce sit
+                    amet ipsum ultricies, facilisis nisl a, viverra dui. Donec lectus dui, hendrerit eget augue
+                    vestibulum,</p>
+            </li>
+            <li>
+                <input type="checkbox" checked>
+                <i></i>
+                <h5>Architectural Models (Models)</h5>
+                <p>Avvenire City is built through 3,000 architectural models. Traits will determine their rarity and how
+                    they contribute to Avvenire City. Models will be based around various types of commercial real
+                    estate in RL such as Retail Shops, Laboratories, Museums, Film Studio, Cafe, Restaurant, Mini Golf,
+                    Art Gallery and so on.</p>
+            </li>
+            <li>
+                <input type="checkbox" checked>
+                <i></i>
+                <h5>PFPs</h5>
+                <p>TBD</p>
+            </li>
+            <li>
+                <input type="checkbox" checked>
+                <i></i>
+                <h5>Avvenire Map</h5>
+                <p>The Avvenire Map will be launched. Holders can connect their wallet to the website and it will show
+                    where their land is situated on the map, located by its coordinates within Avvenire City.</p>
+                <p>The map will be loosely based on the concept of Sandbox coordinates and how they sell land, but we’ll
+                    make it more similar to real life by having a master-planned community. This means land is also
+                    filled with forest, bodies of water, and also the Avvenire Tower. By showing the locations of
+                    forest, water and other environments, we are showing people what other potential land and models can
+                    be released.</p>
+            </li>
+            <li>
+                <input type="checkbox" checked>
+                <i></i>
+                <h5>Land in the Metaverse</h5>
+                <p>Land will be purchased in the metaverse. After land is bought in the metaverse, Avvenire City will
+                    come to life. Citizens will be able to walk around and enjoy the view of your Avvenire Architectural
+                    Model through Sandbox/Decentraland.</p>
+            </li>
+            <li>
+                <input type="checkbox" checked>
+                <i></i>
+                <h5>Utilities</h5>
+                <p>Architectural Models and Citizens can be used in the metaverse.</p>
+                <p>Avvenire City merchandise will be developed. Citizens may be eligible for merch drops bringing
+                    Avvenire to the physical world.</p>
+                <p>A native token for Avvenire City will be developed.</p>
+                <p>All holders of any Avvenire collection will be eligible for airdrops.</p>
+            </li>
+            <li>
+                <input type="checkbox" checked>
+                <i></i>
+                <h5>Community Education</h5>
+                <p>The Avvenire Project will develop resources for Avvenire City citizens, so they can learn how to
+                    build their 3D environments, learn to interact, sell merchandise, or rent their properties, and so
+                    on.</p>
+            </li>
+            <li>
+                <input type="checkbox" checked>
+                <i></i>
+                <h5>Dao/Token</h5>
+                <p>The Community Phase will allow the community to influence the direction of Avvenire, such as the
+                    choice of metaverse. We will come to decisions based on what may suit Avvenire in the long run and
+                    how certain steps in the metaverse grow the brand of Avvenire.</p>
+            </li>
+            <li>
+                <input type="checkbox" checked>
+                <i></i>
+                <h5>Is the team doxxed? Yes.</h5>
+                <p>
+                    <span class="w-text">Artist: </span>
+                    <br>
+                    H. Loshak is a London based 3D Artist and CEO of 4thDimensionST. He specializes in immersive art and
+                    building NFT projects from the ground up. He will lead the design of the Avvenire Project with the
+                    amazing team at 4th Dimension to bring the absolute best to you.
+                </p>
+                <p>
+                    <span class="w-text">Founders: </span>
+                    <br>
+                    Oscar Mireles: Avvenire is Oscar's brainchild. Once a professional eSports gamer, he has turned into
+                    a brand and community builder devoted to web3 and innovation.
+                    <br>
+                    Jeremy Lay: With a background in building successful online retail brands since 2015, has generated
+                    over $150 million in sales online and partnered with Meta (Facebook), Instagram and Tiktok.
+                </p>
+                <p>
+                    <span class="w-text">Influencer: </span>
+                    <br>
+                    Cotal: Social media influencer and professional esports player. Manages followings of hundreds of
+                    thousands across several socials. A content creating machine.
+                </p>
+            </li>
+
+        </ul>
+    </div>
+</section>
+<script src="{{url_for('static', filename='js/toggle.js')}}">
+</script>
 {% endblock %}
