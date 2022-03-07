@@ -23,10 +23,10 @@ contract TokenMutator is
     ReentrancyGuard
 {
     // mint information (whether or not the platform is minting characters)
-    bool characterMintActive = true;  // this defaults to true, as the platform needs to mint characters before allowing tradable traits
+    bool public characterMintActive = true;  // this defaults to true, as the platform needs to mint characters before allowing tradable traits
 
     // mutability information
-    bool mutabilityMode = false;  // initially set the contract to be immutable, this will keep people from trying to use the function before it is released
+    bool public mutabilityMode = false;  // initially set the contract to be immutable, this will keep people from trying to use the function before it is released
     string baseURI;   // a uri for minting (like a base URI), but this allows the contract owner to change it later
     string loadURI;  // a URI that the NFT will be set to while waiting for changes
 
@@ -35,7 +35,7 @@ contract TokenMutator is
     address payable receivingAddress;  // the address that collects the cost of the mutation
 
     // trading information
-    bool tradeBeforeChange;  // initially set to false, don't want people to tokens that are pending changes
+    bool public tradeBeforeChange;  // initially set to false, don't want people to tokens that are pending changes
 
     // make an enumerable for trait types (meant to be overridden with traits from individual project)
     enum TraitType {NULL, TYPE_1, TYPE_2}
@@ -265,6 +265,15 @@ contract TokenMutator is
     {
         // set thte global loadURI to this new loadURI_
         loadURI = loadURI_;
+    }
+
+    /**
+     * @notice a function to toggle the character mint
+     * @param characterMintActive_ as the boolean setting
+    */
+    function setCharacterMintActive(bool characterMintActive_) external onlyOwner
+    {
+        characterMintActive = characterMintActive_;
     }
 
     /**
