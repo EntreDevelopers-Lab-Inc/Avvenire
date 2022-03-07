@@ -46,6 +46,7 @@ contract AvvenireTest is
     address devAddress;
     uint256 paymentToDevs;  // can decrement this to 0 after being paid
 
+    /*
     // set up the trait types (NOT DONE YET)
     enum TraitType {NULL,  BODY, CLOTHING, EYES, HAIR, MOUTH}
 
@@ -72,6 +73,7 @@ contract AvvenireTest is
         Trait hair;
         Trait mouth;
     }
+    */
 
     /**
      * @notice Constructor calls on ERC721A constructor and sets the previously defined global variables
