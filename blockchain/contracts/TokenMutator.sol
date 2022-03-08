@@ -82,11 +82,15 @@ contract TokenMutator is
     // mapping for allowing other contracts to interact with this one
     mapping(address => bool) public allowedContracts;
 
+    // Designated # of characters; **** Needs to be set to immutable following testings ****
+    uint256 numberOfCharacters;
+
     constructor(
         string memory ERC721Name_,
         string memory ERC721AId_,
         string memory baseURI_,
-        string memory loadURI_
+        string memory loadURI_,
+        uint256 numberOfCharacters_
     ) ERC721A(ERC721Name_, ERC721AId_) {
         // set the mint URI
         baseURI = baseURI_;
@@ -102,6 +106,8 @@ contract TokenMutator is
 
         // Set mint to true
         characterMintActive = true;
+
+        numberOfCharacters = numberOfCharacters_;
     }
 
     /**
@@ -501,6 +507,11 @@ contract TokenMutator is
      * @param traitId indicating which trait to set
      */
     function makeTraitTransferable(uint256 traitId) internal {
+        require(
+            traitId > numberOfCharacters,
+            "traidId corresponds to a chracterId"
+        );
+
         // set the ownership to the transaction origin
         _ownerships[traitId].addr = tx.origin;
 
@@ -513,6 +524,11 @@ contract TokenMutator is
      * @param traitId to indicate which trait to change
      */
     function makeTraitNonTransferrable(uint256 traitId) internal {
+        require(
+            traitId > numberOfCharacters,
+            "traidId corresponds to a chracterId"
+        );
+
         // set the ownership to null
         _ownerships[traitId].addr = address(0);
 
