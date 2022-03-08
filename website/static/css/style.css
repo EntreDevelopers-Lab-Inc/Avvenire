@@ -5160,11 +5160,10 @@ textarea:required {
 
 .timelineBody .timeline {
     padding: 2em;
-    margin-bottom: 3px;
+    margin: 0;
     list-style: none;
     position: relative;
     z-index: 2;
-    height: 100vh;
 }
 
 .timelineBody .timeline li {
