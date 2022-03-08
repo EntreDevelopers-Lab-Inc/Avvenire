@@ -1084,14 +1084,11 @@ nav{-webkit-transition: padding-top .3s,padding-bottom .3s;
     position: absolute;
     bottom: 0;
     left: 0;
-    width: 500em;
+    width: 100vw;
     height: 100%;
     opacity: 1;
     visibility: inherit;
     background: transparent url(../img/bg-img/header-1.jpg);
-    overflow: hidden;
-    background-size: contain;
-    object-fit: cover;
     background-repeat: no-repeat;
 }
 
@@ -5127,7 +5124,7 @@ textarea:required {
 .timelineBox {
     width: 100%;
     height: auto;
-    overflow: hidden;
+    overflow: auto;
     border-radius: 2px;
 }
 
