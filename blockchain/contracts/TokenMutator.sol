@@ -53,7 +53,7 @@ contract TokenMutator is
     struct Trait {
         uint256 tokenId; // for mapping characters to their token traits
         string uri; // a uri mapping to the character's trait (must be set)
-        bool isBound; // stores if the trait is free from the character (defaults to false)
+        bool free; // stores if the trait is free from the character (defaults to false)
         bool exists; // checks existence (for minting vs transferring)
         TraitType traitType;
     }
@@ -354,7 +354,7 @@ contract TokenMutator is
             Trait({
                 tokenId: 0, // there will be no traits with tokenId 0, as that must be the first character (cannot have traits without minting the first character)
                 uri: "",
-                isBound: false,
+                free: false,
                 exists: true,
                 traitType: traitType
             });
@@ -387,7 +387,7 @@ contract TokenMutator is
         tokenIdToTrait[tokenId] = Trait({
             tokenId: tokenId,
             uri: "",
-            isBound: true,
+            free: true,
             exists: true,
             traitType: traitType
         });
@@ -407,7 +407,7 @@ contract TokenMutator is
 
         // check if the trait is free
         require(
-            !tokenIdToTrait[tokenId].isBound,
+            !tokenIdToTrait[tokenId].free,
             "This trait is not bound to anything. It cannot be spawned."
         );
 
@@ -416,7 +416,7 @@ contract TokenMutator is
         _ownerships[tokenId].addr = tx.origin;
 
         // set the token to being free
-        tokenIdToTrait[tokenId].isBound = true;
+        tokenIdToTrait[tokenId].free = true;
     }
 
     /**
@@ -471,7 +471,7 @@ contract TokenMutator is
             Trait memory trait = Trait({
                 tokenId: traitId,
                 uri: "",
-                isBound: false,
+                free: false,
                 exists: false,
                 traitType: traitType
             });
@@ -511,7 +511,7 @@ contract TokenMutator is
         _ownerships[traitId].addr = tx.origin;
 
         // set the trait to free (should be tradable combinable)
-        tokenIdToTrait[traitId].isBound = true;
+        tokenIdToTrait[traitId].free = true;
     }
 
     /**
@@ -525,7 +525,7 @@ contract TokenMutator is
         _ownerships[traitId].addr = address(0);
 
         // set the trait to not free (should not be tradable or combinable any longer)
-        tokenIdToTrait[traitId].isBound = false;
+        tokenIdToTrait[traitId].free = false;
     }
 
     /**
@@ -595,7 +595,7 @@ contract TokenMutator is
 
             // if this is a trait, it must be free to be transferred
             if (tokenIdToTrait[tokenId].exists) {
-                require(tokenIdToTrait[tokenId].isBound);
+                require(tokenIdToTrait[tokenId].free);
             }
         }
     }
