@@ -53,8 +53,6 @@ contract AvvenireTestV2 is
     mapping(address => uint256) public totalPaid;
 
     // dev payment information
-    address devAddress;
-    uint256 paymentToDevs;
     bool devsPaid = false; // this will keep us from being paid every time they withdraw money from this contract (necessary for mutability)
 
     /**
