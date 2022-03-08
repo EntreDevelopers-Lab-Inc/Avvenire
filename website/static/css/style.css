@@ -5147,10 +5147,11 @@ textarea:required {
 
 .timelineBody .timeline {
     padding: 2em;
-    margin: 0;
+    margin-bottom: 3px;
     list-style: none;
     position: relative;
     z-index: 2;
+    height: 100vh;
 }
 
 .timelineBody .timeline li {
@@ -5172,9 +5173,10 @@ textarea:required {
     left: 7px;
     top: 0;
     width: 1px;
-    height: 85%;
+    height: 100%;
     background: #25cbd3
 }
+
 
 .timelineBody .timeline li:last-child {
     margin-bottom: 0;
@@ -5211,6 +5213,15 @@ textarea:required {
     flex: 0 0 100px;
     padding: 0;
 }
+
+.timeline-order {
+    font-size: 16px;
+    margin-left: auto;
+    /* -webkit-box-flex: 0; */
+    -ms-flex: 0 0 65%;
+    flex: 0 0 65%;
+}
+
 
 .timelineBody .timeline .timelineDate p {
     color: #25cbd3;
