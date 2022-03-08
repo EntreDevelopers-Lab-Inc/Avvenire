@@ -1064,7 +1064,6 @@ nav{-webkit-transition: padding-top .3s,padding-bottom .3s;
 }
 .hero-section.moving{
     overflow: hidden;
-    background: url(../img/bg-img/header-1.jpg) no-repeat center top; 
     background-size: cover;
 }
 .moving-bg {
@@ -1073,13 +1072,26 @@ nav{-webkit-transition: padding-top .3s,padding-bottom .3s;
     left: 0;
     width: 500em;
     height: 100%;
-    opacity: 0.1;
+    opacity: 1;
     visibility: inherit;
     background: transparent url(../img/core-img/crypto.png) repeat-x scroll 0 100%;
     -webkit-animation: cloudwash 60s linear infinite;
     -moz-animation: cloudwash 60s linear infinite;
     animation: cloudwash 60s linear infinite;
 }
+
+.static-bg {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 100vw;
+    height: 110%;
+    opacity: 1;
+    visibility: inherit;
+    background: transparent url(../img/bg-img/header-1.jpg) no-repeat;
+    background-size: cover;
+}
+
 @media (max-width: 991px){
     .hero-section.moving{
         background-position: left top;
@@ -4861,7 +4873,7 @@ textarea:required {
     text-align:center;
     font-size:13px;
     background:rgba(255,255,255,0.05);
-    color:#bbbbbb;
+    color:#ffffff;
     -webkit-transition:all 500ms ease;
     -ms-transition:all 500ms ease;
     transition:all 500ms ease;
@@ -5111,8 +5123,8 @@ textarea:required {
 
 .timelineBox {
     width: 100%;
-    height: auto;
-    overflow: hidden;
+    height: 100%;
+    overflow: auto;
     border-radius: 2px;
 }
 
@@ -5140,7 +5152,7 @@ textarea:required {
 }
 
 .timelineBody {
-    max-height: 480px;
+    max-height: 100%;
     overflow-x: hidden;
     overflow-y: auto;
 }
@@ -5172,9 +5184,10 @@ textarea:required {
     left: 7px;
     top: 0;
     width: 1px;
-    height: 85%;
+    height: 100%;
     background: #25cbd3
 }
+
 
 .timelineBody .timeline li:last-child {
     margin-bottom: 0;
@@ -5211,6 +5224,15 @@ textarea:required {
     flex: 0 0 100px;
     padding: 0;
 }
+
+.timeline-order {
+    font-size: 16px;
+    margin-left: auto;
+    /* -webkit-box-flex: 0; */
+    -ms-flex: 0 0 65%;
+    flex: 0 0 65%;
+}
+
 
 .timelineBody .timeline .timelineDate p {
     color: #25cbd3;
@@ -6383,6 +6405,30 @@ ul li:nth-of-type(5) {
 
 ul li:nth-of-type(6) {
     animation-delay: 1.75s;
+}
+
+ul li:nth-of-type(7) {
+    animation-delay: 2.00s;
+}
+
+ul li:nth-of-type(8) {
+    animation-delay: 2.25s;
+}
+
+ul li:nth-of-type(9) {
+    animation-delay: 2.50s;
+}
+
+ul li:nth-of-type(10) {
+    animation-delay: 2.75s;
+}
+
+ul li:nth-of-type(11) {
+    animation-delay: 3.00s;
+}
+
+ul li:nth-of-type(12) {
+    animation-delay: 3.25s;
 }
 
 ul li:last-of-type {

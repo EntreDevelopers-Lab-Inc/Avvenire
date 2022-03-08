@@ -5,6 +5,7 @@
 <section class="hero-section moving section-padding" id="home">
     <div class="moving-bg">
     </div>
+    <div class="static-bg"></div>
     <!-- Hero Content -->
     <div class="hero-section-content">
         <div class="container">
@@ -22,9 +23,9 @@
                         </h1>
                         <p class="w-text fadeInUp" data-wow-delay="0.3s">
                             Based in the near future, the Avvenire City is a utopia whereby the love for art and
-                            community are in synchronization. You, as a holder of land in Avvenire City are part of an
-                            exclusive community whereby various benefits are given to land holders via airdrops and new
-                            offerings. The world of Avvenire City is expanding, and we want you to be part of the
+                            community are in synchronization. You, as a citizen of  Avvenire City are part of an
+                            exclusive community with access to various benefits via airdrops and new
+                            offerings. Avvenire City is expanding, and we want you to be part of the
                             journey. Let’s build the brand of Avvenire together.
                         </p>
                     </div>
@@ -39,7 +40,7 @@
 <div class="clearfix">
 </div>
 <!-- ##### Activity Area Start ##### -->
-<section class="blog-area section-padding-100" id="roadmap">
+<section class="blog-area section-padding-100-50" id="roadmap">
     <div class="container">
 
         <div class="row" style="align-items: center;">
@@ -48,69 +49,90 @@
                     <div class="timelineHeader">
                         <h3>Roadmap</h3>
                     </div>
-                    <div class="timelineBody">
+                    <div class="timelineBody" style="overflow: scroll;">
                         <ul class="timeline">
                             <!-- Single Timeline -->
                             <li>
-                                <div class="timelineDot" onclick="toggleRoadMap(1)">
+                                <div class="timelineDot">
                                 </div>
-                                <div class="timelineWork" id="timelinework_1" style="display: none;">
-                                    <h6>Phase 1: Citizenship Mint</h6>
-                                    <span>Launch of the Avvenire Citizenship Mint (limited to 3,000). Welcome to all
-                                        official founding citizens of Avvenire City. As a founding citizen member,
-                                        you
-                                        are not only part of something extraordinary, but you also have the ability
-                                        to
-                                        contribute to the further development of Avvenire City.</span>
-                                    <br>
-                                    <span>Models are based around various types of commercial real estate in RL:
-                                        Retail
-                                        Shops, Laboratories, Museums, Film Studio, Cafe, Restaurant, Mini Golf
-                                        etc.</span>
-                                </div>
+                                <div class="timeline-order">
+                                    <h6 onclick="toggleRoadMap(1)">Phase 1: Citizenship Mint
+                                    </h6>
+                                    <div class="timelineWork" id="timelinework_1" style="display: none;">
+                                        <span>Launch of the Avvenire Citizenship Mint (limited to 3,000). Welcome to all
+                                            official founding citizens of Avvenire City. As a founding citizen member,
+                                            you
+                                            are not only part of something extraordinary, but you also have the ability
+                                            to
+                                            contribute to the further development of Avvenire City.</span>
+                                        <br>
+                                        <span>Models are based around various types of commercial real estate in RL:
+                                            Retail
+                                            Shops, Laboratories, Museums, Film Studio, Cafe, Restaurant, Mini Golf
+                                            etc.</span>
+                                    </div>
 
-                            </li>
-                            <!-- Single Timeline -->
-                            <li>
-                                <div class="timelineDot" onclick="toggleRoadMap(2)"></div>
-                                <div class="timelineWork" id="timelinework_2" style="display: none;">
-                                    <h6>Phase 2: Avvenire City Parcel Release</h6>
-                                    <span>Founding citizens will be airdropped a part of Avvenire City, called an
-                                        Avvenire Parcel. We’ve uniquely designed the parcel to suit the personality of
-                                        your citizenship. The Avvenire Parcels give access to the Avvenire metaverse
-                                        utility.</span>
                                 </div>
                             </li>
                             <!-- Single Timeline -->
                             <li>
-                                <div class="timelineDot" onclick="toggleRoadMap(3)"></div>
-                                <div class="timelineWork" id="timelinework_3" style="display: none;">
-                                    <h6>Phase 3: Avvenire City Exclusive Clothing Apparel</h6>
-                                    <span>Avvenire City is not only a community of like minded individuals, but also a
-                                        brand. Avvenire Citizens will be given the exclusive opportunity to purchase
-                                        apparel designed and inspired by the Avvenire Citizen collection.</span>
+                                <div class="timelineDot"></div>
+                                <div class="timeline-order">
+                                    <h6 onclick="toggleRoadMap(2)">Phase 2: Avvenire City Parcel Release</h6>
+                                    <div class="timelineWork" id="timelinework_2" style="display: none;">
+                                        <span>Founding citizens will be airdropped a part of Avvenire City, called an
+                                            Avvenire Parcel. We’ve uniquely designed the parcel to suit the personality
+                                            of
+                                            your citizenship. The Avvenire Parcels give access to the Avvenire metaverse
+                                            utility.</span>
+                                    </div>
                                 </div>
                             </li>
                             <!-- Single Timeline -->
                             <li>
-                                <div class="timelineDot" onclick="toggleRoadMap(4)"></div>
-                                <div class="timelineWork" id="timelinework_4" style="display: none;">
-                                    <h6>Phase 4: Metaverse Expansion of Avvenire City</h6>
-                                    <span>The most suitable metaverse platform will be chosen for the development of
-                                        Avvenire City in the metaverse. Holders of either the parcel or citizenship nft
-                                        will gain specific access and ownership to the Avvenire City Metaverse.</span>
+                                <div class="timelineDot"></div>
+                                <div class="timeline-order">
+                                    <h6 onclick="toggleRoadMap(3)">Phase 3: Avvenire City Exclusive Clothing Apparel
+                                    </h6>
+                                    <div class="timelineWork" id="timelinework_3" style="display: none;">
+                                        <span>Avvenire City is not only a community of like minded individuals, but also
+                                            a
+                                            brand. Avvenire Citizens will be given the exclusive opportunity to purchase
+                                            apparel designed and inspired by the Avvenire Citizen collection.</span>
+                                    </div>
                                 </div>
                             </li>
                             <!-- Single Timeline -->
                             <li>
-                                <div class="timelineDot" onclick="toggleRoadMap(5)"></div>
-                                <div class="timelineWork" id="timelinework_5" style="display: none;">
-                                    <h6>Phase 5: The future, to be continued...</h6>
-                                    <span>The opportunities are endless for Avvenire, as we expand out into both the
-                                        physical and web3 worlds. From here, we want you to be a part of the decision
-                                        making in what we do next. Whether that be in-real-life parties, apparel brand
-                                        expansion or further airdrops, the future of Avvenire City is in your
-                                        hands.</span>
+                                <div class="timelineDot"></div>
+                                <div class="timeline-order">
+                                    <h6 onclick="toggleRoadMap(4)">Phase 4: Metaverse Expansion of Avvenire City</h6>
+                                    <div class="timelineWork" id="timelinework_4" style="display: none;">
+
+                                        <span>The most suitable metaverse platform will be chosen for the development of
+                                            Avvenire City in the metaverse. Holders of either the parcel or citizenship
+                                            nft
+                                            will gain specific access and ownership to the Avvenire City
+                                            Metaverse.</span>
+                                    </div>
+                                </div>
+                            </li>
+                            <!-- Single Timeline -->
+                            <li>
+                                <div class="timelineDot"></div>
+                                <div class="timeline-order">
+                                    <h6 onclick="toggleRoadMap(5)">Phase 5: The future, to be
+                                        continued...</h6>
+                                    <div class="timelineWork" id="timelinework_5" style="display: none;">
+
+                                        <span>The opportunities are endless for Avvenire, as we expand out into both the
+                                            physical and web3 worlds. From here, we want you to be a part of the
+                                            decision
+                                            making in what we do next. Whether that be in-real-life parties, apparel
+                                            brand
+                                            expansion or further airdrops, the future of Avvenire City is in your
+                                            hands.</span>
+                                    </div>
                                 </div>
                             </li>
 
@@ -137,24 +159,24 @@
             <div class="dream-dots justify-content-center fadeInUp" data-wow-delay="0.2s">
             </div>
             <h2 class="fadeInUp" data-wow-delay="0.3s">
-                Avvenire City
+                Avvenire Citizens
             </h2>
             <p class="fadeInUp" data-wow-delay="0.4s">
-                Join us for the mint of 5,000 homes in Avennire City!
+                Join us as one of the 3,000 citizens of Avvenire City!
             </p>
         </div>
         <div class="row">
             <div class="col-12 col-md-6 col-lg-3">
                 <!-- Content -->
                 <a class="service_single_content collection-item wow fadeInUp" data-wow-delay="0.2s"
-                    href="discover.html">
+                    href="#art">
                     <!-- Icon -->
                     <div class="collection_icon">
                         <img alt="" src="{{url_for('static', filename='img/art-work/c1.png')}}" />
                     </div>
                     <div class="collection_info">
                         <h6>
-                            Cyberpunk City Art
+                            Aoto
                         </h6>
                     </div>
                 </a>
@@ -162,14 +184,14 @@
             <div class="col-12 col-md-6 col-lg-3">
                 <!-- Content -->
                 <a class="service_single_content collection-item wow fadeInUp" data-wow-delay="0.3s"
-                    href="discover.html">
+                    href="#art">
                     <!-- Icon -->
                     <div class="collection_icon">
                         <img alt="" src="{{url_for('static', filename='img/art-work/c2.png')}}" />
                     </div>
                     <div class="collection_info">
                         <h6>
-                            Murphy the Mutant
+                            Kimoko
                         </h6>
                     </div>
                 </a>
@@ -177,14 +199,14 @@
             <div class="col-12 col-md-6 col-lg-3">
                 <!-- Content -->
                 <a class="service_single_content collection-item wow fadeInUp" data-wow-delay="0.4s"
-                    href="discover.html">
+                    href="#art">
                     <!-- Icon -->
                     <div class="collection_icon">
                         <img alt="" src="{{url_for('static', filename='img/art-work/c3.png')}}" />
                     </div>
                     <div class="collection_info">
                         <h6>
-                            Beeple Special Edition
+                            Syrus
                         </h6>
                     </div>
                 </a>
@@ -192,14 +214,14 @@
             <div class="col-12 col-md-6 col-lg-3">
                 <!-- Content -->
                 <a class="service_single_content collection-item wow fadeInUp" data-wow-delay="0.5s"
-                    href="discover.html">
+                    href="#art">
                     <!-- Icon -->
                     <div class="collection_icon">
                         <img alt="" src="{{url_for('static', filename='img/art-work/c4.png')}}" />
                     </div>
                     <div class="collection_info">
                         <h6>
-                            Floyd Mayweather Jr.
+                            Xena
                         </h6>
                     </div>
                 </a>
@@ -207,7 +229,40 @@
         </div>
     </div>
 </section>
-<section class="features section-padding-0-100" id="team">
+<section class="blog-area section-padding-50" id="technology">
+        <div class="section-heading text-center">
+            <!-- Dream Dots -->
+            <h2 class="fadeInUp" data-wow-delay="0.3s">
+                On the Cutting Edge
+            </h2>
+            <p class="fadeInUp" data-wow-delay="0.4s">
+                Building on top to the technology developed in <a href="https://www.azuki.com/erc721a" target="_blank">The Garden</a> to usher in a new era of NFTs.
+            </p>
+        </div>        <div class="container">
+            <div class="row">
+                <div class="col-12 col-md-6">
+                    <div class="single-blog-area wow fadeInUp" data-wow-delay="0.2s" style="visibility: visible; animation-delay: 0.2s; animation-name: fadeInUp;">
+                        <!-- Post Content -->
+                        <div class="blog-content">
+                            <h4 class="post-title">ERC721A</h4>
+                            <p>First implemented by The Azuki mint, ERC721A enables the minting of multiple NFTs for the same gas cost of a single NFT.</p>
+                            <p>Avvenire employs the same benefits gained in the Azuki mint, as we have developed with their new protocol. These innovations include the removal of duplicate storage and batch updating. ERC721A optimizes data storage by leveraging string concatentation at the time of reading the NFT instead of at the time of writing (mint). Since users are unlikely to pay for read operations, they reap the gas benefits. Furthermore, the use of batch updating allows ERC721A mints update the owner's balance once per transaction instead of once per token.</p>
+                        </div>
+                    </div>
+            </div>
+                <div class="col-12 col-md-6">
+                    <div class="single-blog-area wow fadeInUp" data-wow-delay="0.2s" style="visibility: visible; animation-delay: 0.2s; animation-name: fadeInUp;">
+                        <!-- Post Content -->
+                        <div class="blog-content">
+                            <h4 class="post-title">Tradeable Traits</h4>
+                            <p>Our team views NFTs as digital embodiments of real-life objects. For example, an Avvenire Citizen should just be a Web3 person.</p>
+                            <p>Consider any person. Over the course of one week, this individual will likely wear a variety of clothing and jewelry. Over the course of a year, they may change their hairstyle or get a tattoo. We believe that Avvenire citizens should have the same capabilities. In addition to making these traits interchangeable, we decided that each individual trait should be tradable. These can be listed on OpenSea or LooksRare and traded while not bound to an Avvenire Citizen. We look forward to giving Avvenire Citizens access to this new paradigm of Web3.</p>
+                        </div>
+                    </div>
+            </div>
+        </div>
+</section>
+<section class="features section-padding-50" id="team">
     <div class="container">
         <div class="section-heading text-center">
             <!-- Dream Dots -->
@@ -425,7 +480,6 @@
         </div>
     </div>
 </section>
-
 <!-- ##### FAQ Section Start ##### -->
 <section class="faq-section" id="faq">
     <div class="container">
@@ -445,10 +499,16 @@
             <li>
                 <input type="checkbox" checked>
                 <i></i>
+                <h5>Avvenire - Defined</h5>
+                <p>
+                    ‘Avvenire’ means Future. Our vision of the future is to build Avvenire City in the metaverse as a place of beauty, mood, art and community identity.
+                </p>
+            </li>
+            <li>
+                <input type="checkbox" checked>
+                <i></i>
                 <h5>Avvenire City</h5>
-                <p>Sed euismod auctor sollicitudin. Praesent vel dui sed nisl fermentum tristique id sed urna. Fusce sit
-                    amet ipsum ultricies, facilisis nisl a, viverra dui. Donec lectus dui, hendrerit eget augue
-                    vestibulum,</p>
+                <p>Based in the near future, Avvenire City is a utopia where the love for beauty, art and community are in harmony. As a citizen or property owner, you are part of an exclusive community with access to airdrops and new offerings. The world of Avvenire City is expanding, and we want you to be part of the journey.</p>
             </li>
             <li>
                 <input type="checkbox" checked>
@@ -463,15 +523,21 @@
                 <input type="checkbox" checked>
                 <i></i>
                 <h5>PFPs</h5>
-                <p>TBD</p>
+                <p>
+                    Citizens will be minted as a part of a 2D PFP collection.  A design/style connection exists between the Models and Citizens. The style for the PFP citizens is influenced by the anime art tradition. PFPs will be exclusive and hand drawn art.
+                <br><br>
+                    Customization will be possible through our site. Soon after mint, you will be able to exchange the individual traits of your Citizen with other members of Avvenire City. Create your custom Citizen to suit how you see yourself in the Metaverse.
+                <br><br>
+                    Once Avvenire City is in the metaverse it will be populated by the 3D version of the 3,000 citizens (genesis collection). As a Citizen, you will have a unique identity within Avvenire City, with the opportunity to interact with other members of the project.
+                </p>
             </li>
             <li>
                 <input type="checkbox" checked>
                 <i></i>
                 <h5>Avvenire Map</h5>
                 <p>The Avvenire Map will be launched. Holders can connect their wallet to the website and it will show
-                    where their land is situated on the map, located by its coordinates within Avvenire City.</p>
-                <p>The map will be loosely based on the concept of Sandbox coordinates and how they sell land, but we’ll
+                    where their land is situated on the map, located by its coordinates within Avvenire City.<br />The
+                    map will be loosely based on the concept of Sandbox coordinates and how they sell land, but we’ll
                     make it more similar to real life by having a master-planned community. This means land is also
                     filled with forest, bodies of water, and also the Avvenire Tower. By showing the locations of
                     forest, water and other environments, we are showing people what other potential land and models can
@@ -489,11 +555,10 @@
                 <input type="checkbox" checked>
                 <i></i>
                 <h5>Utilities</h5>
-                <p>Architectural Models and Citizens can be used in the metaverse.</p>
-                <p>Avvenire City merchandise will be developed. Citizens may be eligible for merch drops bringing
-                    Avvenire to the physical world.</p>
-                <p>A native token for Avvenire City will be developed.</p>
-                <p>All holders of any Avvenire collection will be eligible for airdrops.</p>
+                <p>Architectural Models and Citizens can be used in the metaverse.<br />Avvenire City merchandise will
+                    be developed. Citizens may be eligible for merch drops bringing
+                    Avvenire to the physical world.<br />A native token for Avvenire City will be developed.<br />All
+                    holders of any Avvenire collection will be eligible for airdrops.</p>
             </li>
             <li>
                 <input type="checkbox" checked>
@@ -538,7 +603,6 @@
                     thousands across several socials. A content creating machine.
                 </p>
             </li>
-
         </ul>
     </div>
 </section>
