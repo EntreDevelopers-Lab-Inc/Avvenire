@@ -4873,7 +4873,7 @@ textarea:required {
     text-align:center;
     font-size:13px;
     background:rgba(255,255,255,0.05);
-    color:#bbbbbb;
+    color:#ffffff;
     -webkit-transition:all 500ms ease;
     -ms-transition:all 500ms ease;
     transition:all 500ms ease;
@@ -6405,6 +6405,30 @@ ul li:nth-of-type(5) {
 
 ul li:nth-of-type(6) {
     animation-delay: 1.75s;
+}
+
+ul li:nth-of-type(7) {
+    animation-delay: 2.00s;
+}
+
+ul li:nth-of-type(8) {
+    animation-delay: 2.25s;
+}
+
+ul li:nth-of-type(9) {
+    animation-delay: 2.50s;
+}
+
+ul li:nth-of-type(10) {
+    animation-delay: 2.75s;
+}
+
+ul li:nth-of-type(11) {
+    animation-delay: 3.00s;
+}
+
+ul li:nth-of-type(12) {
+    animation-delay: 3.25s;
 }
 
 ul li:last-of-type {
