@@ -176,6 +176,9 @@ contract TokenMutator is
         // check if the token exists
         if (!_exists(tokenId)) revert URIQueryForNonexistentToken();
 
+        // check that this is the rightful token owner
+        require(ownerOf(tokenId) == tx.origin, "Only the owner of a token can request its change.");
+
         // check if the token has already been requested to change
         require(
             !tokenChangeRequests[tokenId].changeRequested,
@@ -282,6 +285,14 @@ contract TokenMutator is
     }
 
     /**
+     * @notice gets the mutability of a contract
+    */
+    function getMutablityMode() public view returns (bool)
+    {
+        return mutabilityMode;
+    }
+
+    /**
      * @notice Sets the mint uri
      * @param baseURI_ represents the new base uri
      */
@@ -308,6 +319,14 @@ contract TokenMutator is
         onlyOwner
     {
         characterMintActive = characterMintActive_;
+    }
+
+    /**
+     * @notice a function to get the character mint information
+    */
+    function getCharacterMintActive() public view returns (bool)
+    {
+        return characterMintActive;
     }
 
     /**
