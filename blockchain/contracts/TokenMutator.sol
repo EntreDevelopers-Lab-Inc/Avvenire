@@ -77,7 +77,7 @@ contract TokenMutator is
     mapping(uint256 => Trait) public tokenIdToTrait;
 
     // mapping of tokenId to change request for information --> being public allows anyone to see if the changes are requested
-    mapping(uint256 => ChangeRequest) public tokenChanges;
+    mapping(uint256 => ChangeRequest) public tokenChangeRequests;
 
     // mapping for allowing other contracts to interact with this one
     mapping(address => bool) public allowedContracts;
@@ -127,6 +127,7 @@ contract TokenMutator is
      * @notice returns the tokenURI of a token id (overrides ERC721 function)
      * @param tokenId allows the user to request the tokenURI for a particular token id
      */
+    // Set to vitual to allow devs to override later on...
     function tokenURI(uint256 tokenId)
         public
         view
@@ -138,7 +139,7 @@ contract TokenMutator is
         if (!_exists(tokenId)) revert URIQueryForNonexistentToken(); // error from ERC721A
 
         // if a change has been requested, only show the loading URI
-        if (tokenChanges[tokenId].changeRequested) {
+        if (tokenChangeRequests[tokenId].changeRequested) {
             return loadURI;
         }
 
@@ -173,7 +174,7 @@ contract TokenMutator is
 
         // check if the token has already been requested to change
         require(
-            !tokenChanges[tokenId].changeRequested,
+            !tokenChangeRequests[tokenId].changeRequested,
             "A change has already been requested for this token"
         );
 
@@ -181,14 +182,14 @@ contract TokenMutator is
     }
 
     function _requestChange(uint256 tokenId) internal {
-        require(mutuabilityCost > 0, "mutability cost not set yet");
-
         // take some payment for this transaction if there is some cost set
-        (bool success, ) = receivingAddress.call{value: mutabilityCost}("");
-        require(success, "Insufficient funds for token change");
+        if (mutabilityCost > 0) {
+            (bool success, ) = receivingAddress.call{value: mutabilityCost}("");
+            require(success, "Insufficient funds for token change");
+        }
 
         // set the token as requested to change (don't change the URI, it's a waste of gas --> will be done once in when the admin sets the token uri)
-        tokenChanges[tokenId].changeRequested = true;
+        tokenChangeRequests[tokenId].changeRequested = true;
     }
 
     /**
@@ -204,7 +205,7 @@ contract TokenMutator is
         tokenIdToCharacter[character.tokenId] = character;
 
         // set the token change data
-        tokenChanges[character.tokenId].changeRequested = changeUpdate;
+        tokenChangeRequests[character.tokenId].changeRequested = changeUpdate;
     }
 
     /**
@@ -220,7 +221,7 @@ contract TokenMutator is
         tokenIdToTrait[trait.tokenId] = trait;
 
         // set the token change data
-        tokenChanges[trait.tokenId].changeRequested = changeUpdate;
+        tokenChangeRequests[trait.tokenId].changeRequested = changeUpdate;
     }
 
     /**
@@ -583,7 +584,7 @@ contract TokenMutator is
             // the tokens SHOULD NOT be awaiting a change (you don't want the user to get surprised)
             if (!tradeBeforeChange) {
                 require(
-                    !tokenChanges[tokenId].changeRequested,
+                    !tokenChangeRequests[tokenId].changeRequested,
                     "A change has been requested for this/these token(s). They cannot be traded before this change is completed."
                 );
             }
