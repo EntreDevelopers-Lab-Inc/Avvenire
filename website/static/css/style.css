@@ -1064,7 +1064,6 @@ nav{-webkit-transition: padding-top .3s,padding-bottom .3s;
 }
 .hero-section.moving{
     overflow: hidden;
-    background: url(../img/bg-img/header-1.jpg) no-repeat center top; 
     background-size: cover;
 }
 .moving-bg {
@@ -1073,13 +1072,27 @@ nav{-webkit-transition: padding-top .3s,padding-bottom .3s;
     left: 0;
     width: 500em;
     height: 100%;
-    opacity: 0.1;
+    opacity: 1;
     visibility: inherit;
     background: transparent url(../img/core-img/crypto.png) repeat-x scroll 0 100%;
     -webkit-animation: cloudwash 60s linear infinite;
     -moz-animation: cloudwash 60s linear infinite;
     animation: cloudwash 60s linear infinite;
 }
+
+.static-bg {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    width: 500em;
+    height: 100%;
+    opacity: 1;
+    visibility: inherit;
+    background: transparent url(../img/bg-img/header-1.jpg);
+    overflow: hidden;
+    background-size: contain;
+}
+
 @media (max-width: 991px){
     .hero-section.moving{
         background-position: left top;

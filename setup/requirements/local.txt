@@ -1,5 +1,6 @@
 eth-brownie
 pillow
+pandas
 flask
 flask-restful
 flask-sqlalchemy

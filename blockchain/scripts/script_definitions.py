@@ -92,11 +92,22 @@ def end_auction(ending_auction_price, time_from_epoch):
         public_sale_start_time = chain.time() + time_from_epoch
     else:
         most_recent_block = Web3.eth.get_block("latest")
-        public_sale_start_time = most_recent_block["timestamp"] + time_from_epoch
+        public_sale_start_time = most_recent_block["timestamp"] + \
+            time_from_epoch
 
     avvenire_contract.endAuctionAndSetupNonAuctionSaleInfo(
-        whitelist_price, ending_auction_price, public_sale_start_time, {"from": account}
+        whitelist_price, ending_auction_price, public_sale_start_time, {
+            "from": account}
     )
+
+
+def drop_interval(number_of_drops):
+    drop_time = int(60 * 7.5 * number_of_drops)
+    if network.show_active() in LOCAL_BLOCKCHAIN_ENVIRONMENTS:
+        chain.sleep(drop_time)
+        chain.mine(1)
+    else:
+        time.sleep(drop_time)
 
 
 # Mint Functions
