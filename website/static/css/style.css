@@ -1091,6 +1091,7 @@ nav{-webkit-transition: padding-top .3s,padding-bottom .3s;
     background: transparent url(../img/bg-img/header-1.jpg);
     overflow: hidden;
     background-size: contain;
+    object-fit: cover;
     background-repeat: no-repeat;
 }
 
