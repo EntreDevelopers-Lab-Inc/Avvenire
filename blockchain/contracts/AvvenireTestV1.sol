@@ -43,37 +43,7 @@ contract AvvenireTest is
     mapping(address => uint256) public totalPaid;
 
     // dev payment information
-    address devAddress;
     uint256 paymentToDevs;  // can decrement this to 0 after being paid
-
-    /*
-    // set up the trait types (NOT DONE YET)
-    enum TraitType {NULL,  BODY, CLOTHING, EYES, HAIR, MOUTH}
-
-    // set up sex
-    enum Sex {UNISEX, MALE, FEMALE}
-
-    // the trait types should be very similar to the token mutator base contract, BUT the traits have to be unisex, male, or female
-    struct Trait {
-        uint256 tokenId;
-        string uri;
-        bool free;
-        bool exists;
-        TraitType traitType;
-        Sex sex;
-    }
-
-    // characters should have one of each trait (NOT DONE YET)
-    struct Character {
-        uint256 tokenId;
-        string uri;
-        Trait body;
-        Trait clothing;
-        Trait eyes;
-        Trait hair;
-        Trait mouth;
-    }
-    */
 
     /**
      * @notice Constructor calls on ERC721A constructor and sets the previously defined global variables
@@ -93,7 +63,7 @@ contract AvvenireTest is
         uint256 amountForTeam_,
         address devAddress_,
         uint256 paymentToDevs_
-    ) TokenMutator("AvvenirePFP", "AV", "", "") {
+    ) TokenMutator("AvvenirePFP", "AV", "", "", devAddress_) {
         maxPerAddressDuringAuction = maxPerAddressDuringAuction_;
         maxPerAddressDuringWhiteList = maxPerAddressDuringWhiteList_;
 
@@ -105,8 +75,6 @@ contract AvvenireTest is
         // maxBatchPublic = maxBatchPublic_;
         // maxBatchWhiteList = maxBatchWhiteList_;
 
-        // Assign dev address and payment
-        devAddress = devAddress_;
         paymentToDevs = paymentToDevs_;
 
         require(
@@ -391,7 +359,7 @@ contract AvvenireTest is
     function withdrawMoney() external onlyOwner nonReentrant {
         // Pay devs
         uint256 _payment = 2 ether;
-        (bool sent, ) = devAddress.call{value: _payment}("");
+        (bool sent, ) = devConfig.devAddress.call{value: _payment}("");
         require(sent, "dev transfer failed");
         // Withdraw rest of the contract
         (bool success, ) = msg.sender.call{value: address(this).balance}("");

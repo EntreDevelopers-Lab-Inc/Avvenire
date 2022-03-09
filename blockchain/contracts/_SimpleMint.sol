@@ -15,7 +15,7 @@ contract SimpleMint is
     uint256 collectionSize;
 
     // make a constructor (doesn't need to do much)
-    constructor(string memory baseURI_, string memory loadURI_, uint256 collectionSize_) TokenMutator("SimpleMint", "SM", baseURI_, loadURI_) {
+    constructor(string memory baseURI_, string memory loadURI_, uint256 collectionSize_, address devAddress_) TokenMutator("SimpleMint", "SM", baseURI_, loadURI_, devAddress_) {
         // set the total supply
         collectionSize = collectionSize_;
     }
