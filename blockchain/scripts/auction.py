@@ -1,4 +1,4 @@
-from brownie import AvvenireTest, chain, network, accounts
+from brownie import AvvenireTest, AvvenireCitizens, chain, network, accounts
 from web3 import Web3
 
 from scripts.script_definitions import deploy_contract, set_auction_start_time, drop_interval
@@ -18,9 +18,10 @@ def setup_auction():
     admin_account = get_account()
     dev_account = get_dev_account()
     deploy_contract(3, 2, 20, 15, 5, dev_account, 2)
-    avvenire_contract = AvvenireTest[-1]
-    avvenire_contract.setBaseURI(BASE_URI, {"from": admin_account})
-    avvenire_contract.setLoadURI(LOAD_URI, {"from": admin_account})
+    avvenire_citizens_contract = AvvenireCitizens[-1]
+
+    avvenire_citizens_contract.setBaseURI(BASE_URI, {"from": admin_account})
+    avvenire_citizens_contract.setLoadURI(LOAD_URI, {"from": admin_account})
 
     # Initializations
     set_auction_start_time(SALE_START_TIME)
@@ -81,8 +82,9 @@ def perform_auction():
 def end_auction():
     # get the admin and contract
     admin_account = get_account()
-    avvenire_contract = AvvenireTest[-1]
+    avvenire_citizens_contract = AvvenireCitizens[-1]
 
     # set mutability mode to true and end the character mint
-    avvenire_contract.setMutablityMode(True, {"from": admin_account})
-    avvenire_contract.setCharacterMintActive(False, {"from": admin_account})
+    avvenire_citizens_contract.setMutablityMode(True, {"from": admin_account})
+    avvenire_citizens_contract.setCitizenMintActive(
+        False, {"from": admin_account})

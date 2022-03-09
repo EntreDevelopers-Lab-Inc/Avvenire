@@ -1,7 +1,7 @@
 import pytest
 import time
 
-from brownie import AvvenireTest, chain, network
+from brownie import AvvenireTest, AvvenireCitizens, chain, network
 from web3 import Web3
 
 from scripts.script_definitions import *
@@ -15,8 +15,9 @@ def auction_set(fn_isolation):
     print(dev_address)
     deploy_contract(3, 2, 20, 15, 5, dev_address, DEV_PAYMENT)
     avvenire_contract = AvvenireTest[-1]
+    avvenire_citizens_contract = AvvenireCitizens[-1]
     account = get_account()
-    avvenire_contract.setBaseURI(
+    avvenire_citizens_contract.setBaseURI(
         "https://ipfs.io/ipfs/QmUizisYNzj824jNxuiPTQ1ykBSEjmkp42wMZ7DVFvfZiK/",
         {"from": account},
     )
@@ -33,6 +34,7 @@ def auction_set(fn_isolation):
 def test_withdraw(auction_set):
     # Initializations
     avvenire_contract = AvvenireTest[-1]
+    avvenire_citizens_contract = AvvenireCitizens[-1]
     admin_account = get_account()
     dev_account = get_dev_account()
     avvenire_contract.teamMint({"from": admin_account})
@@ -56,7 +58,7 @@ def test_withdraw(auction_set):
         assert float(Web3.fromWei(cost, "ether")
                      ) == round((1 - count * 0.1), 1)
         assert total_balance == avvenire_contract.balance()
-        assert avvenire_contract.numberMinted(accounts[count]) == 1
+        assert avvenire_citizens_contract.numberMinted(accounts[count]) == 1
 
     # 9 auction mints and 5 team mint = 14 minted total for 5.4 ETH
 
@@ -80,7 +82,7 @@ def test_withdraw(auction_set):
                 "from": accounts[count], "value": public_price_wei}
         )
         total_balance = total_balance + public_price_wei
-        assert avvenire_contract.numberMinted(accounts[count]) == 2
+        assert avvenire_citizens_contract.numberMinted(accounts[count]) == 2
         assert total_balance == avvenire_contract.balance()
 
     # Account balances before withdraw

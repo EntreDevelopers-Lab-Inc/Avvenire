@@ -755,4 +755,13 @@ contract AvvenireCitizens is
     {
         return totalSupply();
     }
+
+    /**
+     * @notice function to withdraw the money from the contract. Only callable by the owner
+     */
+    function withdrawMoney() external onlyOwner nonReentrant {
+        // Withdraw rest of the contract
+        (bool success, ) = msg.sender.call{value: address(this).balance}("");
+        require(success, "team transfer failed.");
+    }
 }

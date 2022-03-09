@@ -1,6 +1,8 @@
-import pytest, brownie, time
+import pytest
+import brownie
+import time
 
-from brownie import AvvenireTest, chain, network
+from brownie import AvvenireTest, AvvenireCitizens, chain, network
 from web3 import Web3
 
 from scripts.script_definitions import *
@@ -28,6 +30,7 @@ def post_auction(fn_isolation):
     dev_account = get_dev_account()
     deploy_contract(3, 2, 20, 15, 5, dev_account, 2)
     avvenire_contract = AvvenireTest[-1]
+    avvenire_citizens_contract = AvvenireCitizens[-1]
 
     # Don't need to pass in chain.time()...
     # Unsure why
@@ -50,6 +53,11 @@ def post_auction(fn_isolation):
 
     # Mint 1 at every drop interval...
     for drops in range(1, 9):
+        print(
+            f"AvvenireTest Contract balance after minting: {avvenire_contract.balance()}")
+        print(
+            f"AvvenireCitizens Contract balance after minting: {avvenire_citizens_contract.balance()}")
+
         drop_interval(1)
         implied_price = auction_start_price_wei - (drop_per_step_wei * drops)
 
@@ -89,14 +97,15 @@ def test_refund_me_before_public_price_set():
 
 def test_refund(public_auction_set):
     avvenire_contract = AvvenireTest[-1]
+    avvenire_citizens_contract = AvvenireCitizens[-1]
     admin_account = get_account()
     auction_end_price_wei = avvenire_contract.AUCTION_END_PRICE()
 
     i = 0
-    while avvenire_contract.numberMinted(accounts[i]) > 0:
+    while avvenire_citizens_contract.numberMinted(accounts[i]) > 0:
         total_paid = avvenire_contract.totalPaid(accounts[i])
         balance_before_refund = accounts[i].balance()
-        number_minted = avvenire_contract.numberMinted(accounts[i])
+        number_minted = avvenire_citizens_contract.numberMinted(accounts[i])
         actual_cost = number_minted * auction_end_price_wei
 
         # If total_paid is greater than what they should've paid, refund.  Else, expect exception
@@ -119,18 +128,20 @@ def test_refund(public_auction_set):
 
 def test_refund_me(public_auction_set):
     avvenire_contract = AvvenireTest[-1]
+    avvenire_citizens_contract = AvvenireCitizens[-1]
     admin_account = get_account()
     auction_end_price_wei = avvenire_contract.AUCTION_END_PRICE()
 
     i = 0
-    while avvenire_contract.numberMinted(accounts[i]) > 0:
+    while avvenire_citizens_contract.numberMinted(accounts[i]) > 0:
         total_paid = avvenire_contract.totalPaid(accounts[i])
         balance_before_refund = accounts[i].balance()
-        number_minted = avvenire_contract.numberMinted(accounts[i])
+        number_minted = avvenire_citizens_contract.numberMinted(accounts[i])
         actual_cost = number_minted * auction_end_price_wei
 
         # If total_paid is greater than what they should've paid, refund.  Else, expect exception
         if total_paid > actual_cost:
+            print(f"Avvenire contract balance: {avvenire_contract.balance()}")
             avvenire_contract.refundMe({"from": accounts[i]})
             balance_after_refund = accounts[i].balance()
             assert balance_after_refund - balance_before_refund == (

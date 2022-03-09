@@ -1,7 +1,7 @@
 import pytest
 import brownie
 
-from brownie import AvvenireTest, accounts
+from brownie import AvvenireTest, AvvenireCitizens, accounts
 from web3 import Web3
 
 from scripts.helpful_scripts import get_account
@@ -20,19 +20,19 @@ def test_fake_token():
     perform_auction()
 
     # get the contract
-    avvenire_contract = AvvenireTest[-1]
+    avvenire_citizens_contract = AvvenireCitizens[-1]
 
     # check the wrong token uri
     with brownie.reverts():
         # token 20 should have an issue, as only 0-19 are minted
-        assert avvenire_contract.tokenURI(20)
+        assert avvenire_citizens_contract.tokenURI(20)
 
 
 # try to get a token uri after a change has been requested
-def test_token_after_change_request():
+def test_direct_false_token_change():
     # get the admin account and the contract
-    admin_account = get_account()
     avvenire_contract = AvvenireTest[-1]
+    avvenire_citizens_contract = AvvenireCitizens[-1]
 
     # mint some nfts to account 2
     account = accounts[2]
@@ -46,18 +46,21 @@ def test_token_after_change_request():
     drop_interval(1)
 
     # change one of the tokens (must be done from admin account, but later from mutability contract)
-    avvenire_contract.requestChange(0, {"from": admin_account})
-    drop_interval(1)
+    with brownie.reverts():
+        avvenire_citizens_contract.requestChange(0, {"from": account})
+        drop_interval(1)
 
-    # try and get the token uri, is it the load uri?
-    token_uri = avvenire_contract.tokenURI(0)
-    assert token_uri == LOAD_URI
-
+    # try and get the token uri, is it still the base uri?
+    token_uri = avvenire_citizens_contract.tokenURI(0)
+    assert token_uri == f"{BASE_URI}0"
 
 # get a normal character URI (mint a bunch of them and request if they exist)
+
+
 def test_character_URI():
     # get the admin account and the contract
     avvenire_contract = AvvenireTest[-1]
+    avvenire_citizens_contract = AvvenireCitizens[-1]
 
     # mint some nfts to account 2
     tokens = 2
@@ -72,8 +75,8 @@ def test_character_URI():
     drop_interval(1)
 
     for i in range(tokens):
-        print(avvenire_contract.tokenURI(i))
-        assert avvenire_contract.tokenURI(i) == f"{BASE_URI}{i}"
+        print(avvenire_citizens_contract.tokenURI(i))
+        assert avvenire_citizens_contract.tokenURI(i) == f"{BASE_URI}{i}"
 
 
 # continue with trait swapping, need all traits first

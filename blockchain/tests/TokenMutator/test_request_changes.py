@@ -1,7 +1,7 @@
 import pytest
 import brownie
 
-from brownie import AvvenireTest, accounts
+from brownie import AvvenireTest, AvvenireCitizens, accounts
 from web3 import Web3
 
 from scripts.script_definitions import drop_interval
@@ -16,6 +16,7 @@ def auction_set(fn_isolation):
 # try to change a token before it is mutable
 def test_token_change_before_mutable():
     avvenire_contract = AvvenireTest[-1]
+    avvenire_citizens_contract = AvvenireCitizens[-1]
 
     # mint some nfts to account 2
     account = accounts[2]
@@ -31,13 +32,13 @@ def test_token_change_before_mutable():
 
     # request a change (will later be from an accessory contract) --> should fail, as not mutable
     with brownie.reverts():
-        assert avvenire_contract.requestChange(0)
+        assert avvenire_citizens_contract.requestChange(0)
+
 
 # test the change of a non-existed token
-
-
 def test_non_existent_token_change():
     avvenire_contract = AvvenireTest[-1]
+    avvenire_citizens_contract = AvvenireCitizens[-1]
 
     # mint some nfts to account 2
     account = accounts[2]
@@ -53,6 +54,6 @@ def test_non_existent_token_change():
 
     # request a change (will later be from an accessory contract) --> should fail, as not no token exists
     with brownie.reverts():
-        assert avvenire_contract.requestChange(1)
+        assert avvenire_citizens_contract.requestChange(1)
 
 # test the rest from an accessory contract

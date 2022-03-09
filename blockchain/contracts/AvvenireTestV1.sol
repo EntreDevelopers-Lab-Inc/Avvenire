@@ -26,8 +26,8 @@ contract AvvenireTest is
     // uint256 public immutable maxBatchWhiteList;
 
     // dev payment information
-    address devAddress;
     uint256 paymentToDevs;  // can decrement this to 0 after being paid
+    address devAddress;
 
     // avvenire citizens contract
     AvvenireCitizensInterface avvenireCitizens;
@@ -57,7 +57,6 @@ contract AvvenireTest is
      * @param collectionSize_ the number of NFTs in the collection
      * @param amountForTeam_ the number of NFTs for the team
      * @param amountForAuctionAndTeam_ specifies total amount to auction + the total amount for the team
-     * @param devAddress_ address of devs
      * @param paymentToDevs_ payment to devs
      */
     constructor (
@@ -370,8 +369,6 @@ contract AvvenireTest is
     //     );
     //     avvenireCitizens.safeMint(msg.sender, quantity);
     // }
-
-    string private _baseTokenURI;
 
     /**
      * @notice function to withdraw the money from the contract. Only callable by the owner

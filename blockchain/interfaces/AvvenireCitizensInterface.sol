@@ -6,10 +6,10 @@
 pragma solidity ^0.8.4;
 
 import "@openzeppelin/contracts/utils/Strings.sol";
-import "../interfaces/IERC721A.sol";
+import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 
 
-interface AvvenireCitizensInterface is IERC721A {
+interface AvvenireCitizensInterface is IERC721 {
     // traits are bound to sex for fitting
     enum Sex {NULL, MALE, FEMALE}
 

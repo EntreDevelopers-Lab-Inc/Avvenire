@@ -1,6 +1,8 @@
-import pytest, brownie, time
+import pytest
+import brownie
+import time
 
-from brownie import AvvenireTest, chain, network
+from brownie import AvvenireTest, AvvenireCitizens, chain, network
 from web3 import Web3
 
 from scripts.script_definitions import *
@@ -25,8 +27,8 @@ def auction_set(fn_isolation):
     admin_account = get_account()
     dev_account = get_dev_account()
     deploy_contract(3, 2, 20, 15, 5, dev_account, 2)
-    avvenire_contract = AvvenireTest[-1]
-    avvenire_contract.setBaseURI(
+    avvenire_citizens_contract = AvvenireCitizens[-1]
+    avvenire_citizens_contract.setBaseURI(
         "https://ipfs.io/ipfs/QmUizisYNzj824jNxuiPTQ1ykBSEjmkp42wMZ7DVFvfZiK/",
         {"from": admin_account},
     )
@@ -81,6 +83,7 @@ def test_mint_too_many():
 def test_auction_mint():
     # Before drops intervals
     avvenire_contract = AvvenireTest[-1]
+    avvenire_citizens_contract = AvvenireCitizens[-1]
     drop_per_step_wei = avvenire_contract.AUCTION_DROP_PER_STEP()
     auction_start_price_wei = avvenire_contract.AUCTION_START_PRICE()
 
@@ -94,10 +97,10 @@ def test_auction_mint():
     avvenire_contract.auctionMint(
         1, {"from": accounts[0], "value": auction_start_price_wei}
     )
-    assert avvenire_contract.numberMinted(accounts[0]) == 1
-    assert avvenire_contract.balanceOf(accounts[0]) == 1
+    assert avvenire_citizens_contract.numberMinted(accounts[0]) == 1
+    assert avvenire_citizens_contract.balanceOf(accounts[0]) == 1
     assert (
-        avvenire_contract.tokenURI(0)
+        avvenire_citizens_contract.tokenURI(0)
         == f"https://ipfs.io/ipfs/QmUizisYNzj824jNxuiPTQ1ykBSEjmkp42wMZ7DVFvfZiK/0"
     )
 
@@ -113,10 +116,10 @@ def test_auction_mint():
 
         balance_after_mint = accounts[drops].balance()
 
-        assert avvenire_contract.numberMinted(accounts[drops]) == 1
-        assert avvenire_contract.balanceOf(accounts[drops]) == 1
+        assert avvenire_citizens_contract.numberMinted(accounts[drops]) == 1
+        assert avvenire_citizens_contract.balanceOf(accounts[drops]) == 1
         assert (
-            avvenire_contract.tokenURI(drops)
+            avvenire_citizens_contract.tokenURI(drops)
             == f"https://ipfs.io/ipfs/QmUizisYNzj824jNxuiPTQ1ykBSEjmkp42wMZ7DVFvfZiK/{drops}"
         )
         assert implied_price == balance_before_mint - balance_after_mint
@@ -141,7 +144,8 @@ def test_all_prices():
     # During drop intervals
     for drops in range(1, 9):
         drop_interval(1)
-        implied_price = round(auction_start_price_wei - (drop_per_step_wei * drops), 1)
+        implied_price = round(auction_start_price_wei -
+                              (drop_per_step_wei * drops), 1)
         assert avvenire_contract.getAuctionPrice() == implied_price
 
     # After all drops...
@@ -151,6 +155,7 @@ def test_all_prices():
 
 def test_mint_after_auction_amount():
     avvenire_contract = AvvenireTest[-1]
+    avvenire_citizens_contract = AvvenireCitizens[-1]
     auction_sale_price_wei = Web3.toWei(1, "ether")
     mint_quantity = 3
     mint_cost = auction_sale_price_wei * mint_quantity
@@ -163,10 +168,10 @@ def test_mint_after_auction_amount():
             mint_quantity,
             {"from": accounts[count], "value": mint_cost},
         )
-        assert avvenire_contract.numberMinted(accounts[count]) == 3
-        assert avvenire_contract.balanceOf(accounts[count]) == 3
+        assert avvenire_citizens_contract.numberMinted(accounts[count]) == 3
+        assert avvenire_citizens_contract.balanceOf(accounts[count]) == 3
 
-    assert avvenire_contract.totalSupply() == 15
+    assert avvenire_citizens_contract.totalSupply() == 15
 
     with brownie.reverts():
         avvenire_contract.auctionMint(
@@ -178,6 +183,7 @@ def test_mint_after_auction_amount():
 # Only testable in local environment...
 def test_refund():
     avvenire_contract = AvvenireTest[-1]
+    avvenire_citizens_contract = AvvenireCitizens[-1]
     dev_account = get_dev_account()
     admin_account = get_account()
 
@@ -206,12 +212,13 @@ def test_refund():
     i = 2
     quantity_to_mint = 3
     while (
-        avvenire_contract.totalSupply() + quantity_to_mint
+        avvenire_citizens_contract.totalSupply() + quantity_to_mint
         <= avvenire_contract.amountForAuctionAndTeam()
     ):
         _account = accounts[i]
         avvenire_contract.auctionMint(
-            quantity_to_mint, {"from": _account, "value": Web3.toWei(2, "ether")}
+            quantity_to_mint, {"from": _account,
+                               "value": Web3.toWei(2, "ether")}
         )
         i = i + 1
 
@@ -222,7 +229,8 @@ def test_refund():
     assert public_price == Web3.toWei(0.5, "ether")
 
     # Set public price before refund
-    avvenire_contract.endAuctionAndSetupNonAuctionSaleInfo(0, public_price, 500)
+    avvenire_contract.endAuctionAndSetupNonAuctionSaleInfo(
+        0, public_price, 500)
 
     # *** Refunding ***
     avvenire_contract.refund(dev_account, {"from": admin_account})

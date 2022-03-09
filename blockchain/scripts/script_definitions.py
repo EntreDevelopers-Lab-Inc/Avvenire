@@ -1,4 +1,4 @@
-from brownie import AvvenireTest, chain, network
+from brownie import AvvenireTest, AvvenireCitizens, chain, network
 from scripts.helpful_scripts import (
     get_account,
     get_dev_account,
@@ -28,6 +28,11 @@ def deploy_contract(
 
     # if not Web3.isAddress(devAddress):
 
+    # deploy avvenire citizens contract
+    avvenire_citizens_contract = AvvenireCitizens.deploy(
+        "AvvenireCitizens", "AVC", "", "", dev_address, {"from": account})
+
+    # deploy avvenire test contract
     avvenire_contract = AvvenireTest.deploy(
         max_per_address_during_auctioin,
         max_per_address_during_whitelist,
@@ -36,8 +41,13 @@ def deploy_contract(
         amount_for_team,
         dev_address,
         payment_to_devs_ETH,
+        avvenire_citizens_contract,
         {"from": account},
     )
+
+    # allow the test contract to interact with the citizens contract
+    avvenire_citizens_contract.setAllowedPermission(
+        avvenire_contract.address, True, {"from": account})
 
     print(f"Contract deployed to {avvenire_contract.address}")
 
