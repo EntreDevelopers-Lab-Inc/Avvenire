@@ -3,28 +3,29 @@
 /**
  * @title token mutating contract for ERC721A
  */
-pragma solidity ^0.8.0;
+pragma solidity ^0.8.4;
 
+import "../interfaces/AvvenireCitizensInterface.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 import "@chiru-labs/contracts/ERC721A.sol";
+// _setOwnersExplicit( ) moved from the ERC721A contract to an extension
 import "@chiru-labs/contracts/extensions/ERC721AOwnersExplicit.sol";
 import "@openzeppelin/contracts/utils/Strings.sol";
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 
-error URIQueryForNonexistentToken();
+
 error TraitTypeDoesNotExist();
 
 // token mutator changes the way that an ERC721A contract interacts with tokens
-contract TokenMutator is
+contract AvvenireCitizens is
     Ownable,
     ERC721A,
     ERC721AOwnersExplicit,
-    ReentrancyGuard
+    ReentrancyGuard,
+    AvvenireCitizensInterface
 {
-
-    // mint information (whether or not the platform is minting characters)
-    bool public characterMintActive; // this defaults to true, as the platform needs to mint characters before allowing tradable traits
-
+    // mint information (whether or not the platform is minting citizens)
+    bool public citizenMintActive; // this defaults to true, as the platform needs to mint citizens before allowing tradable traits
 
     string baseURI; // a uri for minting (like a base URI), but this allows the contract owner to change it later
     string loadURI; // a URI that the NFT will be set to while waiting for changes
@@ -52,68 +53,14 @@ contract TokenMutator is
 
     DevConfig devConfig; // need to set it this way to avoid stack being too deep
 
-    // traits are bound to sex for fitting
-    enum Sex {NULL, MALE, FEMALE}
-
-    // make an enumerable for trait types (meant to be overridden with traits from individual project)
-    enum TraitType {
-        NULL,
-        BACKGROUND,
-        BODY,
-        TATTOOS,
-        EYES,
-        MOUTH,
-        MASKS,
-        NECKLACES,
-        CLOTHING,
-        EARRINGS,
-        HAIR,
-        EFFECTS
-    }
-
-
     // struct for storing change information
     // want to keep this in a struct, as it will allow other contracts to add data about the change to it
     struct ChangeRequest {
         bool changeRequested;
     }
 
-    // struct for storing trait data for the character (used ONLY in the character struct)
-    struct Trait {
-        uint256 tokenId; // for mapping characters to their token traits
-        string uri; // a uri mapping to the character's trait (must be set)
-        bool free; // stores if the trait is free from the character (defaults to false)
-        bool exists; // checks existence (for minting vs transferring)
-        Sex sex;
-        TraitType traitType;
-    }
-
-    // struct for storing all the traits
-    struct Traits {
-        Trait background;
-        Trait body;
-        Trait tattoos;
-        Trait eyes;
-        Trait mouth;
-        Trait masks;
-        Trait necklaces;
-        Trait clothing;
-        Trait earrings;
-        Trait hair;
-        Trait effects;
-    }
-
-    // struct for storing characters
-    struct Character {
-        uint256 tokenId;
-        string uri;
-        bool exists; //  checks existence (for minting vs transferring)
-        Sex sex;
-        Traits traits;
-    }
-
-    // mapping for tokenId to character
-    mapping(uint256 => Character) public tokenIdToCharacter;
+    // mapping for tokenId to citizen
+    mapping(uint256 => Citizen) public tokenIdToCitizen;
 
     // mapping for tokenId to trait
     mapping(uint256 => Trait) public tokenIdToTrait;
@@ -124,14 +71,15 @@ contract TokenMutator is
     // mapping for allowing other contracts to interact with this one
     mapping(address => bool) public allowedContracts;
 
-    // Designated # of characters; **** Needs to be set to immutable following testings ****
+    // Designated # of citizens; **** Needs to be set to immutable following testings ****
     constructor(
         string memory ERC721Name_,
         string memory ERC721AId_,
         string memory baseURI_,
         string memory loadURI_,
         address devAddress_
-    ) ERC721A(ERC721Name_, ERC721AId_) {
+    ) ERC721A(ERC721Name_, ERC721AId_)
+    {
 
         // set the mint URI
         baseURI = baseURI_;
@@ -146,18 +94,10 @@ contract TokenMutator is
         allowedContracts[msg.sender] = true;
 
         // Set mint to true
-        characterMintActive = true;
+        citizenMintActive = true;
 
         // set the dev address for royalties and payment
         devConfig.devAddress = devAddress_;
-    }
-
-    /**
-      Modifier to make sure that the caller is a user and not another contract
-     */
-    modifier callerIsUser() {
-        require(tx.origin == msg.sender, "The caller is another contract."); // check that a user is accessing a contract
-        _;
     }
 
     /**
@@ -191,16 +131,16 @@ contract TokenMutator is
             return loadURI;
         }
 
-        // if there is a character associated with this token, return the chacter's uri
-        if (bytes(tokenIdToCharacter[tokenId].uri).length > 0) {
-            return tokenIdToCharacter[tokenId].uri;
+        // if there is a citizen associated with this token, return the chacter's uri
+        if (bytes(tokenIdToCitizen[tokenId].uri).length > 0) {
+            return tokenIdToCitizen[tokenId].uri;
         }
 
         if (bytes(tokenIdToTrait[tokenId].uri).length > 0) {
             return tokenIdToTrait[tokenId].uri;
         }
 
-        // if there is no load uri, character uri, or trait uri, just return the base
+        // if there is no load uri, citizen uri, or trait uri, just return the base
         return string(abi.encodePacked(baseURI, Strings.toString(tokenId)));
     }
 
@@ -212,7 +152,6 @@ contract TokenMutator is
         external
         payable
         callerIsAllowed
-        nonReentrant
     {
         // check if you can even request changes at the moment
         require(mutabilityConfig.mutabilityMode, "Tokens are currently immutable.");
@@ -232,7 +171,8 @@ contract TokenMutator is
         _requestChange(tokenId); // call the internal function
     }
 
-    function _requestChange(uint256 tokenId) internal {
+    function _requestChange(uint256 tokenId) internal
+    {
         // take some payment for this transaction if there is some cost set
         if (mutabilityConfig.mutabilityCost > 0) {
             (bool success, ) = receivingAddress.call{value: mutabilityConfig.mutabilityCost}("");
@@ -244,19 +184,19 @@ contract TokenMutator is
     }
 
     /**
-     * @notice Set the character data (id, uri, any traits). This will likely happen when combining nfts by the USER --> the URI should be set somewhere else, so the admin incurs minimal gas costs
-     * @param character allows a contract to set the character's data to new information
+     * @notice Set the citizen data (id, uri, any traits). This will likely happen when combining nfts by the USER --> the URI should be set somewhere else, so the admin incurs minimal gas costs
+     * @param citizen allows a contract to set the citizen's data to new information
      * @param changeUpdate sets the change data to the correct boolean (allows the option to set the changes to false after something has been updated OR keep it at true if the update isn't done)
      */
-    function setCharacterData(Character memory character, bool changeUpdate)
+    function setCitizenData(Citizen memory citizen, bool changeUpdate)
         external
         callerIsAllowed
     {
-        // set the character data
-        tokenIdToCharacter[character.tokenId] = character;
+        // set the citizen data
+        tokenIdToCitizen[citizen.tokenId] = citizen;
 
         // set the token change data
-        tokenChangeRequests[character.tokenId].changeRequested = changeUpdate;
+        tokenChangeRequests[citizen.tokenId].changeRequested = changeUpdate;
     }
 
     /**
@@ -276,50 +216,6 @@ contract TokenMutator is
     }
 
     /**
-     * @notice Set the uri of a character (unlikely to use over setting the entire data)
-     * @param tokenId allows the contract to find the corresponding character
-     * @param newURI is the new uri for the character's struct
-     */
-    function setCharacterURI(uint256 tokenId, string memory newURI)
-        external
-        callerIsAllowed
-    {
-        // check if the token id exists
-        if (!_exists(tokenId)) revert URIQueryForNonexistentToken();
-
-        // require that the character exists (only case where this would be trouble would be the first token would have index 0, but we can guarantee that at least one token exists)
-        require(
-            tokenIdToCharacter[tokenId].tokenId == tokenId,
-            "There is no character that matches this tokenId"
-        );
-
-        // set the character's uri
-        tokenIdToCharacter[tokenId].uri = newURI;
-    }
-
-    /**
-     * @notice Set the uri of a trait (unlikely to use over setting the entire data)
-     * @param tokenId allows the contract to find the corresponding trait
-     * @param newURI is the new uri for the trait's struct
-     */
-    function setTraitURI(uint256 tokenId, string memory newURI)
-        external
-        callerIsAllowed
-    {
-        // check if the token id exists
-        if (!_exists(tokenId)) revert URIQueryForNonexistentToken();
-
-        // require that the trait exists
-        require(
-            tokenIdToTrait[tokenId].tokenId == tokenId,
-            "There is no trait that matches this tokenId"
-        );
-
-        // set the trait's uri
-        tokenIdToTrait[tokenId].uri = newURI;
-    }
-
-    /**
      * @notice Sets the mutability of the contract (whether changes are accepted)
      * @param mutabilityMode_ allows the contract owner to change the mutability of the tokens
      */
@@ -331,7 +227,7 @@ contract TokenMutator is
     /**
      * @notice gets the mutability of a contract
     */
-    function getMutablityMode() public view returns (bool)
+    function getMutabilityMode() public view returns (bool)
     {
         return mutabilityConfig.mutabilityMode;
     }
@@ -355,22 +251,22 @@ contract TokenMutator is
     }
 
     /**
-     * @notice a function to toggle the character mint
-     * @param characterMintActive_ as the boolean setting
+     * @notice a function to toggle the citizen mint
+     * @param citizenMintActive_ as the boolean setting
      */
-    function setCharacterMintActive(bool characterMintActive_)
+    function setCitizenMintActive(bool citizenMintActive_)
         external
         onlyOwner
     {
-        characterMintActive = characterMintActive_;
+        citizenMintActive = citizenMintActive_;
     }
 
     /**
-     * @notice a function to get the character mint information
+     * @notice a function to get the citizen mint information
     */
-    function getCharacterMintActive() public view returns (bool)
+    function getCitizenMintActive() public view returns (bool)
     {
-        return characterMintActive;
+        return citizenMintActive;
     }
 
     /**
@@ -432,12 +328,12 @@ contract TokenMutator is
     }
 
     /**
-     * @notice internal function for getting the default trait (mostly for creating new characters, waste of compute for creating new traits)
+     * @notice internal function for getting the default trait (mostly for creating new citizens, waste of compute for creating new traits)
      */
     function baseTrait(Sex sex, TraitType traitType) internal returns (Trait memory) {
         return
             Trait({
-                tokenId: 0, // there will be no traits with tokenId 0, as that must be the first character (cannot have traits without minting the first character)
+                tokenId: 0, // there will be no traits with tokenId 0, as that must be the first citizen (cannot have traits without minting the first citizen)
                 uri: "",
                 free: false,
                 exists: true,
@@ -447,12 +343,12 @@ contract TokenMutator is
     }
 
     /**
-     * @notice internal function to create a new character
+     * @notice internal function to create a new citizen
      * @param tokenId (for binding the token id)
      */
-    function createNewCharacter(uint256 tokenId) internal virtual {
-        // create a new character and put it in the mapping --> just set the token id and that it exists, don't set any of the traits or the URI
-        tokenIdToCharacter[tokenId] = Character({
+    function createNewCitizen(uint256 tokenId) internal {
+        // create a new citizen and put it in the mapping --> just set the token id and that it exists, don't set any of the traits or the URI
+        tokenIdToCitizen[tokenId] = Citizen({
             tokenId: tokenId,
             uri: "", // keep this blank to keep the user from paying excess gas before decomposition (the tokenURI function will handle for blank URIs)
             exists: true,
@@ -499,7 +395,7 @@ contract TokenMutator is
      * set to public to allow it to be called both internally and by other contracts
      * @param tokenId for the token that is being altered
      */
-    function respawnTrait(uint256 tokenId) public callerIsAllowed {
+    function respawnTrait(uint256 tokenId) external callerIsAllowed {
         // check if the trait exists
         require(tokenIdToTrait[tokenId].exists, "This trait does not exist.");
 
@@ -516,43 +412,6 @@ contract TokenMutator is
 
         // set the token to being free
         tokenIdToTrait[tokenId].free = true;
-    }
-
-    /**
-     * @notice external function spawning traits --> best utilized when minting many at once (using multiple safe mints --> good practice to send one spawn traits for all new traits, and another for respawning all the old ones)
-     * @param tokenIds are an array of token ids that correspond to the traits that must be spawned
-     */
-    function spawnTraits(uint256[] calldata tokenIds) external callerIsAllowed {
-        // make sure that we are in mutability mode --> otherwise, traits should not be spawned, as no changes should occur
-        require(mutabilityConfig.mutabilityMode, "Traits are currently immutable.");
-
-        // ensure that all the token Ids are 0 --> iterate over the array
-        bool allNewTokens = true;
-        for (uint256 i = 0; i < tokenIds.length; i += 1) {
-            if (tokenIds[i] != 0) {
-                // set that all the tokens are NOT new, and break the loop
-                allNewTokens = false;
-                break;
-            }
-        }
-
-        // if they are all new tokens, mint all of them with safeMint
-        if (allNewTokens) {
-            _safeMint(tx.origin, tokenIds.length);
-        }
-        // else, each token must be chosen to be minted or respawned
-        else {
-            for (uint256 i = 0; i < tokenIds.length; i += 1) {
-                // if the tokenId is 0, safe mint it
-                if (tokenIds[i] == 0) {
-                    _safeMint(tx.origin, 1);
-                }
-                // else, respawn the trait (will fail if the trait does not exist or is already free)
-                else {
-                    respawnTrait(tokenIds[i]);
-                }
-            }
-        }
     }
 
     /**
@@ -631,14 +490,15 @@ contract TokenMutator is
     }
 
     /**
-     * @notice a function to bind a tokenId to a character (used in combining)
-     * going to assume that the transaction origin owns the character (this function will be called multiple times)
-     * @param characterId gets the character
+     * @notice a function to bind a tokenId to a citizen (used in combining)
+     * Note: the tokenId must exist, this does not create new tokens (use spawn traits for that)
+     * going to assume that the transaction origin owns the citizen (this function will be called multiple times)
+     * @param citizenId gets the citizen
      * @param traitId for the trait
      * @param traitType for the trait's type
      */
     function bind(
-        uint256 characterId,
+        uint256 citizenId,
         uint256 traitId,
         Sex sex,
         TraitType traitType
@@ -649,125 +509,155 @@ contract TokenMutator is
             // check if the trait exists
             require(tokenIdToTrait[traitId].exists, "This trait does not exist.");
 
-            // ensure that the trait and character have the same sex
-            require(tokenIdToCharacter[characterId].sex == tokenIdToTrait[traitId].sex, "You cannot combine traits from opposite sexes.");
+            // ensure that the trait and citizen have the same sex
+            require(tokenIdToCitizen[citizenId].sex == tokenIdToTrait[traitId].sex, "You cannot combine traits from opposite sexes.");
         }
 
         // check each of the types and bind them accordingly
         if (traitType == TraitType.BACKGROUND) {
             // make the old trait transferrable
             makeTraitTransferable(
-                tokenIdToCharacter[characterId].traits.background.tokenId
+                tokenIdToCitizen[citizenId].traits.background.tokenId
             );
 
             // set the new trait
-            tokenIdToCharacter[characterId]
+            tokenIdToCitizen[citizenId]
                 .traits.background = lockAndReturnTraitForBinding(traitId, sex, traitType);
 
         } else if (traitType == TraitType.BODY) {
             // make the old trait transferrable
             makeTraitTransferable(
-                tokenIdToCharacter[characterId].traits.body.tokenId
+                tokenIdToCitizen[citizenId].traits.body.tokenId
             );
 
             // set the new trait
-            tokenIdToCharacter[characterId]
+            tokenIdToCitizen[citizenId]
                 .traits.body = lockAndReturnTraitForBinding(traitId, sex, traitType);
 
         } else if (traitType == TraitType.TATTOOS) {
             // make the old trait transferrable
             makeTraitTransferable(
-                tokenIdToCharacter[characterId].traits.tattoos.tokenId
+                tokenIdToCitizen[citizenId].traits.tattoos.tokenId
             );
 
             // set the new trait
-            tokenIdToCharacter[characterId]
+            tokenIdToCitizen[citizenId]
                 .traits.tattoos = lockAndReturnTraitForBinding(traitId, sex, traitType);
 
         } else if (traitType == TraitType.EYES) {
             // make the old trait transferrable
             makeTraitTransferable(
-                tokenIdToCharacter[characterId].traits.eyes.tokenId
+                tokenIdToCitizen[citizenId].traits.eyes.tokenId
             );
 
             // set the new trait
-            tokenIdToCharacter[characterId]
+            tokenIdToCitizen[citizenId]
                 .traits.eyes = lockAndReturnTraitForBinding(traitId, sex, traitType);
 
         } else if (traitType == TraitType.MOUTH) {
             // make the old trait transferrable
             makeTraitTransferable(
-                tokenIdToCharacter[characterId].traits.mouth.tokenId
+                tokenIdToCitizen[citizenId].traits.mouth.tokenId
             );
 
             // set the new trait
-            tokenIdToCharacter[characterId]
+            tokenIdToCitizen[citizenId]
                 .traits.mouth = lockAndReturnTraitForBinding(traitId, sex, traitType);
 
         } else if (traitType == TraitType.MASKS) {
             // make the old trait transferrable
             makeTraitTransferable(
-                tokenIdToCharacter[characterId].traits.masks.tokenId
+                tokenIdToCitizen[citizenId].traits.masks.tokenId
             );
 
             // set the new trait
-            tokenIdToCharacter[characterId]
+            tokenIdToCitizen[citizenId]
                 .traits.masks = lockAndReturnTraitForBinding(traitId, sex, traitType);
 
         } else if (traitType == TraitType.NECKLACES) {
             // make the old trait transferrable
             makeTraitTransferable(
-                tokenIdToCharacter[characterId].traits.necklaces.tokenId
+                tokenIdToCitizen[citizenId].traits.necklaces.tokenId
             );
 
             // set the new trait
-            tokenIdToCharacter[characterId]
+            tokenIdToCitizen[citizenId]
                 .traits.necklaces = lockAndReturnTraitForBinding(traitId, sex, traitType);
 
         } else if (traitType == TraitType.CLOTHING) {
             // make the old trait transferrable
             makeTraitTransferable(
-                tokenIdToCharacter[characterId].traits.clothing.tokenId
+                tokenIdToCitizen[citizenId].traits.clothing.tokenId
             );
 
             // set the new trait
-            tokenIdToCharacter[characterId]
+            tokenIdToCitizen[citizenId]
                 .traits.clothing = lockAndReturnTraitForBinding(traitId, sex, traitType);
 
         } else if (traitType == TraitType.EARRINGS) {
             // make the old trait transferrable
             makeTraitTransferable(
-                tokenIdToCharacter[characterId].traits.earrings.tokenId
+                tokenIdToCitizen[citizenId].traits.earrings.tokenId
             );
 
             // set the new trait
-            tokenIdToCharacter[characterId]
+            tokenIdToCitizen[citizenId]
                 .traits.earrings = lockAndReturnTraitForBinding(traitId, sex, traitType);
 
         } else if (traitType == TraitType.HAIR) {
             // make the old trait transferrable
             makeTraitTransferable(
-                tokenIdToCharacter[characterId].traits.hair.tokenId
+                tokenIdToCitizen[citizenId].traits.hair.tokenId
             );
 
             // set the new trait
-            tokenIdToCharacter[characterId]
+            tokenIdToCitizen[citizenId]
                 .traits.hair = lockAndReturnTraitForBinding(traitId, sex, traitType);
 
         } else if (traitType == TraitType.EFFECTS) {
             // make the old trait transferrable
             makeTraitTransferable(
-                tokenIdToCharacter[characterId].traits.effects.tokenId
+                tokenIdToCitizen[citizenId].traits.effects.tokenId
             );
 
             // set the new trait
-            tokenIdToCharacter[characterId]
+            tokenIdToCitizen[citizenId]
                 .traits.effects = lockAndReturnTraitForBinding(traitId, sex, traitType);
 
         } else {
             // return an error that the trait type does not exist
             revert TraitTypeDoesNotExist();
         }
+    }
+
+    /**
+     * @notice external safemint function for allowed contracts
+     * @param address_ for where to mint to
+     * @param quantity_ for the amount
+    */
+    function safeMint(address address_, uint256 quantity_) external callerIsAllowed
+    {
+        _safeMint(address_, quantity_);
+    }
+
+    /**
+     * @notice returns the number minted from specified address
+     * @param owner an address of an owner in the NFT collection
+     */
+    function numberMinted(address owner) public view returns (uint256) {
+        // check how many have been minted to this owner --> where is this data stored, in the standard?
+        // _addressData mapping in the ERC721A standard; line 51 - Daniel
+        return _numberMinted(owner);
+    }
+
+    /**
+     * @notice Returns a struct, which contains a token owner's address and the time they acquired the token
+     * @param tokenId the tokenID
+     */
+    function getOwnershipData(
+        uint256 tokenId // storing all the old ownership
+    ) external view returns (TokenOwnership memory) {
+        return ownershipOf(tokenId); // get historic ownership
     }
 
     /**
@@ -829,20 +719,40 @@ contract TokenMutator is
             tokenId < endTokenId;
             tokenId += 1
         ) {
-            // check if the token exists in the character or trait mapping
+            // check if the token exists in the citizen or trait mapping
             if (
-                (!tokenIdToCharacter[tokenId].exists) &&
+                (!tokenIdToCitizen[tokenId].exists) &&
                 (!tokenIdToTrait[tokenId].exists)
             ) {
-                // if the token id does not exist, create a new character or trait
-                if (characterMintActive) {
-                    // create a new character if the mint is active
-                    createNewCharacter(tokenId);
+                // if the token id does not exist, create a new citizen or trait
+                if (citizenMintActive) {
+                    // create a new citizen if the mint is active
+                    createNewCitizen(tokenId);
                 } else {
-                    // create a new trait if the character mint is inactive, and there is no trait mapping to the token id
+                    // create a new trait if the citizen mint is inactive, and there is no trait mapping to the token id
                     createNewTrait(tokenId); // no way to know the trait type on token transferm so just set it to null
                 }
             }
         }
+    }
+
+    /**
+     * @notice gets rid of the loops used in the ownerOf function in the ERC721A standard
+     * @param quantity the number of tokens that you want to eliminate the loops for
+     */
+    function setOwnersExplicit(uint256 quantity)
+        external
+        onlyOwner
+        nonReentrant
+    {
+        _setOwnersExplicit(quantity);
+    }
+
+    /**
+     * @notice function that gets the total supply from the ERC721A contract
+    */
+    function getTotalSupply() external view returns (uint256)
+    {
+        return totalSupply();
     }
 }
