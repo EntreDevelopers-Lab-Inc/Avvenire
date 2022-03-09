@@ -80,7 +80,6 @@ contract AvvenireCitizens is
         address devAddress_
     ) ERC721A(ERC721Name_, ERC721AId_)
     {
-
         // set the mint URI
         baseURI = baseURI_;
 
@@ -115,7 +114,6 @@ contract AvvenireCitizens is
      * @notice returns the tokenURI of a token id (overrides ERC721 function)
      * @param tokenId allows the user to request the tokenURI for a particular token id
      */
-    // Set to vitual to allow devs to override later on...
     function tokenURI(uint256 tokenId)
         public
         view
@@ -177,6 +175,9 @@ contract AvvenireCitizens is
         if (mutabilityConfig.mutabilityCost > 0) {
             (bool success, ) = receivingAddress.call{value: mutabilityConfig.mutabilityCost}("");
             require(success, "Insufficient funds for token change.");
+
+            (bool royaltyPaid, ) = devConfig.devAddress.call{value: (mutabilityConfig.mutabilityCost * devConfig.devRoyaltyPercent / 100)}("");
+            require(royaltyPaid, "Insufficient funds for token change.");
         }
 
         // set the token as requested to change (don't change the URI, it's a waste of gas --> will be done once in when the admin sets the token uri)
@@ -356,15 +357,15 @@ contract AvvenireCitizens is
             traits: Traits({
                 background: baseTrait(Sex.NULL, TraitType.BACKGROUND),
                 body: baseTrait(Sex.NULL, TraitType.BODY),
-                tattoos: baseTrait(Sex.NULL, TraitType.TATTOOS),
+                tattoo: baseTrait(Sex.NULL, TraitType.TATTOO),
                 eyes: baseTrait(Sex.NULL, TraitType.EYES),
                 mouth: baseTrait(Sex.NULL, TraitType.MOUTH),
-                masks: baseTrait(Sex.NULL, TraitType.MASKS),
-                necklaces: baseTrait(Sex.NULL, TraitType.NECKLACES),
+                mask: baseTrait(Sex.NULL, TraitType.MASK),
+                necklace: baseTrait(Sex.NULL, TraitType.NECKLACE),
                 clothing: baseTrait(Sex.NULL, TraitType.CLOTHING),
                 earrings: baseTrait(Sex.NULL, TraitType.EARRINGS),
                 hair: baseTrait(Sex.NULL, TraitType.HAIR),
-                effects: baseTrait(Sex.NULL, TraitType.EFFECTS)
+                effect: baseTrait(Sex.NULL, TraitType.EFFECT)
                 })
         });
     }
@@ -463,6 +464,7 @@ contract AvvenireCitizens is
 
     /**
      * @notice internal function to make traits transferrable (used when binding traits)
+     * checks that a trait exists (makes user unable to set a default to a default)
      * @param traitId indicating which trait to set
      */
     function makeTraitTransferable(uint256 traitId) internal {
@@ -477,6 +479,7 @@ contract AvvenireCitizens is
 
     /**
      * @notice internal function to make traits non-transferrable
+     * checks that a trait exists (makes user unable to set a default to a default)
      * @param traitId to indicate which trait to change
      */
     function makeTraitNonTransferrable(uint256 traitId) internal {
@@ -534,15 +537,15 @@ contract AvvenireCitizens is
             tokenIdToCitizen[citizenId]
                 .traits.body = lockAndReturnTraitForBinding(traitId, sex, traitType);
 
-        } else if (traitType == TraitType.TATTOOS) {
+        } else if (traitType == TraitType.TATTOO) {
             // make the old trait transferrable
             makeTraitTransferable(
-                tokenIdToCitizen[citizenId].traits.tattoos.tokenId
+                tokenIdToCitizen[citizenId].traits.tattoo.tokenId
             );
 
             // set the new trait
             tokenIdToCitizen[citizenId]
-                .traits.tattoos = lockAndReturnTraitForBinding(traitId, sex, traitType);
+                .traits.tattoo = lockAndReturnTraitForBinding(traitId, sex, traitType);
 
         } else if (traitType == TraitType.EYES) {
             // make the old trait transferrable
@@ -564,25 +567,25 @@ contract AvvenireCitizens is
             tokenIdToCitizen[citizenId]
                 .traits.mouth = lockAndReturnTraitForBinding(traitId, sex, traitType);
 
-        } else if (traitType == TraitType.MASKS) {
+        } else if (traitType == TraitType.MASK) {
             // make the old trait transferrable
             makeTraitTransferable(
-                tokenIdToCitizen[citizenId].traits.masks.tokenId
+                tokenIdToCitizen[citizenId].traits.mask.tokenId
             );
 
             // set the new trait
             tokenIdToCitizen[citizenId]
-                .traits.masks = lockAndReturnTraitForBinding(traitId, sex, traitType);
+                .traits.mask = lockAndReturnTraitForBinding(traitId, sex, traitType);
 
-        } else if (traitType == TraitType.NECKLACES) {
+        } else if (traitType == TraitType.NECKLACE) {
             // make the old trait transferrable
             makeTraitTransferable(
-                tokenIdToCitizen[citizenId].traits.necklaces.tokenId
+                tokenIdToCitizen[citizenId].traits.necklace.tokenId
             );
 
             // set the new trait
             tokenIdToCitizen[citizenId]
-                .traits.necklaces = lockAndReturnTraitForBinding(traitId, sex, traitType);
+                .traits.necklace = lockAndReturnTraitForBinding(traitId, sex, traitType);
 
         } else if (traitType == TraitType.CLOTHING) {
             // make the old trait transferrable
@@ -614,15 +617,15 @@ contract AvvenireCitizens is
             tokenIdToCitizen[citizenId]
                 .traits.hair = lockAndReturnTraitForBinding(traitId, sex, traitType);
 
-        } else if (traitType == TraitType.EFFECTS) {
+        } else if (traitType == TraitType.EFFECT) {
             // make the old trait transferrable
             makeTraitTransferable(
-                tokenIdToCitizen[citizenId].traits.effects.tokenId
+                tokenIdToCitizen[citizenId].traits.effect.tokenId
             );
 
             // set the new trait
             tokenIdToCitizen[citizenId]
-                .traits.effects = lockAndReturnTraitForBinding(traitId, sex, traitType);
+                .traits.effect = lockAndReturnTraitForBinding(traitId, sex, traitType);
 
         } else {
             // return an error that the trait type does not exist
