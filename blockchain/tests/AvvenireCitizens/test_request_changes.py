@@ -37,7 +37,6 @@ def test_non_existent_token_change():
     avvenire_market_contract = AvvenireCitizenMarket[-1]
 
     # mint some nfts to account 2
-    admin_account = get_account()
     account = accounts[2]
 
     # make sure that the gas is less than 5% of the auction
@@ -50,7 +49,7 @@ def test_non_existent_token_change():
 
     # request a change (will later be from an accessory contract) --> should fail, as not no token exists
     with brownie.reverts():
-        assert avvenire_market_contract.requestChange(1, {"from": admin_account})
+        assert avvenire_market_contract.requestChange(1, {"from": account})
 
 
 # REQUEST CHANGE WILL ALWAYS THROW AN ERROR IF THE ACCOUNT IS NOT AN ALLOWED ACCOUNT
@@ -61,7 +60,6 @@ def test_request_by_nonowner():
     avvenire_contract = AvvenireTest[-1]
     avvenire_citizens_contract = AvvenireCitizens[-1]
     avvenire_market_contract = AvvenireCitizenMarket[-1]
-    admin_account = get_account()
 
     cost = Web3.toWei(1, "ether")
     avvenire_contract.auctionMint(1, {"from": accounts[1], "value": cost})
@@ -81,7 +79,6 @@ def test_request_after_existing_request():
     avvenire_contract = AvvenireTest[-1]
     avvenire_citizens_contract = AvvenireCitizens[-1]
     avvenire_market_contract = AvvenireCitizenMarket[-1]
-    admin_account = get_account()
 
     cost = Web3.toWei(1, "ether")
     avvenire_contract.auctionMint(1, {"from": accounts[1], "value": cost})
