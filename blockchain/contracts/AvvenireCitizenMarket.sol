@@ -150,7 +150,7 @@ contract AvvenireCitizenMarket is Ownable, AvvenireCitizenDataInterface {
             // mint the citzens
             avvenireCitizens.safeMint(tx.origin, toMint);
 
-            _refundIfOver(totalCost);
+            //_refundIfOver(totalCost);
         }
 
         // request a character change
