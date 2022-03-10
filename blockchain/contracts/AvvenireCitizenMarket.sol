@@ -121,6 +121,8 @@ contract AvvenireCitizenMarket is
         {
             avvenireCitizens.safeMint(tx.origin, toMint);
         }
+
+        // request a character change
     }
 
     /**
