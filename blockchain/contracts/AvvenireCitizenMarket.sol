@@ -41,7 +41,9 @@ contract AvvenireCitizenMarket is Ownable, AvvenireCitizenDataInterface {
     @param avvenireCitizensContractAddress the address for the existing avvvenireCitizens contract  
      */
     constructor(address avvenireCitizensContractAddress) {
-        avvenireCitizens = AvvenireCitizensInterface(contractAddress);
+        avvenireCitizens = AvvenireCitizensInterface(
+            avvenireCitizensContractAddress
+        );
     }
 
     /**
