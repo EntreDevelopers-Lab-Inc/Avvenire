@@ -47,16 +47,10 @@ contract AvvenireCitizenMarket is Ownable, AvvenireCitizenDataInterface {
     }
 
     /**
-     * @notice a function to combine the token's parts
-     * this must be payable in order to request changes to each individual component
-     * IF the file gets too big, this can be an array, but that would be suboptimal, as it would not require that only one of each trait could be passed
-     * @param citizenId for getting the citizen
-     * @param traitChanges for getting the traits
-     */
-    function combine(uint256 citizenId, TraitChanges memory traitChanges)
-        external
-        payable
-    {
+     * @notice a modifier to check if the citizen can be changed (as all changes require a citizen)
+     * @param citizenId represents the citizen's id
+    */
+    modifier canChange(uint256 citizenId) {
         // make sure that tokens are mutable
         require(
             avvenireCitizens.getMutabilityMode(),
@@ -69,6 +63,21 @@ contract AvvenireCitizenMarket is Ownable, AvvenireCitizenDataInterface {
             "You do not own this token."
         );
 
+        _;
+    }
+
+    /**
+     * @notice a function to combine the token's parts
+     * this must be payable in order to request changes to each individual component
+     * IF the file gets too big, this can be an array, but that would be suboptimal, as it would not require that only one of each trait could be passed
+     * @param citizenId for getting the citizen
+     * @param traitChanges for getting the traits
+     */
+    function combine(uint256 citizenId, TraitChanges memory traitChanges)
+        external
+        payable
+        canChange(citizenId)
+    {
         // have some amount to mint
         uint256 toMint = 0;
 
@@ -125,6 +134,7 @@ contract AvvenireCitizenMarket is Ownable, AvvenireCitizenDataInterface {
         }
 
         // request a character change
+        requestChange(citizenId);
     }
 
     /**

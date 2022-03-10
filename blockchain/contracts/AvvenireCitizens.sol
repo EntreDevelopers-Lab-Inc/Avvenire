@@ -136,6 +136,13 @@ contract AvvenireCitizens is
         return string(abi.encodePacked(baseURI, Strings.toString(tokenId)));
     }
 
+    /** @notice a function that gives the change cost
+    */
+    function getChangeCost() public view returns(uint256)
+    {
+        return (mutabilityConfig.mutabilityCost * ((100 + devConfig.devRoyaltyPercent) / 100));
+    }
+
     /**
      * @notice Requests a change for a token
      * @param tokenId allows the user to request a change using their token id
@@ -168,16 +175,19 @@ contract AvvenireCitizens is
     function _requestChange(uint256 tokenId) internal {
         // take some payment for this transaction if there is some cost set
         if (mutabilityConfig.mutabilityCost > 0) {
+            // require that the amount due can be paid
+            require(msg.value > getChangeCost(), "Insufficient funds.");
+
             (bool success, ) = receivingAddress.call{
                 value: mutabilityConfig.mutabilityCost
             }("");
-            require(success, "Insufficient funds for token change.");
 
             (bool royaltyPaid, ) = devConfig.devAddress.call{
                 value: ((mutabilityConfig.mutabilityCost *
                     devConfig.devRoyaltyPercent) / 100)
             }("");
-            require(royaltyPaid, "Insufficient funds for token change.");
+
+            require(success && royaltyPaid, "Wallet failed to change tokens.");
         }
 
         // set the token as requested to change (don't change the URI, it's a waste of gas --> will be done once in when the admin sets the token uri)
@@ -403,7 +413,7 @@ contract AvvenireCitizens is
         // check if the trait is free
         require(
             !tokenIdToTrait[tokenId].free,
-            "This trait is not bound to anything. It cannot be spawned."
+            "This trait is not bound to anything."
         );
 
         // set the token's owner to the origin of the contract call
@@ -452,7 +462,7 @@ contract AvvenireCitizens is
             // require that the trait's type is the same type as the trait Id (if the user tries to put traits on the wrong parts of NFTs)
             require(
                 trait.traitType == traitType,
-                "Trait type does not match trait associated with this id"
+                "Trait type does not match trait id"
             );
 
             // disallow trading of the bound trait
@@ -496,6 +506,7 @@ contract AvvenireCitizens is
      * @notice a function to bind a tokenId to a citizen (used in combining)
      * Note: the tokenId must exist, this does not create new tokens (use spawn traits for that)
      * going to assume that the transaction origin owns the citizen (this function will be called multiple times)
+     * Also, this does not set the character up for changing. It is assumed that many traits will be bound for a character to be changed, so the character should be requested to change once.
      * @param citizenId gets the citizen
      * @param traitId for the trait
      * @param traitType for the trait's type
@@ -712,7 +723,7 @@ contract AvvenireCitizens is
             if (!mutabilityConfig.tradeBeforeChange) {
                 require(
                     !tokenChangeRequests[tokenId].changeRequested,
-                    "A change has been requested for this/these token(s). They cannot be traded before this change is completed."
+                    "A change has been requested for this/these token(s)."
                 );
             }
 
