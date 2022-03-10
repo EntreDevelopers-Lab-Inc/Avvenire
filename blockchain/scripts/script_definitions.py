@@ -1,4 +1,10 @@
-from brownie import AvvenireTest, AvvenireCitizens, chain, network
+from brownie import (
+    AvvenireTest,
+    AvvenireCitizens,
+    AvvenireCitizenMarket,
+    network,
+    chain,
+)
 from scripts.helpful_scripts import (
     get_account,
     get_dev_account,
@@ -30,7 +36,12 @@ def deploy_contract(
 
     # deploy avvenire citizens contract
     avvenire_citizens_contract = AvvenireCitizens.deploy(
-        "AvvenireCitizens", "AVC", "", "", dev_address, {"from": account})
+        "AvvenireCitizens", "AVC", "", "", dev_address, {"from": account}
+    )
+
+    avvenire_market_contract = AvvenireCitizenMarket.deploy(
+        avvenire_citizens_contract.address, {"from": account}
+    )
 
     # deploy avvenire test contract
     avvenire_contract = AvvenireTest.deploy(
@@ -41,13 +52,18 @@ def deploy_contract(
         amount_for_team,
         dev_address,
         payment_to_devs_ETH,
-        avvenire_citizens_contract,
+        avvenire_citizens_contract.address,
         {"from": account},
     )
 
     # allow the test contract to interact with the citizens contract
     avvenire_citizens_contract.setAllowedPermission(
-        avvenire_contract.address, True, {"from": account})
+        avvenire_contract.address, True, {"from": account}
+    )
+
+    avvenire_citizens_contract.setAllowedPermission(
+        avvenire_market_contract.address, True, {"from": account}
+    )
 
     print(f"Contract deployed to {avvenire_contract.address}")
 
@@ -102,12 +118,10 @@ def end_auction(ending_auction_price, time_from_epoch):
         public_sale_start_time = chain.time() + time_from_epoch
     else:
         most_recent_block = Web3.eth.get_block("latest")
-        public_sale_start_time = most_recent_block["timestamp"] + \
-            time_from_epoch
+        public_sale_start_time = most_recent_block["timestamp"] + time_from_epoch
 
     avvenire_contract.endAuctionAndSetupNonAuctionSaleInfo(
-        whitelist_price, ending_auction_price, public_sale_start_time, {
-            "from": account}
+        whitelist_price, ending_auction_price, public_sale_start_time, {"from": account}
     )
 
 

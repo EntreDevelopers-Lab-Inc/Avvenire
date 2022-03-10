@@ -2,17 +2,14 @@
 
 /**
  * @title AvvenireCitizens Trait Management Contract
-*/
+ */
 pragma solidity ^0.8.4;
 
 import "../interfaces/AvvenireCitizensInterface.sol";
 import "../interfaces/AvvenireCitizenDataInterface.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
 
-contract AvvenireCitizenMarket is
-    Ownable,
-    AvvenireCitizenDataInterface
-{
+contract AvvenireCitizenMarket is Ownable, AvvenireCitizenDataInterface {
     // store the avvenireCitizens contract
     AvvenireCitizensInterface public avvenireCitizens;
 
@@ -40,20 +37,37 @@ contract AvvenireCitizenMarket is
     }
 
     /**
+    @notice the constructor of the contract
+    @param avvenireCitizensContractAddress the address for the existing avvvenireCitizens contract  
+     */
+    constructor(address avvenireCitizensContractAddress) {
+        avvenireCitizens = AvvenireCitizensInterface(
+            avvenireCitizensContractAddress
+        );
+    }
+
+    /**
      * @notice a function to combine the token's parts
      * this must be payable in order to request changes to each individual component
      * IF the file gets too big, this can be an array, but that would be suboptimal, as it would not require that only one of each trait could be passed
      * @param citizenId for getting the citizen
      * @param traitChanges for getting the traits
-    */
-    function combine(uint256 citizenId, TraitChanges memory traitChanges) external payable
+     */
+    function combine(uint256 citizenId, TraitChanges memory traitChanges)
+        external
+        payable
     {
         // make sure that tokens are mutable
-        require(avvenireCitizens.getMutabilityMode(), "Tokens are currently immutable.");
+        require(
+            avvenireCitizens.getMutabilityMode(),
+            "Tokens are currently immutable."
+        );
 
         // check that the citizen's owner is the transaction
-        require(avvenireCitizens.ownerOf(citizenId) == msg.sender, "You do not own this token.");
-
+        require(
+            avvenireCitizens.ownerOf(citizenId) == msg.sender,
+            "You do not own this token."
+        );
 
         // have some amount to mint
         uint256 toMint = 0;
@@ -61,64 +75,52 @@ contract AvvenireCitizenMarket is
         // check each traitId individually --> bind it if a change has been requested
         // each trait's mergability will be checked on binding (to reduce gas costs, access the mapping on the frontend before using this function)
         // if changing and traitId == 0, add it to the list that need to be minted, else bind the trait directly
-        if (traitChanges.backgroundChange.toChange)
-        {
+        if (traitChanges.backgroundChange.toChange) {
             _bindTrait(citizenId, toMint, traitChanges.backgroundChange);
         }
 
-        if (traitChanges.bodyChange.toChange)
-        {
+        if (traitChanges.bodyChange.toChange) {
             _bindTrait(citizenId, toMint, traitChanges.bodyChange);
         }
 
-        if (traitChanges.tattooChange.toChange)
-        {
+        if (traitChanges.tattooChange.toChange) {
             _bindTrait(citizenId, toMint, traitChanges.tattooChange);
         }
 
-        if (traitChanges.eyesChange.toChange)
-        {
+        if (traitChanges.eyesChange.toChange) {
             _bindTrait(citizenId, toMint, traitChanges.eyesChange);
         }
 
-        if (traitChanges.mouthChange.toChange)
-        {
+        if (traitChanges.mouthChange.toChange) {
             _bindTrait(citizenId, toMint, traitChanges.mouthChange);
         }
 
-        if (traitChanges.maskChange.toChange)
-        {
+        if (traitChanges.maskChange.toChange) {
             _bindTrait(citizenId, toMint, traitChanges.maskChange);
         }
 
-        if (traitChanges.necklaceChange.toChange)
-        {
+        if (traitChanges.necklaceChange.toChange) {
             _bindTrait(citizenId, toMint, traitChanges.necklaceChange);
         }
 
-        if (traitChanges.clothingChange.toChange)
-        {
+        if (traitChanges.clothingChange.toChange) {
             _bindTrait(citizenId, toMint, traitChanges.clothingChange);
         }
 
-        if (traitChanges.earringsChange.toChange)
-        {
+        if (traitChanges.earringsChange.toChange) {
             _bindTrait(citizenId, toMint, traitChanges.earringsChange);
         }
 
-        if (traitChanges.hairChange.toChange)
-        {
+        if (traitChanges.hairChange.toChange) {
             _bindTrait(citizenId, toMint, traitChanges.hairChange);
         }
 
-        if (traitChanges.effectChange.toChange)
-        {
+        if (traitChanges.effectChange.toChange) {
             _bindTrait(citizenId, toMint, traitChanges.effectChange);
         }
 
         // if there are any to mint, do so
-        if (toMint > 0)
-        {
+        if (toMint > 0) {
             avvenireCitizens.safeMint(tx.origin, toMint);
         }
 
@@ -130,28 +132,45 @@ contract AvvenireCitizenMarket is
      * ASSUME that the trait has already been checked that it wants to be changed
      * @param citizenId for locating the citizen
      * @param traitChange for indicating how the trait will change
-    */
-    function _bindTrait(uint256 citizenId, uint256 toMint, TraitChange memory traitChange) internal
-    {
-        if (traitChange.traitId == 0)
-        {
+     */
+    function _bindTrait(
+        uint256 citizenId,
+        uint256 toMint,
+        TraitChange memory traitChange
+    ) internal {
+        if (traitChange.traitId == 0) {
             toMint += 1;
+        } else {
+            avvenireCitizens.bind(
+                citizenId,
+                traitChange.traitId,
+                traitChange.sex,
+                traitChange.traitType
+            );
         }
-        else
-        {
-            avvenireCitizens.bind(citizenId, traitChange.traitId, traitChange.sex, traitChange.traitType);
-        }
-
     }
 
     /**
      * @notice a function to set the avvenireCitizens contract address (only from owner)
-    */
-    function setAvvenireContractAddress(address contractAddress) external onlyOwner
+     */
+    function setAvvenireContractAddress(address contractAddress)
+        external
+        onlyOwner
     {
         avvenireCitizens = AvvenireCitizensInterface(contractAddress);
     }
 
+    /**
+     * @notice internal function to request a change
+     * @param tokenId the id of the token that should be changed
+     */
+    function _requestChange(uint256 tokenId) internal {
+        avvenireCitizens.requestChange(tokenId);
+    }
+
+    // ** NEEDS TO BE DELETED LATER **
+    // SOLE PURPOSE IS FOR EXPLICIT TESTING
+    function requestChange(uint256 tokenId) public {
+        _requestChange(tokenId);
+    }
 }
-
-

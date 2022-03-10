@@ -1,8 +1,17 @@
 from brownie import AvvenireTest, AvvenireCitizens, chain, network, accounts
 from web3 import Web3
 
-from scripts.script_definitions import deploy_contract, set_auction_start_time, drop_interval
-from scripts.helpful_scripts import get_account, get_dev_account, LOCAL_BLOCKCHAIN_ENVIRONMENTS
+from scripts.script_definitions import (
+    deploy_contract,
+    set_auction_start_time,
+    drop_interval,
+    end_auction,
+)
+from scripts.helpful_scripts import (
+    get_account,
+    get_dev_account,
+    LOCAL_BLOCKCHAIN_ENVIRONMENTS,
+)
 
 import time
 
@@ -10,8 +19,12 @@ SALE_START_TIME = 100
 PUBLIC_SALE_START_TIME = 120
 PUBLIC_SALE_KEY = 12345
 DEV_PAYMENT = Web3.toWei(2, "ether")
-BASE_URI = "https://gateway.pinata.cloud/ipfs/QmSBome9gF2dNujZdxSAGybxmo4XPLcctG2QZFnpdR4q2a/"
-LOAD_URI = "https://gateway.pinata.cloud/ipfs/Qme4pwMxwMJobSuTCqvczJCgmuM54EHBVtrEVqKtsjYWos"
+BASE_URI = (
+    "https://gateway.pinata.cloud/ipfs/QmSBome9gF2dNujZdxSAGybxmo4XPLcctG2QZFnpdR4q2a/"
+)
+LOAD_URI = (
+    "https://gateway.pinata.cloud/ipfs/Qme4pwMxwMJobSuTCqvczJCgmuM54EHBVtrEVqKtsjYWos"
+)
 
 
 def setup_auction():
@@ -51,8 +64,7 @@ def perform_auction():
 
     # Mint an NFT at every interval...
     for count in range(1, 9):
-        avvenire_contract.auctionMint(
-            1, {"from": accounts[count], "value": cost})
+        avvenire_contract.auctionMint(1, {"from": accounts[count], "value": cost})
         drop_interval(1)
 
     # 9 auction mints and 5 team mint = 14 minted total for 5.4 ETH
@@ -73,18 +85,20 @@ def perform_auction():
     # Mint 6 @ public price
     for count in range(1, 6):
         avvenire_contract.publicSaleMint(
-            1, PUBLIC_SALE_KEY, {
-                "from": accounts[count], "value": public_price_wei}
+            1, PUBLIC_SALE_KEY, {"from": accounts[count], "value": public_price_wei}
         )
 
 
 # function to end the character mint
-def end_auction():
+def end_auction_and_enable_changes():
     # get the admin and contract
     admin_account = get_account()
     avvenire_citizens_contract = AvvenireCitizens[-1]
+    avvenire_auction_contract = AvvenireTest[-1]
+
+    current_auction_pricea = avvenire_auction_contract.getAuctionPrice()
+    end_auction(current_auction_pricea, 0)
 
     # set mutability mode to true and end the character mint
     avvenire_citizens_contract.setMutablityMode(True, {"from": admin_account})
-    avvenire_citizens_contract.setCitizenMintActive(
-        False, {"from": admin_account})
+    avvenire_citizens_contract.setCitizenMintActive(False, {"from": admin_account})
