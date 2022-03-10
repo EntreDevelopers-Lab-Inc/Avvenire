@@ -150,17 +150,14 @@ contract AvvenireCitizenMarket is Ownable, AvvenireCitizenDataInterface {
         }
 
         // request a character change
-        if (changeCost > 0)
-        {
-            // send the value of one change
-            avvenireCitizens.requestChange{value: changeCost}(citizenId);
+        // send the value of one change
+        avvenireCitizens.requestChange{value: changeCost}(citizenId);
 
-            // add the amount paid to track the total cost
-            totalCost += changeCost;
+        // add the amount paid to track the total cost
+        totalCost += changeCost;
 
-            // refund the rest of the transaction value if the transaction is over
-            _refundIfOver(totalCost);
-        }
+        // refund the rest of the transaction value if the transaction is over
+        _refundIfOver(totalCost);
     }
 
     /**
