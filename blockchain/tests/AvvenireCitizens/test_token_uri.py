@@ -31,18 +31,19 @@ def test_fake_token():
 # try to get a token uri after a change has been requested
 def test_direct_false_token_change():
     # get the admin account and the contract
-    avvenire_contract = AvvenireTest[-1]
+    avvenire_auction_contract = AvvenireTest[-1]
     avvenire_citizens_contract = AvvenireCitizens[-1]
 
     # mint some nfts to account 2
     account = accounts[2]
     # make sure that the gas is less than 5% of the auction
     cost = Web3.toWei(1, "ether")
-    avvenire_contract.auctionMint(1, {"from": account, "value": cost})
+    avvenire_auction_contract.auctionMint(1, {"from": account, "value": cost})
     drop_interval(1)
 
     # end the auction
-    end_auction()
+    current_auction_price = avvenire_auction_contract.getAuctionPrice()
+    end_auction(current_auction_price, 0)
     drop_interval(1)
 
     # change one of the tokens (must be done from admin account, but later from mutability contract)
@@ -54,12 +55,11 @@ def test_direct_false_token_change():
     token_uri = avvenire_citizens_contract.tokenURI(0)
     assert token_uri == f"{BASE_URI}0"
 
+
 # get a normal character URI (mint a bunch of them and request if they exist)
-
-
 def test_character_URI():
     # get the admin account and the contract
-    avvenire_contract = AvvenireTest[-1]
+    avvenire_auction_contract = AvvenireTest[-1]
     avvenire_citizens_contract = AvvenireCitizens[-1]
 
     # mint some nfts to account 2
@@ -67,11 +67,13 @@ def test_character_URI():
     account = accounts[2]
     cost = Web3.toWei(
         tokens, "ether")
-    avvenire_contract.auctionMint(tokens, {"from": account, "value": cost})
+    avvenire_auction_contract.auctionMint(
+        tokens, {"from": account, "value": cost})
     drop_interval(1)
 
     # end the auction
-    end_auction()
+    current_auction_price = avvenire_auction_contract.getAuctionPrice()
+    end_auction(current_auction_price, 0)
     drop_interval(1)
 
     for i in range(tokens):

@@ -175,8 +175,9 @@ contract AvvenireCitizens is
     function _requestChange(uint256 tokenId) internal {
         // take some payment for this transaction if there is some cost set
         if (mutabilityConfig.mutabilityCost > 0) {
-            // require that the amount due can be paid
-            require(msg.value > getChangeCost(), "Insufficient funds.");
+            // cannot require that the amount due is paid, as this function is used in when minting traits from safe mint
+                // even making safeMint payable would be useless, as this can only check the value of one trait, not many
+                // seems nonsensical to make safemint payable with require statements, as only allowed contracts can call it, and we would be checking ourselves at the cost of users (when we could instead write one require statement at the end of a transaction in an allowed contract)
 
             (bool success, ) = receivingAddress.call{
                 value: mutabilityConfig.mutabilityCost
@@ -360,7 +361,7 @@ contract AvvenireCitizens is
      * @param tokenId (for binding the token id)
      */
     function createNewCitizen(uint256 tokenId) internal {
-        // create a new citizen and put it in the mapping --> just set the token id and that it exists, don't set any of the traits or the URI
+        // create a new citizen and put it in the mapping --> just set the token id and that it exists, don't set any of the traits or the URI (as these can be handled in the initial mint)
         tokenIdToCitizen[tokenId] = Citizen({
             tokenId: tokenId,
             uri: "", // keep this blank to keep the user from paying excess gas before decomposition (the tokenURI function will handle for blank URIs)

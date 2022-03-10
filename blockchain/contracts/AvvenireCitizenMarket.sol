@@ -70,6 +70,8 @@ contract AvvenireCitizenMarket is Ownable, AvvenireCitizenDataInterface {
      * @notice a function to combine the token's parts
      * this must be payable in order to request changes to each individual component
      * IF the file gets too big, this can be an array, but that would be suboptimal, as it would not require that only one of each trait could be passed
+     * in order to decompose traits, just pass all the traits to change as null --> use the frontend to check out what traits are non-defaults --> only change those
+     * we never check for the case that there are a bunch of non-changes, as we will do so on the frontend (if someone is interacting with the contract directly, we assume that they know not to request a change with no values)
      * @param citizenId for getting the citizen
      * @param traitChanges for getting the traits
      */
@@ -79,7 +81,13 @@ contract AvvenireCitizenMarket is Ownable, AvvenireCitizenDataInterface {
         canChange(citizenId)
     {
         // have some amount to mint
-        uint256 toMint = 0;
+        uint256 toMint;
+
+        // get the cost of requesting one change
+        uint256 changeCost = avvenireCitizens.getChangeCost();
+
+        // track the total cost
+        uint256 totalCost;
 
         // check each traitId individually --> bind it if a change has been requested
         // each trait's mergability will be checked on binding (to reduce gas costs, access the mapping on the frontend before using this function)
@@ -130,11 +138,29 @@ contract AvvenireCitizenMarket is Ownable, AvvenireCitizenDataInterface {
 
         // if there are any to mint, do so
         if (toMint > 0) {
+            // add the amount to mint to the total cost
+            totalCost += toMint * changeCost;
+
+            // for every new trait to mint, a change will be requested, so send the appropriate amount of eth (do so directly, as safe mint is not payable)
+            (bool success,) = address(avvenireCitizens).call{value: totalCost}("");
+            require(success, "Insufficient funds for new traits minted.");
+
+            // mint the citzens
             avvenireCitizens.safeMint(tx.origin, toMint);
         }
 
         // request a character change
-        requestChange(citizenId);
+        if (changeCost > 0)
+        {
+            // send the value of one change
+            avvenireCitizens.requestChange{value: changeCost}(citizenId);
+
+            // add the amount paid to track the total cost
+            totalCost += changeCost;
+
+            // refund the rest of the transaction value if the transaction is over
+            _refundIfOver(totalCost);
+        }
     }
 
     /**
@@ -183,4 +209,19 @@ contract AvvenireCitizenMarket is Ownable, AvvenireCitizenDataInterface {
     function requestChange(uint256 tokenId) public {
         _requestChange(tokenId);
     }
+
+    /**
+     * @notice refunds excess eth
+     * @param cost is the amount required for the change
+    */
+    function _refundIfOver(uint256 cost) internal
+    {
+        // make sure the msg sent enough eth
+        require(msg.value > cost, "Insufficient funds.");
+
+        if (msg.value > cost) {
+            payable(msg.sender).transfer(msg.value - cost); // pay the user the excess
+        }
+    }
+
 }

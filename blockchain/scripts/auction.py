@@ -64,7 +64,8 @@ def perform_auction():
 
     # Mint an NFT at every interval...
     for count in range(1, 9):
-        avvenire_contract.auctionMint(1, {"from": accounts[count], "value": cost})
+        avvenire_contract.auctionMint(
+            1, {"from": accounts[count], "value": cost})
         drop_interval(1)
 
     # 9 auction mints and 5 team mint = 14 minted total for 5.4 ETH
@@ -85,7 +86,8 @@ def perform_auction():
     # Mint 6 @ public price
     for count in range(1, 6):
         avvenire_contract.publicSaleMint(
-            1, PUBLIC_SALE_KEY, {"from": accounts[count], "value": public_price_wei}
+            1, PUBLIC_SALE_KEY, {
+                "from": accounts[count], "value": public_price_wei}
         )
 
 
@@ -96,9 +98,10 @@ def end_auction_and_enable_changes():
     avvenire_citizens_contract = AvvenireCitizens[-1]
     avvenire_auction_contract = AvvenireTest[-1]
 
-    current_auction_pricea = avvenire_auction_contract.getAuctionPrice()
-    end_auction(current_auction_pricea, 0)
+    current_auction_price = avvenire_auction_contract.getAuctionPrice()
+    end_auction(current_auction_price, 0)
 
     # set mutability mode to true and end the character mint
     avvenire_citizens_contract.setMutablityMode(True, {"from": admin_account})
-    avvenire_citizens_contract.setCitizenMintActive(False, {"from": admin_account})
+    avvenire_citizens_contract.setCitizenMintActive(
+        False, {"from": admin_account})
