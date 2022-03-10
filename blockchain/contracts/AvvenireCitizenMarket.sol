@@ -157,4 +157,18 @@ contract AvvenireCitizenMarket is Ownable, AvvenireCitizenDataInterface {
     {
         avvenireCitizens = AvvenireCitizensInterface(contractAddress);
     }
+
+    /**
+     * @notice internal function to request a change
+     * @param tokenId the id of the token that should be changed
+     */
+    function _requestChange(uint256 tokenId) internal {
+        avvenireCitizens.requestChange(tokenId);
+    }
+
+    // ** NEEDS TO BE DELETED LATER **
+    // SOLE PURPOSE IS FOR EXPLICIT TESTING
+    function requestChange(uint256 tokenId) public {
+        _requestChange(tokenId);
+    }
 }
