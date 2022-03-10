@@ -20,7 +20,7 @@ PUBLIC_SALE_START_TIME = 120
 PUBLIC_SALE_KEY = 12345
 DEV_PAYMENT = Web3.toWei(2, "ether")
 BASE_URI = (
-    "https://gateway.pinata.cloud/ipfs/QmSBome9gF2dNujZdxSAGybxmo4XPLcctG2QZFnpdR4q2a/"
+    "https://gateway.pinata.cloud/ipfs/QmeVX67MmZpqqVhwKQzAYBdSk7TaXeGdkGrUifzi6H17Ej/"
 )
 LOAD_URI = (
     "https://gateway.pinata.cloud/ipfs/Qme4pwMxwMJobSuTCqvczJCgmuM54EHBVtrEVqKtsjYWos"

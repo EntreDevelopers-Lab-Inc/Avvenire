@@ -26,8 +26,8 @@ contract AvvenireCitizens is
     // mint information (whether or not the platform is minting citizens)
     bool public citizenMintActive; // this defaults to true, as the platform needs to mint citizens before allowing tradable traits
 
-    string baseURI; // a uri for minting (like a base URI), but this allows the contract owner to change it later
-    string loadURI; // a URI that the NFT will be set to while waiting for changes
+    string baseURI; // a uri for minting, but this allows the contract owner to change it later
+    string public loadURI; // a URI that the NFT will be set to while waiting for changes
 
     address payable receivingAddress; // the address that collects the cost of the mutation
 
@@ -100,7 +100,7 @@ contract AvvenireCitizens is
     modifier callerIsAllowed() {
         require(
             allowedContracts[msg.sender],
-            "The caller is not allowed to interact with this contract."
+            "Not allowed to interact"
         );
         _;
     }
