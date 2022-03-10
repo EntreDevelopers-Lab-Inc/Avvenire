@@ -13,7 +13,6 @@ import "@chiru-labs/contracts/extensions/ERC721AOwnersExplicit.sol";
 import "@openzeppelin/contracts/utils/Strings.sol";
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 
-
 error TraitTypeDoesNotExist();
 
 // token mutator changes the way that an ERC721A contract interacts with tokens
@@ -34,21 +33,18 @@ contract AvvenireCitizens is
 
     struct MutabilityConfig {
         bool mutabilityMode; // initially set the contract to be immutable, this will keep people from trying to use the function before it is released
-
         // payment information
         uint256 mutabilityCost; // the amount that it costs to make a change (initializes to 0)
-
         // trading information
         bool tradeBeforeChange; // initially set to false, don't want people to tokens that are pending changes
     }
 
     MutabilityConfig public mutabilityConfig;
 
-
     // dev payment
     struct DevConfig {
         address devAddress;
-        uint devRoyaltyPercent;
+        uint256 devRoyaltyPercent;
     }
 
     DevConfig devConfig; // need to set it this way to avoid stack being too deep
@@ -78,8 +74,7 @@ contract AvvenireCitizens is
         string memory baseURI_,
         string memory loadURI_,
         address devAddress_
-    ) ERC721A(ERC721Name_, ERC721AId_)
-    {
+    ) ERC721A(ERC721Name_, ERC721AId_) {
         // set the mint URI
         baseURI = baseURI_;
 
@@ -117,7 +112,6 @@ contract AvvenireCitizens is
     function tokenURI(uint256 tokenId)
         public
         view
-        virtual
         override
         returns (string memory)
     {
@@ -146,19 +140,21 @@ contract AvvenireCitizens is
      * @notice Requests a change for a token
      * @param tokenId allows the user to request a change using their token id
      */
-    function requestChange(uint256 tokenId)
-        external
-        payable
-        callerIsAllowed
-    {
+    function requestChange(uint256 tokenId) external payable callerIsAllowed {
         // check if you can even request changes at the moment
-        require(mutabilityConfig.mutabilityMode, "Tokens are currently immutable.");
+        require(
+            mutabilityConfig.mutabilityMode,
+            "Tokens are currently immutable."
+        );
 
         // check if the token exists
         if (!_exists(tokenId)) revert URIQueryForNonexistentToken();
 
         // check that this is the rightful token owner
-        require(ownerOf(tokenId) == tx.origin, "Only the owner of a token can request its change.");
+        require(
+            ownerOf(tokenId) == tx.origin,
+            "Only the owner of a token can request its change."
+        );
 
         // check if the token has already been requested to change
         require(
@@ -169,14 +165,18 @@ contract AvvenireCitizens is
         _requestChange(tokenId); // call the internal function
     }
 
-    function _requestChange(uint256 tokenId) internal
-    {
+    function _requestChange(uint256 tokenId) internal {
         // take some payment for this transaction if there is some cost set
         if (mutabilityConfig.mutabilityCost > 0) {
-            (bool success, ) = receivingAddress.call{value: mutabilityConfig.mutabilityCost}("");
+            (bool success, ) = receivingAddress.call{
+                value: mutabilityConfig.mutabilityCost
+            }("");
             require(success, "Insufficient funds for token change.");
 
-            (bool royaltyPaid, ) = devConfig.devAddress.call{value: (mutabilityConfig.mutabilityCost * devConfig.devRoyaltyPercent / 100)}("");
+            (bool royaltyPaid, ) = devConfig.devAddress.call{
+                value: ((mutabilityConfig.mutabilityCost *
+                    devConfig.devRoyaltyPercent) / 100)
+            }("");
             require(royaltyPaid, "Insufficient funds for token change.");
         }
 
@@ -227,9 +227,8 @@ contract AvvenireCitizens is
 
     /**
      * @notice gets the mutability of a contract
-    */
-    function getMutabilityMode() public view returns (bool)
-    {
+     */
+    function getMutabilityMode() public view returns (bool) {
         return mutabilityConfig.mutabilityMode;
     }
 
@@ -255,18 +254,14 @@ contract AvvenireCitizens is
      * @notice a function to toggle the citizen mint
      * @param citizenMintActive_ as the boolean setting
      */
-    function setCitizenMintActive(bool citizenMintActive_)
-        external
-        onlyOwner
-    {
+    function setCitizenMintActive(bool citizenMintActive_) external onlyOwner {
         citizenMintActive = citizenMintActive_;
     }
 
     /**
      * @notice a function to get the citizen mint information
-    */
-    function getCitizenMintActive() public view returns (bool)
-    {
+     */
+    function getCitizenMintActive() public view returns (bool) {
         return citizenMintActive;
     }
 
@@ -289,10 +284,12 @@ contract AvvenireCitizens is
     /**
      * @notice allow the devs to change their address
      * @param devAddress_ would be the new dev address
-    */
-    function changeDevAddress(address devAddress_) external
-    {
-        require(msg.sender == devConfig.devAddress, "Only the devs can change their address.");
+     */
+    function changeDevAddress(address devAddress_) external {
+        require(
+            msg.sender == devConfig.devAddress,
+            "Only the devs can change their address."
+        );
 
         devConfig.devAddress = devAddress_;
     }
@@ -300,10 +297,12 @@ contract AvvenireCitizens is
     /**
      * @notice allow the devs to set their royalties
      * @param devRoyaltyPercent_ is the percent (out of 100) to pay the devs
-    */
-    function setDevRoyalty(uint devRoyaltyPercent_) external
-    {
-        require(msg.sender == devConfig.devAddress, "Only the devs can change their royalty.");
+     */
+    function setDevRoyalty(uint256 devRoyaltyPercent_) external {
+        require(
+            msg.sender == devConfig.devAddress,
+            "Only the devs can change their royalty."
+        );
 
         devConfig.devRoyaltyPercent = devRoyaltyPercent_;
     }
@@ -331,7 +330,10 @@ contract AvvenireCitizens is
     /**
      * @notice internal function for getting the default trait (mostly for creating new citizens, waste of compute for creating new traits)
      */
-    function baseTrait(Sex sex, TraitType traitType) internal returns (Trait memory) {
+    function baseTrait(Sex sex, TraitType traitType)
+        internal
+        returns (Trait memory)
+    {
         return
             Trait({
                 tokenId: 0, // there will be no traits with tokenId 0, as that must be the first citizen (cannot have traits without minting the first citizen)
@@ -366,7 +368,7 @@ contract AvvenireCitizens is
                 earrings: baseTrait(Sex.NULL, TraitType.EARRINGS),
                 hair: baseTrait(Sex.NULL, TraitType.HAIR),
                 effect: baseTrait(Sex.NULL, TraitType.EFFECT)
-                })
+            })
         });
     }
 
@@ -374,9 +376,7 @@ contract AvvenireCitizens is
      * @notice internal function to create a new trait (called after token transfer --> in safe mint)
      * @param tokenId (for binding the token id)
      */
-    function createNewTrait(uint256 tokenId)
-        internal
-    {
+    function createNewTrait(uint256 tokenId) internal {
         // create a new trait and put it in the mapping --> just set the token id, that it exists and that it is free
         tokenIdToTrait[tokenId] = Trait({
             tokenId: tokenId,
@@ -421,10 +421,11 @@ contract AvvenireCitizens is
      * @param traitId indicated the trait id that will be bound (can be set to 0 for a non-existend trait that adheres to the type)
      * @param traitType indicates the type of trait to be bound
      */
-    function lockAndReturnTraitForBinding(uint256 traitId, Sex sex, TraitType traitType)
-        internal
-        returns (Trait memory)
-    {
+    function lockAndReturnTraitForBinding(
+        uint256 traitId,
+        Sex sex,
+        TraitType traitType
+    ) internal returns (Trait memory) {
         // store the trait that should be bound
         if (traitId == 0) {
             // this trait does not exist, just set it to the default struct
@@ -453,7 +454,6 @@ contract AvvenireCitizens is
                 trait.traitType == traitType,
                 "Trait type does not match trait associated with this id"
             );
-
 
             // disallow trading of the bound trait
             makeTraitNonTransferrable(traitId);
@@ -505,15 +505,20 @@ contract AvvenireCitizens is
         uint256 traitId,
         Sex sex,
         TraitType traitType
-    ) external virtual callerIsAllowed {
+    ) external callerIsAllowed {
         // if binding non-empty trait, must require the correct sex and ensure that the tokenId exists
-        if (traitId != 0)
-        {
+        if (traitId != 0) {
             // check if the trait exists
-            require(tokenIdToTrait[traitId].exists, "This trait does not exist.");
+            require(
+                tokenIdToTrait[traitId].exists,
+                "This trait does not exist."
+            );
 
             // ensure that the trait and citizen have the same sex
-            require(tokenIdToCitizen[citizenId].sex == tokenIdToTrait[traitId].sex, "You cannot combine traits from opposite sexes.");
+            require(
+                tokenIdToCitizen[citizenId].sex == tokenIdToTrait[traitId].sex,
+                "You cannot combine traits from opposite sexes."
+            );
         }
 
         // check each of the types and bind them accordingly
@@ -525,8 +530,12 @@ contract AvvenireCitizens is
 
             // set the new trait
             tokenIdToCitizen[citizenId]
-                .traits.background = lockAndReturnTraitForBinding(traitId, sex, traitType);
-
+                .traits
+                .background = lockAndReturnTraitForBinding(
+                traitId,
+                sex,
+                traitType
+            );
         } else if (traitType == TraitType.BODY) {
             // make the old trait transferrable
             makeTraitTransferable(
@@ -535,8 +544,8 @@ contract AvvenireCitizens is
 
             // set the new trait
             tokenIdToCitizen[citizenId]
-                .traits.body = lockAndReturnTraitForBinding(traitId, sex, traitType);
-
+                .traits
+                .body = lockAndReturnTraitForBinding(traitId, sex, traitType);
         } else if (traitType == TraitType.TATTOO) {
             // make the old trait transferrable
             makeTraitTransferable(
@@ -545,8 +554,8 @@ contract AvvenireCitizens is
 
             // set the new trait
             tokenIdToCitizen[citizenId]
-                .traits.tattoo = lockAndReturnTraitForBinding(traitId, sex, traitType);
-
+                .traits
+                .tattoo = lockAndReturnTraitForBinding(traitId, sex, traitType);
         } else if (traitType == TraitType.EYES) {
             // make the old trait transferrable
             makeTraitTransferable(
@@ -555,8 +564,8 @@ contract AvvenireCitizens is
 
             // set the new trait
             tokenIdToCitizen[citizenId]
-                .traits.eyes = lockAndReturnTraitForBinding(traitId, sex, traitType);
-
+                .traits
+                .eyes = lockAndReturnTraitForBinding(traitId, sex, traitType);
         } else if (traitType == TraitType.MOUTH) {
             // make the old trait transferrable
             makeTraitTransferable(
@@ -565,8 +574,8 @@ contract AvvenireCitizens is
 
             // set the new trait
             tokenIdToCitizen[citizenId]
-                .traits.mouth = lockAndReturnTraitForBinding(traitId, sex, traitType);
-
+                .traits
+                .mouth = lockAndReturnTraitForBinding(traitId, sex, traitType);
         } else if (traitType == TraitType.MASK) {
             // make the old trait transferrable
             makeTraitTransferable(
@@ -575,8 +584,8 @@ contract AvvenireCitizens is
 
             // set the new trait
             tokenIdToCitizen[citizenId]
-                .traits.mask = lockAndReturnTraitForBinding(traitId, sex, traitType);
-
+                .traits
+                .mask = lockAndReturnTraitForBinding(traitId, sex, traitType);
         } else if (traitType == TraitType.NECKLACE) {
             // make the old trait transferrable
             makeTraitTransferable(
@@ -585,8 +594,12 @@ contract AvvenireCitizens is
 
             // set the new trait
             tokenIdToCitizen[citizenId]
-                .traits.necklace = lockAndReturnTraitForBinding(traitId, sex, traitType);
-
+                .traits
+                .necklace = lockAndReturnTraitForBinding(
+                traitId,
+                sex,
+                traitType
+            );
         } else if (traitType == TraitType.CLOTHING) {
             // make the old trait transferrable
             makeTraitTransferable(
@@ -595,8 +608,12 @@ contract AvvenireCitizens is
 
             // set the new trait
             tokenIdToCitizen[citizenId]
-                .traits.clothing = lockAndReturnTraitForBinding(traitId, sex, traitType);
-
+                .traits
+                .clothing = lockAndReturnTraitForBinding(
+                traitId,
+                sex,
+                traitType
+            );
         } else if (traitType == TraitType.EARRINGS) {
             // make the old trait transferrable
             makeTraitTransferable(
@@ -605,8 +622,12 @@ contract AvvenireCitizens is
 
             // set the new trait
             tokenIdToCitizen[citizenId]
-                .traits.earrings = lockAndReturnTraitForBinding(traitId, sex, traitType);
-
+                .traits
+                .earrings = lockAndReturnTraitForBinding(
+                traitId,
+                sex,
+                traitType
+            );
         } else if (traitType == TraitType.HAIR) {
             // make the old trait transferrable
             makeTraitTransferable(
@@ -615,8 +636,8 @@ contract AvvenireCitizens is
 
             // set the new trait
             tokenIdToCitizen[citizenId]
-                .traits.hair = lockAndReturnTraitForBinding(traitId, sex, traitType);
-
+                .traits
+                .hair = lockAndReturnTraitForBinding(traitId, sex, traitType);
         } else if (traitType == TraitType.EFFECT) {
             // make the old trait transferrable
             makeTraitTransferable(
@@ -625,8 +646,8 @@ contract AvvenireCitizens is
 
             // set the new trait
             tokenIdToCitizen[citizenId]
-                .traits.effect = lockAndReturnTraitForBinding(traitId, sex, traitType);
-
+                .traits
+                .effect = lockAndReturnTraitForBinding(traitId, sex, traitType);
         } else {
             // return an error that the trait type does not exist
             revert TraitTypeDoesNotExist();
@@ -637,8 +658,10 @@ contract AvvenireCitizens is
      * @notice external safemint function for allowed contracts
      * @param address_ for where to mint to
      * @param quantity_ for the amount
-    */
-    function safeMint(address address_, uint256 quantity_) external callerIsAllowed
+     */
+    function safeMint(address address_, uint256 quantity_)
+        external
+        callerIsAllowed
     {
         _safeMint(address_, quantity_);
     }
@@ -675,7 +698,7 @@ contract AvvenireCitizens is
         address to,
         uint256 startTokenId,
         uint256 quantity
-    ) internal virtual override {
+    ) internal override {
         // token id end counter
         uint256 endTokenId = startTokenId + quantity;
 
@@ -695,7 +718,10 @@ contract AvvenireCitizens is
 
             // if this is a trait, it must be free to be transferred
             if (tokenIdToTrait[tokenId].exists) {
-                require(tokenIdToTrait[tokenId].free, "Trait is non-transferrable.");
+                require(
+                    tokenIdToTrait[tokenId].free,
+                    "Trait is non-transferrable."
+                );
             }
         }
     }
@@ -712,7 +738,7 @@ contract AvvenireCitizens is
         address to,
         uint256 startTokenId,
         uint256 quantity
-    ) internal virtual override {
+    ) internal override {
         // token id end counter
         uint256 endTokenId = startTokenId + quantity;
 
@@ -753,9 +779,8 @@ contract AvvenireCitizens is
 
     /**
      * @notice function that gets the total supply from the ERC721A contract
-    */
-    function getTotalSupply() external view returns (uint256)
-    {
+     */
+    function getTotalSupply() external view returns (uint256) {
         return totalSupply();
     }
 
