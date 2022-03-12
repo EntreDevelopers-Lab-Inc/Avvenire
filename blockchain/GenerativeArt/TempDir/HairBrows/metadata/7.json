@@ -1,0 +1,24 @@
+{
+    "name": "HairBrows #7",
+    "image": "",
+    "attributes": [
+        {
+            "trait_type": "Brows",
+            "value": "Blue brows"
+        },
+        {
+            "trait_type": "Hair",
+            "value": "Blue hero hair"
+        }
+    ],
+    "trait_files": [
+        {
+            "trait_type": "Brows",
+            "file": "Brows/08.PNG"
+        },
+        {
+            "trait_type": "Hair",
+            "file": "Hair/08.PNG"
+        }
+    ]
+}

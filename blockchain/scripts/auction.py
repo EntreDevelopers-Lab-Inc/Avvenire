@@ -1,8 +1,18 @@
-from brownie import AvvenireTest, chain, network, accounts
+from brownie import AvvenireTest, AvvenireCitizens, chain, network, accounts
 from web3 import Web3
 
-from scripts.script_definitions import deploy_contract, set_auction_start_time, drop_interval
-from scripts.helpful_scripts import get_account, get_dev_account, LOCAL_BLOCKCHAIN_ENVIRONMENTS
+from constants import BASE_URI, LOAD_URI
+from scripts.script_definitions import (
+    deploy_contract,
+    set_auction_start_time,
+    drop_interval,
+    end_auction,
+)
+from scripts.helpful_scripts import (
+    get_account,
+    get_dev_account,
+    LOCAL_BLOCKCHAIN_ENVIRONMENTS,
+)
 
 import time
 
@@ -10,17 +20,16 @@ SALE_START_TIME = 100
 PUBLIC_SALE_START_TIME = 120
 PUBLIC_SALE_KEY = 12345
 DEV_PAYMENT = Web3.toWei(2, "ether")
-BASE_URI = "https://gateway.pinata.cloud/ipfs/QmSBome9gF2dNujZdxSAGybxmo4XPLcctG2QZFnpdR4q2a/"
-LOAD_URI = "https://gateway.pinata.cloud/ipfs/Qme4pwMxwMJobSuTCqvczJCgmuM54EHBVtrEVqKtsjYWos"
 
 
 def setup_auction():
     admin_account = get_account()
     dev_account = get_dev_account()
     deploy_contract(3, 2, 20, 15, 5, dev_account, 2)
-    avvenire_contract = AvvenireTest[-1]
-    avvenire_contract.setBaseURI(BASE_URI, {"from": admin_account})
-    avvenire_contract.setLoadURI(LOAD_URI, {"from": admin_account})
+    avvenire_citizens_contract = AvvenireCitizens[-1]
+
+    avvenire_citizens_contract.setBaseURI(BASE_URI, {"from": admin_account})
+    avvenire_citizens_contract.setLoadURI(LOAD_URI, {"from": admin_account})
 
     # Initializations
     set_auction_start_time(SALE_START_TIME)
@@ -78,11 +87,16 @@ def perform_auction():
 
 
 # function to end the character mint
-def end_auction():
+def end_auction_and_enable_changes():
     # get the admin and contract
     admin_account = get_account()
-    avvenire_contract = AvvenireTest[-1]
+    avvenire_citizens_contract = AvvenireCitizens[-1]
+    avvenire_auction_contract = AvvenireTest[-1]
+
+    current_auction_price = avvenire_auction_contract.getAuctionPrice()
+    end_auction(current_auction_price, 0)
 
     # set mutability mode to true and end the character mint
-    avvenire_contract.setMutablityMode(True, {"from": admin_account})
-    avvenire_contract.setCharacterMintActive(False, {"from": admin_account})
+    avvenire_citizens_contract.setMutablityMode(True, {"from": admin_account})
+    avvenire_citizens_contract.setCitizenMintActive(
+        False, {"from": admin_account})

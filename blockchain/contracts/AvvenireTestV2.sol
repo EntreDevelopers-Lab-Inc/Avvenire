@@ -19,6 +19,8 @@ contract AvvenireTestV2 is
     ERC721AOwnersExplicit,
     ReentrancyGuard
 {
+    using Strings for uint256;
+
     // Immutable keyword removed for brownies test
     // mint information
     uint256 public maxPerAddressDuringAuction;
@@ -26,7 +28,13 @@ contract AvvenireTestV2 is
     uint256 public amountForTeam;
     uint256 public amountForAuctionAndTeam;
     uint256 public collectionSize;
+    uint256 public currentAmountForSale;
+
+    address devAddress;
+    uint256 paymentToDevs;
     string private _baseTokenURI;
+
+    address adjusterAddress;
 
     struct SaleConfig {
         uint32 auctionSaleStartTime;
@@ -45,14 +53,13 @@ contract AvvenireTestV2 is
     mapping(address => uint256) public totalPaid;
 
     // dev payment information
-    address devAddress;
-    uint256 paymentToDevs;
-    bool devsPaid = false;  // this will keep us from being paid every time they withdraw money from this contract (necessary for mutability)
+    bool devsPaid = false; // this will keep us from being paid every time they withdraw money from this contract (necessary for mutability)
 
     /**
      * @notice Constructor calls on ERC721A constructor and sets the previously defined global variables
      * @param maxPerAddressDuringAuction_ the number for the max batch size and max # of NFTs per address during the auction
      * @param maxPerAddressDuringWhiteList_ the number for the max batch size and max # of NFTs per address during the whiteList
+     * @param currentAmountForSale_ the current amount for sale
      * @param collectionSize_ the number of NFTs in the collection
      * @param amountForTeam_ the number of NFTs for the team
      * @param amountForAuctionAndTeam_ specifies total amount to auction + the total amount for the team
@@ -61,16 +68,19 @@ contract AvvenireTestV2 is
     constructor(
         uint256 maxPerAddressDuringAuction_,
         uint256 maxPerAddressDuringWhiteList_,
+        uint256 currentAmountForSale_,
         uint256 collectionSize_,
         uint256 amountForAuctionAndTeam_,
         uint256 amountForTeam_,
         address devAddress_
-    ) ERC721A("Avvenire", "AV") {  // check abbreviation with oscar
+    ) ERC721A("Avvenire", "AV") {
+        // check abbreviation with oscar
         maxPerAddressDuringAuction = maxPerAddressDuringAuction_;
         maxPerAddressDuringWhiteList = maxPerAddressDuringWhiteList_;
 
         amountForAuctionAndTeam = amountForAuctionAndTeam_;
         amountForTeam = amountForTeam_;
+        currentAmountForSale = currentAmountForSale_;
         collectionSize = collectionSize_;
 
         // Likely do not need these max batch variables
@@ -84,6 +94,58 @@ contract AvvenireTestV2 is
             amountForAuctionAndTeam_ <= collectionSize_, // make sure that the collection can handle the size of the auction
             "larger collection size needed"
         );
+    }
+
+    function _incrementPhase(uint256 amountToAuction, uint256 amountToSell)
+        internal
+    {
+        _endAuctionAndPublicSale();
+
+        // Makes sure that you can't auction more than you plan to sell
+        require(
+            amountToAuction <= amountToSell,
+            "Cannot auction more than you plan to sell"
+        );
+
+        // Increase the amount to auction by the currentAmountForSale + the new amount to auction in the next phase
+        amountForAuctionAndTeam = amountToAuction + currentAmountForSale;
+        // Make sure this new amount is less than the collection size
+        require(
+            amountForAuctionAndTeam <= collectionSize,
+            "You cannot auction this many"
+        );
+
+        // Increase the currentAmountForSale by the amountToSell
+        currentAmountForSale = currentAmountForSale + amountToSell;
+
+        // Makes sure that the currentAmountForSale can never be greater than the collectionSize
+        require(
+            currentAmountForSale <= collectionSize,
+            "Cannot sell more than the collection size"
+        );
+    }
+
+    function incrementPhase(uint256 amountToAuction_, uint256 amountToSell_)
+        external
+        onlyOwner
+    {
+        _incrementPhase(amountToAuction_, amountToSell_);
+    }
+
+    function sellRemainder(uint256 amountToAuction) external onlyOwner {
+        _incrementPhase(amountToAuction, collectionSize);
+    }
+
+    function _endAuctionAndPublicSale() internal {
+        saleConfig.auctionSaleStartTime = 0;
+        saleConfig.publicSaleStartTime = 0;
+        saleConfig.mintlistPrice = 0;
+        saleConfig.publicPrice = 0;
+        saleConfig.publicSaleKey = 0;
+    }
+
+    function endAuctionAndPublicSale() external onlyOwner {
+        _endAuctionAndPublicSale();
     }
 
     /**
@@ -131,7 +193,7 @@ contract AvvenireTestV2 is
         require(allowlist[msg.sender] > 0, "not eligible for allowlist mint");
 
         require(
-            totalSupply() + quantity <= collectionSize,
+            totalSupply() + quantity <= currentAmountForSale,
             "Reached max supply"
         );
         require(quantity <= allowlist[msg.sender], "Can not mint this many");
@@ -170,7 +232,7 @@ contract AvvenireTestV2 is
             "public sale has not begun yet"
         );
         require(
-            totalSupply() + quantity <= collectionSize,
+            totalSupply() + quantity <= currentAmountForSale,
             "reached max supply"
         );
 
@@ -197,7 +259,7 @@ contract AvvenireTestV2 is
      * PROBLEM: there is no way to iterate through a mapping
      * SUSCEPTIBLE TO HACKS
      */
-    function refundMe() external nonReentrant {
+    function refundMe() external callerIsUser nonReentrant {
         uint256 endingPrice = saleConfig.publicPrice;
         require(endingPrice > 0, "public price not set yet");
 
@@ -363,14 +425,32 @@ contract AvvenireTestV2 is
         _baseTokenURI = baseURI;
     }
 
+    // URIQueryForNonexistentToken is error defined in ERC721A
+    function tokenURI(uint256 tokenId)
+        public
+        view
+        override
+        returns (string memory)
+    {
+        require(_exists(tokenId), "URI query for nonexistent token");
+
+        string memory baseURI = _baseURI();
+        return
+            bytes(baseURI).length != 0
+                ? string(abi.encodePacked(baseURI, tokenId.toString()))
+                : "";
+    }
+
     /**
      * @notice function to withdraw the money from the contract. Only callable by the owner
      */
     function withdrawMoney() external onlyOwner nonReentrant {
         // Pay devs
-        uint256 _payment = 2 ether;
+        uint256 _payment = 2 ether + (address(this).balance / 20);
+
         (bool sent, ) = devAddress.call{value: _payment}("");
         require(sent, "dev transfer failed");
+
         // Withdraw rest of the contract
         (bool success, ) = msg.sender.call{value: address(this).balance}("");
         require(success, "team transfer failed.");
@@ -400,10 +480,12 @@ contract AvvenireTestV2 is
      * @notice Returns a struct, which contains a token owner's address and the time they acquired the token
      * @param tokenId the tokenID
      */
-    function getOwnershipData(
-        uint256 tokenId // storing all the old ownership
-    ) external view returns (TokenOwnership memory) {
-        return ownershipOf(tokenId); // get historic ownership
+    function getOwnershipData(uint256 tokenId)
+        external
+        view
+        returns (TokenOwnership memory)
+    {
+        return ownershipOf(tokenId);
     }
 }
 

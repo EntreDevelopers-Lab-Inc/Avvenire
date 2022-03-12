@@ -3,17 +3,17 @@
 /**
  *@title Avvenire ERC721 Contract
  */
-pragma solidity ^0.8.0;
+pragma solidity ^0.8.4;
 
-import './TokenMutator.sol';
+import "../interfaces/AvvenireCitizensInterface.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
-import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
-// _setOwnersExplicit( ) moved from the ERC721A contract to an extension
 import "@openzeppelin/contracts/utils/Strings.sol";
+import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 
 // ERC721AOwnersExplicit already inherits from ERC721A
 contract AvvenireTest is
-    TokenMutator
+    Ownable,
+    ReentrancyGuard
 {
     // mint information
     uint256 public maxPerAddressDuringAuction; // constant for later assignment>?t
@@ -24,6 +24,13 @@ contract AvvenireTest is
     uint256 public collectionSize; // Total collection size
     //uint256 public immutable maxBatchPublic;
     // uint256 public immutable maxBatchWhiteList;
+
+    // dev payment information
+    uint256 paymentToDevs;  // can decrement this to 0 after being paid
+    address devAddress;
+
+    // avvenire citizens contract
+    AvvenireCitizensInterface avvenireCitizens;
 
     struct SaleConfig {
         uint32 auctionSaleStartTime; //
@@ -42,38 +49,6 @@ contract AvvenireTest is
     //Do I need to keep public?
     mapping(address => uint256) public totalPaid;
 
-    // dev payment information
-    address devAddress;
-    uint256 paymentToDevs;  // can decrement this to 0 after being paid
-
-    /*
-    // set up the trait types (NOT DONE YET)
-    enum TraitType {NULL,  BODY, CLOTHING, EYES, HAIR, MOUTH}
-
-    // set up sex
-    enum Sex {UNISEX, MALE, FEMALE}
-
-    // the trait types should be very similar to the token mutator base contract, BUT the traits have to be unisex, male, or female
-    struct Trait {
-        uint256 tokenId;
-        string uri;
-        bool free;
-        bool exists;
-        TraitType traitType;
-        Sex sex;
-    }
-
-    // characters should have one of each trait (NOT DONE YET)
-    struct Character {
-        uint256 tokenId;
-        string uri;
-        Trait body;
-        Trait clothing;
-        Trait eyes;
-        Trait hair;
-        Trait mouth;
-    }
-    */
 
     /**
      * @notice Constructor calls on ERC721A constructor and sets the previously defined global variables
@@ -82,18 +57,19 @@ contract AvvenireTest is
      * @param collectionSize_ the number of NFTs in the collection
      * @param amountForTeam_ the number of NFTs for the team
      * @param amountForAuctionAndTeam_ specifies total amount to auction + the total amount for the team
-     * @param devAddress_ address of devs
      * @param paymentToDevs_ payment to devs
      */
-    constructor(
+    constructor (
         uint256 maxPerAddressDuringAuction_,
         uint256 maxPerAddressDuringWhiteList_,
         uint256 collectionSize_,
         uint256 amountForAuctionAndTeam_,
         uint256 amountForTeam_,
         address devAddress_,
-        uint256 paymentToDevs_
-    ) TokenMutator("AvvenirePFP", "AV", "", "") {
+        uint256 paymentToDevs_,
+        address avvenireCitizensContractAddress_
+        )
+    {
         maxPerAddressDuringAuction = maxPerAddressDuringAuction_;
         maxPerAddressDuringWhiteList = maxPerAddressDuringWhiteList_;
 
@@ -105,14 +81,25 @@ contract AvvenireTest is
         // maxBatchPublic = maxBatchPublic_;
         // maxBatchWhiteList = maxBatchWhiteList_;
 
-        // Assign dev address and payment
+        // set dev payment
         devAddress = devAddress_;
         paymentToDevs = paymentToDevs_;
+
+        // set avvenire citizens address
+        avvenireCitizens = AvvenireCitizensInterface(avvenireCitizensContractAddress_);
 
         require(
             amountForAuctionAndTeam_ <= collectionSize_, // make sure that the collection can handle the size of the auction
             "larger collection size needed"
         );
+    }
+
+    /**
+      Modifier to make sure that the caller is a user and not another contract
+     */
+    modifier callerIsUser() {
+        require(tx.origin == msg.sender, "The caller is another contract."); // check that a user is accessing a contract
+        _;
     }
 
     /**
@@ -128,15 +115,15 @@ contract AvvenireTest is
             "sale has not started yet"
         );
         require(
-            totalSupply() + quantity <= amountForAuctionAndTeam,
+            avvenireCitizens.getTotalSupply() + quantity <= amountForAuctionAndTeam,
             "not enough remaining reserved for auction to support desired mint amount"
         );
         require(
-            numberMinted(msg.sender) + quantity <= maxPerAddressDuringAuction, // make sure they are not trying to mint too many --> note: this is going to need to be different in our case as the whitelisted users have different mint amounts
+            avvenireCitizens.numberMinted(msg.sender) + quantity <= maxPerAddressDuringAuction, // make sure they are not trying to mint too many --> note: this is going to need to be different in our case as the whitelisted users have different mint amounts
             "can not mint this many"
         );
         uint256 totalCost = getAuctionPrice() * quantity; // total amount of ETH needed for the transaction
-        _safeMint(msg.sender, quantity); // mint this amount to the sender
+        avvenireCitizens.safeMint(msg.sender, quantity); // mint this amount to the sender
         refundIfOver(totalCost); // make sure to refund the excess
 
         //Add to totalPaid
@@ -156,14 +143,14 @@ contract AvvenireTest is
         require(allowlist[msg.sender] > 0, "not eligible for allowlist mint"); // this also checks the decrement
         // need a require statement to make sure that quantity is less than the limit for each user
         require(
-            totalSupply() + quantity <= collectionSize,
+            avvenireCitizens.getTotalSupply() + quantity <= collectionSize,
             "Reached max supply"
         );
         require(quantity <= allowlist[msg.sender], "Can not mint this many");
 
         allowlist[msg.sender] = allowlist[msg.sender] - quantity;
 
-        _safeMint(msg.sender, quantity);
+        avvenireCitizens.safeMint(msg.sender, quantity);
 
         // Give a 30% discount compared to the dutch auction
         uint256 totalCost = quantity * price;
@@ -197,17 +184,17 @@ contract AvvenireTest is
             "public sale has not begun yet"
         );
         require(
-            totalSupply() + quantity <= collectionSize,
+            avvenireCitizens.getTotalSupply() + quantity <= collectionSize,
             "reached max supply"
         );
 
         // Is there a cap for the maxPerAddress during the mint?
 
         // require(
-        //     numberMinted(msg.sender) + quantity <= maxPerAddressDuringMint,
+        //     avvenireCitizens.numberMinted(msg.sender) + quantity <= maxPerAddressDuringMint,
         //     "can not mint this many"
         // );
-        _safeMint(msg.sender, quantity);
+        avvenireCitizens.safeMint(msg.sender, quantity);
 
         uint256 totalCost = publicPrice * quantity;
         refundIfOver(totalCost);
@@ -236,7 +223,7 @@ contract AvvenireTest is
         uint256 endingPrice = saleConfig.publicPrice;
         require(endingPrice > 0, "public price not set yet");
 
-        uint256 actualCost = endingPrice * numberMinted(msg.sender);
+        uint256 actualCost = endingPrice * avvenireCitizens.numberMinted(msg.sender);
         int256 reimbursement = int256(totalPaid[msg.sender]) -
             int256(actualCost);
         require(reimbursement > 0, "You are not eligible for a refund");
@@ -255,7 +242,7 @@ contract AvvenireTest is
         uint256 endingPrice = saleConfig.publicPrice;
         require(endingPrice > 0, "public price not set yet");
 
-        uint256 actualCost = endingPrice * numberMinted(toRefund);
+        uint256 actualCost = endingPrice * avvenireCitizens.numberMinted(toRefund);
         int256 reimbursement = int256(totalPaid[toRefund]) - int256(actualCost);
         require(reimbursement > 0, "Not eligible for a refund");
 
@@ -371,19 +358,17 @@ contract AvvenireTest is
      * @notice function to mint for the team
      */
     function teamMint() external onlyOwner {
-        require(totalSupply() == 0, "NFTs already minted");
-        _safeMint(msg.sender, amountForTeam);
+        require(avvenireCitizens.getTotalSupply() == 0, "NFTs already minted");
+        avvenireCitizens.safeMint(msg.sender, amountForTeam);
     }
 
     // function teamMint(uint256 quantity) external onlyOwner {
     //     require(
-    //         totalSupply() + quantity <= amountForTeam,
+    //         avvenireCitizens.getTotalSupply() + quantity <= amountForTeam,
     //         "too many already minted or quantity exceeds amountForTeam"
     //     );
-    //     _safeMint(msg.sender, quantity);
+    //     avvenireCitizens.safeMint(msg.sender, quantity);
     // }
-
-    string private _baseTokenURI;
 
     /**
      * @notice function to withdraw the money from the contract. Only callable by the owner
@@ -396,38 +381,6 @@ contract AvvenireTest is
         // Withdraw rest of the contract
         (bool success, ) = msg.sender.call{value: address(this).balance}("");
         require(success, "team transfer failed.");
-    }
-
-    /**
-     * @notice gets rid of the loops used in the ownerOf function in the ERC721A standard
-     * @param quantity the number of tokens that you want to eliminate the loops for
-     */
-    function setOwnersExplicit(uint256 quantity)
-        external
-        onlyOwner
-        nonReentrant
-    {
-        _setOwnersExplicit(quantity);
-    }
-
-    /**
-     * @notice returns the number minted from specified address
-     * @param owner an address of an owner in the NFT collection
-     */
-    function numberMinted(address owner) public view returns (uint256) {
-        // check how many have been minted to this owner --> where is this data stored, in the standard?
-        // _addressData mapping in the ERC721A standard; line 51 - Daniel
-        return _numberMinted(owner);
-    }
-
-    /**
-     * @notice Returns a struct, which contains a token owner's address and the time they acquired the token
-     * @param tokenId the tokenID
-     */
-    function getOwnershipData(
-        uint256 tokenId // storing all the old ownership
-    ) external view returns (TokenOwnership memory) {
-        return ownershipOf(tokenId); // get historic ownership
     }
 }
 

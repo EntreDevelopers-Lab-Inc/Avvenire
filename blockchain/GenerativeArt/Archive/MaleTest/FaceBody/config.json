@@ -1,0 +1,30 @@
+{
+    "trait_groups": [
+        {
+            "folder": "BODY",
+            "csv": "body.csv",
+            "extension": ".PNG"
+        },
+        {
+            "folder": "EYES",
+            "csv": "eyes.csv",
+            "extension": ".PNG"
+        },
+        {
+            "folder": "MOUTH",
+            "csv": "mouth.csv",
+            "extension": ".PNG"
+        },
+        {
+            "folder": "CLOTHING",
+            "csv": "clothing.csv",
+            "extension": ".PNG"
+        },
+        {
+            "folder": "HAIR",
+            "csv": "hair.csv",
+            "extension": ".PNG"
+        }
+    ],
+    "export_extension": "PNG"
+}
