@@ -1,6 +1,7 @@
 from brownie import AvvenireTest, AvvenireCitizens, chain, network, accounts
 from web3 import Web3
 
+from constants import BASE_URI, LOAD_URI
 from scripts.script_definitions import (
     deploy_contract,
     set_auction_start_time,
@@ -19,12 +20,6 @@ SALE_START_TIME = 100
 PUBLIC_SALE_START_TIME = 120
 PUBLIC_SALE_KEY = 12345
 DEV_PAYMENT = Web3.toWei(2, "ether")
-BASE_URI = (
-    "https://gateway.pinata.cloud/ipfs/QmeVX67MmZpqqVhwKQzAYBdSk7TaXeGdkGrUifzi6H17Ej/"
-)
-LOAD_URI = (
-    "https://gateway.pinata.cloud/ipfs/Qme4pwMxwMJobSuTCqvczJCgmuM54EHBVtrEVqKtsjYWos"
-)
 
 
 def setup_auction():

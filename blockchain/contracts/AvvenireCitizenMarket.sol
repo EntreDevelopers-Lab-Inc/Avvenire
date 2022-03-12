@@ -66,6 +66,13 @@ contract AvvenireCitizenMarket is Ownable, AvvenireCitizenDataInterface {
         _;
     }
 
+
+    /**
+     * @notice a function that can request that a user is allowed to change the token
+     * note: there is no way that we can get the citizens to actually
+    */
+
+
     /**
      * @notice a function to combine the token's parts
      * this must be payable in order to request changes to each individual component
