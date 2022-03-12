@@ -20,5 +20,4 @@ interface AvvenireCitizensInterface is AvvenireCitizenDataInterface, IERC721 {
     function bind(uint256, uint256, Sex, TraitType) external;
     function safeMint(address, uint256) external;
     function numberMinted(address) external returns (uint256);
-    function respawnTrait(uint256) external;
 }

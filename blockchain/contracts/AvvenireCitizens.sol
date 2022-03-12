@@ -100,6 +100,17 @@ contract AvvenireCitizens is
     }
 
     /**
+     * modifier to check if it is the devs
+    */
+    modifier onlyDevs() {
+        require(
+            msg.sender == devConfig.devAddress,
+            "Not devs"
+        );
+        _;
+    }
+
+    /**
      * @notice returns the tokenURI of a token id (overrides ERC721 function)
      * @param tokenId allows the user to request the tokenURI for a particular token id
      */
@@ -223,117 +234,6 @@ contract AvvenireCitizens is
     }
 
     /**
-     * @notice Sets the mutability of the contract (whether changes are accepted)
-     * @param mutabilityMode_ allows the contract owner to change the mutability of the tokens
-     */
-    function setMutablityMode(bool mutabilityMode_) external onlyOwner {
-        // set te new mutability mode to this boolean
-        mutabilityConfig.mutabilityMode = mutabilityMode_;
-    }
-
-    /**
-     * @notice gets the mutability of a contract
-     */
-    function getMutabilityMode() public view returns (bool) {
-        return mutabilityConfig.mutabilityMode;
-    }
-
-    /**
-     * @notice Sets the mint uri
-     * @param baseURI_ represents the new base uri
-     */
-    function setBaseURI(string calldata baseURI_) external onlyOwner {
-        // set thte global baseURI to this new baseURI_
-        baseURI = baseURI_;
-    }
-
-    /**
-     * @notice Sets the load uri
-     * @param loadURI_ represents the new load uri
-     */
-    function setLoadURI(string calldata loadURI_) external onlyOwner {
-        // set thte global loadURI to this new loadURI_
-        loadURI = loadURI_;
-    }
-
-    /**
-     * @notice a function to toggle the citizen mint
-     * @param citizenMintActive_ as the boolean setting
-     */
-    function setCitizenMintActive(bool citizenMintActive_) external onlyOwner {
-        citizenMintActive = citizenMintActive_;
-    }
-
-    /**
-     * @notice a function to get the citizen mint information
-     */
-    function getCitizenMintActive() public view returns (bool) {
-        return citizenMintActive;
-    }
-
-    /**
-     * @notice Sets the mutability cost
-     * @param mutabilityCost_ is the new mutability cost
-     */
-    function setMutabilityCost(uint256 mutabilityCost_) external onlyOwner {
-        mutabilityConfig.mutabilityCost = mutabilityCost_;
-    }
-
-    /**
-     * @notice Sets the receivingAddress
-     * @param receivingAddress_ is the new receiving address
-     */
-    function setReceivingAddress(address receivingAddress_) external onlyOwner {
-        receivingAddress = payable(receivingAddress_);
-    }
-
-    /**
-     * @notice allow the devs to change their address
-     * @param devAddress_ would be the new dev address
-     */
-    function changeDevAddress(address devAddress_) external {
-        require(
-            msg.sender == devConfig.devAddress,
-            "Not devs"
-        );
-
-        devConfig.devAddress = devAddress_;
-    }
-
-    /**
-     * @notice allow the devs to set their royalties
-     * @param devRoyaltyPercent_ is the percent (out of 100) to pay the devs
-     */
-    function setDevRoyalty(uint256 devRoyaltyPercent_) external {
-        require(
-            msg.sender == devConfig.devAddress,
-            "Not devs"
-        );
-
-        devConfig.devRoyaltyPercent = devRoyaltyPercent_;
-    }
-
-    /**
-     * @notice set whether or not the token can be traded while changes are pending
-     * @param setting is a boolean of the change
-     */
-    function setTokenTradeBeforeChange(bool setting) external onlyOwner {
-        mutabilityConfig.tradeBeforeChange = setting;
-    }
-
-    /**
-     * @notice sets an address's allowed list permission (for future interaction)
-     * @param address_ is the address to set the data for
-     * @param setting is the boolean for the data
-     */
-    function setAllowedPermission(address address_, bool setting)
-        external
-        onlyOwner
-    {
-        allowedContracts[address_] = setting;
-    }
-
-    /**
      * @notice internal function for getting the default trait (mostly for creating new citizens, waste of compute for creating new traits)
      */
     function baseTrait(Sex sex, TraitType traitType)
@@ -395,30 +295,6 @@ contract AvvenireCitizens is
 
         // everytime a new trait is created, a change must be requested, as there is no data bound to it yet
         _requestChange(tokenId);
-    }
-
-    /**
-     * @notice a function callable by another contract to set a trait back to being free
-     * set to public to allow it to be called both internally and by other contracts
-     * @param tokenId for the token that is being altered
-     */
-    function respawnTrait(uint256 tokenId) external callerIsAllowed {
-        // check if the trait exists
-        require(tokenIdToTrait[tokenId].exists, "This trait does not exist");
-
-        // check if the trait is free
-        require(
-            !tokenIdToTrait[tokenId].free,
-            "This trait is not bound to anything"
-        );
-
-        // set the token's owner to the origin of the contract call
-        // don't want this to be the message sender, as that is likely to be another contract
-        // can't be the owner of, as it is not bound to anything
-        _ownerships[tokenId].addr = tx.origin;
-
-        // set the token to being free
-        tokenIdToTrait[tokenId].free = true;
     }
 
     /**
@@ -793,6 +669,107 @@ contract AvvenireCitizens is
      */
     function getTotalSupply() external view returns (uint256) {
         return totalSupply();
+    }
+
+    /**
+     * @notice Sets the mutability of the contract (whether changes are accepted)
+     * @param mutabilityMode_ allows the contract owner to change the mutability of the tokens
+     */
+    function setMutablityMode(bool mutabilityMode_) external onlyOwner {
+        // set te new mutability mode to this boolean
+        mutabilityConfig.mutabilityMode = mutabilityMode_;
+    }
+
+    /**
+     * @notice gets the mutability of a contract
+     */
+    function getMutabilityMode() public view returns (bool) {
+        return mutabilityConfig.mutabilityMode;
+    }
+
+    /**
+     * @notice Sets the mint uri
+     * @param baseURI_ represents the new base uri
+     */
+    function setBaseURI(string calldata baseURI_) external onlyOwner {
+        // set thte global baseURI to this new baseURI_
+        baseURI = baseURI_;
+    }
+
+    /**
+     * @notice Sets the load uri
+     * @param loadURI_ represents the new load uri
+     */
+    function setLoadURI(string calldata loadURI_) external onlyOwner {
+        // set thte global loadURI to this new loadURI_
+        loadURI = loadURI_;
+    }
+
+    /**
+     * @notice a function to toggle the citizen mint
+     * @param citizenMintActive_ as the boolean setting
+     */
+    function setCitizenMintActive(bool citizenMintActive_) external onlyOwner {
+        citizenMintActive = citizenMintActive_;
+    }
+
+    /**
+     * @notice a function to get the citizen mint information
+     */
+    function getCitizenMintActive() public view returns (bool) {
+        return citizenMintActive;
+    }
+
+    /**
+     * @notice Sets the mutability cost
+     * @param mutabilityCost_ is the new mutability cost
+     */
+    function setMutabilityCost(uint256 mutabilityCost_) external onlyOwner {
+        mutabilityConfig.mutabilityCost = mutabilityCost_;
+    }
+
+    /**
+     * @notice Sets the receivingAddress
+     * @param receivingAddress_ is the new receiving address
+     */
+    function setReceivingAddress(address receivingAddress_) external onlyOwner {
+        receivingAddress = payable(receivingAddress_);
+    }
+
+    /**
+     * @notice allow the devs to change their address
+     * @param devAddress_ would be the new dev address
+     */
+    function changeDevAddress(address devAddress_) external onlyDevs {
+        devConfig.devAddress = devAddress_;
+    }
+
+    /**
+     * @notice allow the devs to set their royalties
+     * @param devRoyaltyPercent_ is the percent (out of 100) to pay the devs
+     */
+    function setDevRoyalty(uint256 devRoyaltyPercent_) external onlyDevs {
+        devConfig.devRoyaltyPercent = devRoyaltyPercent_;
+    }
+
+    /**
+     * @notice set whether or not the token can be traded while changes are pending
+     * @param setting is a boolean of the change
+     */
+    function setTokenTradeBeforeChange(bool setting) external onlyOwner {
+        mutabilityConfig.tradeBeforeChange = setting;
+    }
+
+    /**
+     * @notice sets an address's allowed list permission (for future interaction)
+     * @param address_ is the address to set the data for
+     * @param setting is the boolean for the data
+     */
+    function setAllowedPermission(address address_, bool setting)
+        external
+        onlyOwner
+    {
+        allowedContracts[address_] = setting;
     }
 
     /**
