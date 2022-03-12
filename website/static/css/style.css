@@ -5158,7 +5158,6 @@ textarea:required {
 }
 
 .timelineBody .timeline {
-    padding: 2em;
     margin: 0;
     list-style: none;
     position: relative;
@@ -5178,7 +5177,7 @@ textarea:required {
     padding: 1em 0;
     position: relative;
 }
-.timelineBody .timeline li:before{
+.timeline li:before{
     position: absolute;
     content: '';
     left: 7px;
@@ -5189,7 +5188,7 @@ textarea:required {
 }
 
 
-.timelineBody .timeline li:last-child {
+.timeline li:last-child {
     margin-bottom: 0;
 }
 
