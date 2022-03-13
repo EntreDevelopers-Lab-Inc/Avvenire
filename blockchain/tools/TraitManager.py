@@ -8,7 +8,11 @@ except ImportError:
 
 
 # create a trait order
-TRAIT_ORDER = ['Background', 'Body', 'Tattoo', 'Eyes', 'Mouth', 'Mask', 'Necklace', 'Clothing', 'Earrings', 'Hair', 'Effect']
+TRAIT_ORDER = ['Background', 'Body', 'Tattoo', 'Eyes', 'Mouth',
+               'Mask', 'Necklace', 'Clothing', 'Earrings', 'Hair', 'Effect']
+
+# create the sex order
+SEX_ORDER = ['Male', 'Female']
 
 # create a file extension
 EXTENSION = 'PNG'
@@ -19,34 +23,70 @@ DEFAULT_FILE = f"DEFAULT.{EXTENSION}"
 
 # make a class that can create citizens by comparing ipfs to on-chain data
 class CitizenCreator:
-    def __init__(self, ipfs_traits, chain_traits, trait_changes):
+    def __init__(self, ipfs_traits, chain_data, sex):
         # save each group of traits
         self.ipfs_traits = ipfs_traits
-        self.chain_traits = self.int_to_files(chain_traits)
 
-        # this is a list of trait changes (true and false)
-        self.trait_changes = trait_changes
+        # save the overall on-chain data
+        self.chain_data = chain_data
 
-    # create a function that converts int traits to files
+        # convert the on-chain data into files
+        self.chain_traits = self.extract_data_for_traits(chain_data)
+
+        # store the sex, so you can use the right file
+        self.sex = sex
+
+    # create a function that converts traits to files
     # only going to get a list of data off the chain --> need to convert it somehow
-    def int_to_files(self, traits):
+    def extract_data_for_traits(self, chain_data):
         # create a list for the files
-        files = []
+        data = []
 
         # iterate over all the traits
         for i in range(len(TRAIT_ORDER)):
-            # create a file from the integer
-            trait_file = f"{TRAIT_ORDER[i]}/{file_from_int(traits[i])}"
+            # create a file from the integer --> some trait & first item in trait struct list --> get the tokenId
+            trait_file = self.extract_data_for_trait(chain_data[i])
 
-            # add the trait file tot he list of files
-            files.append(trait_file)
+            # cannot have incomplete build
+            if not trait_file:
+                return None
+
+            # add the trait file to the list of files
+            data.append(trait_file)
 
         # return the files
-        return files
+        return data
+
+    # a function for getting a file from an ipfs trait uri
+    def extract_data_for_trait(self, trait):
+        # if there is a uri, get the info from there
+        if trait[1]:
+            # get the trait data from ipfs
+            try:
+                data = requests.get(trait[1]).json()
+            except requests.exceptions.JSONDecodeError:
+                print(f"No trait data found at {trait[1]}")
+                return None
+
+            return data
+        # if there is not a uri, need to check if it exists
+        elif trait[3]:
+            # if it exists, just return a dictionary of unknown, as it will not be used
+            return {'file': 'unknown', 'attributes': {'trait_type': 'unknown', 'value': 'unknown'}}
+        # if no uri, and it doesn't exist, set it to the default
+        else:
+            # get what type of trait it is
+            trait_type = TRAIT_ORDER[trait[5] - 1]
+
+            # continue here
 
     # create a property that gives you the mergable files
     @property
     def mergable_files(self):
+        # make sure that we have chain traits
+        if not self.chain_traits:
+            return None
+
         # create a file list
         files = []
 
@@ -56,7 +96,7 @@ class CitizenCreator:
             ipfs_trait = self.ipfs_traits[i]['file']
 
             # get the chain trait
-            chain_trait = self.chain_traits[i]
+            chain_trait = self.chain_data[i]
 
             # if the ipfs trait and the chain trait are the same, just use that file
             if ipfs_trait == chain_trait:
@@ -67,13 +107,13 @@ class CitizenCreator:
             # if the ipfs file is NOT a default, and the new one is, the trait has been removed, add the chain trait
             elif (ipfs_trait != DEFAULT_FILE) and (chain_trait == DEFAULT_FILE):
                 # what about the case where the chain trait is changed for the first time?
-                # need to figure out if a trait has been changed (only want to check here for allowing maximum amount of decentralization)
-                if self.trait_changes[i]:
+                # need to figure out if the chain trait exists, in which case, it should not be changed
+                if self.chain_data[i].exists:
                     # the trait has been changed, go with the on-chain version
-                    files.append(chain_trait)
-                else:
-                    # the trait has NOT been changed, go with the ipfs version
                     files.append(ipfs_trait)
+                else:
+                    # the trait has been changed to the default, so go with the on-chain version
+                    files.append(chain_trait)
             # if the ipfs trait is not the same as the chain trait, the traits have been swapped
             else:
                 files.append(chain_trait)
@@ -114,7 +154,7 @@ class CitizenMarketBroker:
             print(f"No change was requested for citizen {self.citizen_id}")
 
         # get all the existing traits from ipfs (these will be integers)
-        ipfs_traits = self.get_ipfs_traits(citizen)
+        ipfs_data = self.get_ipfs_data(citizen)
 
         # if there are not ipfs traits, say that we failed to update the citizen
         if not ipfs_traits:
@@ -122,8 +162,11 @@ class CitizenMarketBroker:
                 f"Failed to update citizen due to lack of ipfs data: {self.citizen_id}")
             return
 
+        # get the citizen's sex
+        sex = ipfs_data['attributes'][0]['value']
+
         # create a citizen creator with the two bunches of traits
-        citizen_creator = CitizenCreator(ipfs_traits, citizen.traits)
+        citizen_creator = CitizenCreator(ipfs_data, citizen.traits, sex)
 
         # create the NEW citizen using generative art (using citizen creator)
 
@@ -155,9 +198,9 @@ class CitizenMarketBroker:
         # matching a blank trait change from the Avvenire Citizen Market contract
         return [0, False, 0, 0]
 
-    def get_ipfs_traits(self, citizen):
+    def get_ipfs_data(self, citizen):
         # check if there is a uri
-        uri = citizen.uri
+        uri = citizen[1]
 
         # a uri with nothing set to it signifies a freshly minted citizen (where there have been no changes yet)
         if not uri:
@@ -170,23 +213,7 @@ class CitizenMarketBroker:
             print(f"No character data found at {uri}")
             return None
 
-        # get the trait files out of the json
-        trait_files = data['trait_files']
-
-        return trait_files
-
-
-# a function for taking an integer and turning it into a compatible filepath
-def file_from_int(integer):
-    # if the integer is 0, return default
-    if integer == 0:
-        return DEFAULT_FILE
-    # if the integer is < 10, return a buffered number
-    elif integer < 10:
-        return f"0{integer}.{EXTENSION}"
-    # else. return the integer in a formatted way
-    else:
-        return f"{integer}.{EXTENSION}"
+        return data
 
 
 '''

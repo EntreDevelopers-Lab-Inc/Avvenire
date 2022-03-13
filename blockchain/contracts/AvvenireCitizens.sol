@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 
 /**
- * @title token mutating contract for ERC721A
+ * @title Avvenire Citizens Contract
  */
 pragma solidity ^0.8.4;
 
@@ -236,7 +236,7 @@ contract AvvenireCitizens is
     /**
      * @notice internal function for getting the default trait (mostly for creating new citizens, waste of compute for creating new traits)
      */
-    function baseTrait(Sex sex, TraitType traitType)
+    function baseTrait(Sex sex, TraitType traitType, bool exists)
         internal
         returns (Trait memory)
     {
@@ -245,7 +245,7 @@ contract AvvenireCitizens is
                 tokenId: 0, // there will be no traits with tokenId 0, as that must be the first citizen (cannot have traits without minting the first citizen)
                 uri: "",
                 free: false,
-                exists: (uint(traitType) == 0),  // this makes a null trait type false
+                exists: exists,  // allow setting the existence
                 sex: sex,
                 traitType: traitType
             });
@@ -263,17 +263,17 @@ contract AvvenireCitizens is
             exists: true,
             sex: Sex.NULL,  // must be unisex for mint
             traits: Traits({
-                background: baseTrait(Sex.NULL, TraitType.NULL),  // minting with a default background
-                body: baseTrait(Sex.NULL, TraitType.BODY),
-                tattoo: baseTrait(Sex.NULL, TraitType.NULL),  // minting with no tattoos
-                eyes: baseTrait(Sex.NULL, TraitType.EYES),
-                mouth: baseTrait(Sex.NULL, TraitType.MOUTH),
-                mask: baseTrait(Sex.NULL, TraitType.MASK),  // mint with no masks
-                necklace: baseTrait(Sex.NULL, TraitType.NULL),  // mint with no necklaces
-                clothing: baseTrait(Sex.NULL, TraitType.CLOTHING),
-                earrings: baseTrait(Sex.NULL, TraitType.NULL),  // mint with no earrings
-                hair: baseTrait(Sex.NULL, TraitType.HAIR),
-                effect: baseTrait(Sex.NULL, TraitType.NULL)  // mint with no effects
+                background: baseTrait(Sex.NULL, TraitType.BACKGROUND, false),  // minting with a default background
+                body: baseTrait(Sex.NULL, TraitType.BODY, true),
+                tattoo: baseTrait(Sex.NULL, TraitType.TATTOO, false),  // minting with no tattoos
+                eyes: baseTrait(Sex.NULL, TraitType.EYES, true),
+                mouth: baseTrait(Sex.NULL, TraitType.MOUTH, true),
+                mask: baseTrait(Sex.NULL, TraitType.MASK, false),  // mint with no masks
+                necklace: baseTrait(Sex.NULL, TraitType.NECKLACE, false),  // mint with no necklaces
+                clothing: baseTrait(Sex.NULL, TraitType.CLOTHING, true),
+                earrings: baseTrait(Sex.NULL, TraitType.EARRINGS, false),  // mint with no earrings
+                hair: baseTrait(Sex.NULL, TraitType.HAIR, true),
+                effect: baseTrait(Sex.NULL, TraitType.EFFECT, false)  // mint with no effects
             })
         });
     }
