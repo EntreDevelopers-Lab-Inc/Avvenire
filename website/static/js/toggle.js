@@ -3,7 +3,14 @@ function toggleRoadMap(count) {
   let sideImage = document.getElementById("side_image");
   let display = element.style.display;
 
-  sideImage.src = `/static/img/roadmap/${count}.jpg`;
+  var newSrc = location + `/static/img/roadmap/${count}.PNG`
+
+  if (sideImage.src != newSrc)
+  {
+    //$(sideImage).hide(3);
+    sideImage.src = newSrc;
+    //$(sideImage).show(3);
+  }
 
   if (display === "block") {
     element.style.display = "none";
@@ -11,3 +18,4 @@ function toggleRoadMap(count) {
     element.style.display = "block";
   }
 }
+

@@ -17,8 +17,8 @@ contract AvvenireCitizenMarket is Ownable, AvvenireCitizenDataInterface {
     struct TraitChange {
         uint256 traitId; // setting this to 0 will bind the trait to its default (NULL)
         bool toChange; // will be checked in the for loop to see if the trait needs to be changed
-        TraitType traitType;
         Sex sex;
+        TraitType traitType;
     }
 
     // struct for storing an entire bunch of trait changes
@@ -66,12 +66,20 @@ contract AvvenireCitizenMarket is Ownable, AvvenireCitizenDataInterface {
         _;
     }
 
+
+    /**
+     * @notice a function that can request that a user is allowed to change the token
+     * note: there is no way that we can get the citizens to actually
+    */
+
+
     /**
      * @notice a function to combine the token's parts
      * this must be payable in order to request changes to each individual component
      * IF the file gets too big, this can be an array, but that would be suboptimal, as it would not require that only one of each trait could be passed
      * in order to decompose traits, just pass all the traits to change as null --> use the frontend to check out what traits are non-defaults --> only change those
      * we never check for the case that there are a bunch of non-changes, as we will do so on the frontend (if someone is interacting with the contract directly, we assume that they know not to request a change with no values)
+     * the bind function used actually sets the citizen trait --> all data on chain will be "correct" (note: tokenURIs may need to be set for newly minted tokens)
      * @param citizenId for getting the citizen
      * @param traitChanges for getting the traits
      */
@@ -154,16 +162,20 @@ contract AvvenireCitizenMarket is Ownable, AvvenireCitizenDataInterface {
         }
 
         // request a character change
+<<<<<<< HEAD
         if (changeCost > 0) {
             // send the value of one change
             avvenireCitizens.requestChange{value: changeCost}(citizenId);
+=======
+        // send the value of one change
+        avvenireCitizens.requestChange{value: changeCost}(citizenId);
+>>>>>>> beta
 
-            // add the amount paid to track the total cost
-            totalCost += changeCost;
+        // add the amount paid to track the total cost
+        totalCost += changeCost;
 
-            // refund the rest of the transaction value if the transaction is over
-            _refundIfOver(totalCost);
-        }
+        // refund the rest of the transaction value if the transaction is over
+        _refundIfOver(totalCost);
     }
 
     /**

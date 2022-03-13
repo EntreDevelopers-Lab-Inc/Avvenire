@@ -1,0 +1,48 @@
+{
+    "name": "Avvenire Test Citizen #17",
+    "image": "https://gateway.pinata.cloud/ipfs/QmfVU6C6axQ7WZfK7Ywt6PCkKjE6VkN73RsDCVz3A1eN69/17.PNG",
+    "attributes": [
+        {
+            "trait_type": "Body",
+            "value": "Brown skin"
+        },
+        {
+            "trait_type": "Eyes",
+            "value": "Red relaxed eyes "
+        },
+        {
+            "trait_type": "Mouth",
+            "value": "Teeth smiling mouth"
+        },
+        {
+            "trait_type": "Clothing",
+            "value": "Black explorer jacket"
+        },
+        {
+            "trait_type": "Hair",
+            "value": "Red hero hair"
+        }
+    ],
+    "trait_files": [
+        {
+            "trait_type": "Body",
+            "file": "Body/05.PNG"
+        },
+        {
+            "trait_type": "Eyes",
+            "file": "Eyes/04.PNG"
+        },
+        {
+            "trait_type": "Mouth",
+            "file": "Mouth/02.PNG"
+        },
+        {
+            "trait_type": "Clothing",
+            "file": "Clothing/05.PNG"
+        },
+        {
+            "trait_type": "Hair",
+            "file": "Hair/5.PNG"
+        }
+    ]
+}
