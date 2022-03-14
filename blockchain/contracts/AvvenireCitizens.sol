@@ -550,12 +550,11 @@ contract AvvenireCitizens is
         external
         callerIsAllowed
     {
-        _safeMint(address_, quantity_);
-
         require(
-            totalSupply() <= collectionSize * (1 + numberOfTraits),
+            totalSupply() + quantity_ <= collectionSize * (1 + numberOfTraits),
             "Total supply cannot exceed colleciton size and traits"
         );
+        _safeMint(address_, quantity_);
     }
 
     /**
