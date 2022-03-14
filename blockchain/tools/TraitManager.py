@@ -1,10 +1,7 @@
+from .constants import BASE_URI, EXTENSION
+from .GenerativeArt.core.art import Art
+from .tools.ipfs import upload_to_ipfs
 import requests
-
-# constants file is either in test mode or the full path
-try:
-    from blockchain.constants import BASE_URI
-except ImportError:
-    from constants import BASE_URI
 
 
 # create a trait order
@@ -14,11 +11,11 @@ TRAIT_ORDER = ['Background', 'Body', 'Tattoo', 'Eyes', 'Mouth',
 # create the sex order
 SEX_ORDER = ['Male', 'Female']
 
-# create a file extension
-EXTENSION = 'PNG'
-
 # set the default
 DEFAULT_FILE = f"DEFAULT.{EXTENSION}"
+
+# set the export folder
+EXPORT_FOLDER = 'temp'
 
 
 # make a class that can create citizens by comparing ipfs to on-chain data
@@ -150,15 +147,23 @@ class CitizenCreator:
     # function to upload to ipfs (both citizen and metadata --> return metadata uri)
     def upload_to_ipfs(self):
         # get the files
+        files = [f"{self.sex}/{file}" for file in self.composition_files]
+
+        # create a piece of art, initializing with the first file
+        art = Art({'full_path': files[0]})
 
         # iterate over the files
-            # make the full path of the file, as this will indicate where to find the file for pasting
-
+        for file in files[1:]:
             # paste each file onto the original piece of art
+            art.paste({'full_path': file})
 
-        # create a hash using bytecode and upload it to the local pinata api: https://medium.com/python-pandemonium/getting-started-with-python-and-ipfs-94d14fdffd10
+        # upload the image to ipfs
+        resp = upload_to_ipfs(art.image)
 
-        # upload the image hash to pinata: https://docs.pinata.cloud/api-pinning/pin-by-hash
+        # add some error checking for the response
+
+        # make the pinata link
+        pinata_link = f""
 
         # now that you have the pinata link, finish the metadata
 
