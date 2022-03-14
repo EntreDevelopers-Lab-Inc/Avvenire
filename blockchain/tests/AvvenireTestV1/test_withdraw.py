@@ -18,7 +18,7 @@ from scripts.auction import (
 def auction_set(fn_isolation):
     dev_address = get_dev_account()
     print(dev_address)
-    deploy_contract(3, 2, 20, 15, 5, dev_address, DEV_PAYMENT)
+    deploy_contract(3, 2, 20, 15, 5, dev_address, DEV_PAYMENT, 11)
     avvenire_contract = AvvenireTest[-1]
     avvenire_citizens_contract = AvvenireCitizens[-1]
     account = get_account()

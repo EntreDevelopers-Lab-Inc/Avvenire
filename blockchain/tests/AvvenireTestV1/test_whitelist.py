@@ -18,7 +18,7 @@ WHITELIST_DISCOUNT = 0.3
 def auction_set():
     admin_account = get_account()
     dev_account = get_dev_account()
-    deploy_contract(3, 2, 20, 15, 5, dev_account, 2)
+    deploy_contract(3, 2, 20, 15, 5, dev_account, 2, 11)
     avvenire_contract = AvvenireTest[-1]
     avvenire_citizens_contract = AvvenireCitizens[-1]
     avvenire_citizens_contract.setBaseURI(
@@ -28,14 +28,12 @@ def auction_set():
 
     # Don't need to pass in chain.time()...
     # Unsure why
-    avvenire_contract.setAuctionSaleStartTime(
-        SALE_START_TIME, {"from": admin_account})
+    avvenire_contract.setAuctionSaleStartTime(SALE_START_TIME, {"from": admin_account})
 
 
 @pytest.fixture()
 def no_auction():
-    whitelist = [accounts[1], accounts[2],
-                 accounts[3], accounts[4], accounts[5]]
+    whitelist = [accounts[1], accounts[2], accounts[3], accounts[4], accounts[5]]
     admin_account = get_account()
     dev_account = get_dev_account()
 
@@ -46,7 +44,7 @@ def no_auction():
     # uint256 amountForTeam_,
     # address devAddress_,
     # uint256 paymentToDevs_
-    deploy_contract(3, 2, 20, 15, 5, dev_account, 2)
+    deploy_contract(3, 2, 20, 15, 5, dev_account, 2, 11)
 
     avvenire_contract = AvvenireTest[-1]
     public_price_wei = Web3.toWei(PUBLIC_SALE_PRICE_ETH, "ether")
@@ -65,11 +63,9 @@ def test_whitelist_mint_1(no_auction):
     mint_quantity = 2
     # Total cost of mint + .1 ETH for gas
     total_cost = Web3.toWei(
-        PUBLIC_SALE_PRICE_ETH *
-        (1 - WHITELIST_DISCOUNT) * mint_quantity, "ether"
+        PUBLIC_SALE_PRICE_ETH * (1 - WHITELIST_DISCOUNT) * mint_quantity, "ether"
     )
-    whitelist = [accounts[1], accounts[2],
-                 accounts[3], accounts[4], accounts[5]]
+    whitelist = [accounts[1], accounts[2], accounts[3], accounts[4], accounts[5]]
     for account in whitelist:
         account_balance_before = account.balance()
         avvenire_contract.whiteListMint(
@@ -88,16 +84,14 @@ def test_whitelist_mint_1(no_auction):
 
         # Asserts the account can't whitelist mint again
         with brownie.reverts():
-            avvenire_contract.whiteListMint(
-                1, {"from": account, "value": total_cost})
+            avvenire_contract.whiteListMint(1, {"from": account, "value": total_cost})
 
 
 def test_remove_whitelist(no_auction):
     avvenire_contract = AvvenireTest[-1]
     avvenire_citizens_contract = AvvenireCitizens[-1]
     admin_account = get_account()
-    whitelist = [accounts[1], accounts[2],
-                 accounts[3], accounts[4], accounts[5]]
+    whitelist = [accounts[1], accounts[2], accounts[3], accounts[4], accounts[5]]
 
     for account in whitelist:
         avvenire_contract.removeFromWhitelist(account, {"from": admin_account})
@@ -107,24 +101,21 @@ def test_remove_whitelist(no_auction):
 
         # Makes sure thatremoveFromWhiteList reverts if called on account where allowlist(account) == 0
         with brownie.reverts():
-            avvenire_contract.removeFromWhitelist(
-                account, {"from": admin_account})
+            avvenire_contract.removeFromWhitelist(account, {"from": admin_account})
 
         # Makes sure the account can't whitelist mint again
         total_cost = Web3.toWei(
             PUBLIC_SALE_PRICE_ETH * (1 - WHITELIST_DISCOUNT), "ether"
         )
         with brownie.reverts():
-            avvenire_contract.whiteListMint(
-                1, {"from": account, "value": total_cost})
+            avvenire_contract.whiteListMint(1, {"from": account, "value": total_cost})
 
 
 def test_whitelist_mint_2(no_auction):
     avvenire_contract = AvvenireTest[-1]
     mint_quantity = 2
     total_cost = Web3.toWei(
-        PUBLIC_SALE_PRICE_ETH *
-        (1 - WHITELIST_DISCOUNT) * mint_quantity, "ether"
+        PUBLIC_SALE_PRICE_ETH * (1 - WHITELIST_DISCOUNT) * mint_quantity, "ether"
     )
     account = accounts[1]
 
@@ -133,8 +124,7 @@ def test_whitelist_mint_2(no_auction):
 
     # Try to mint another 2
     with brownie.reverts():
-        avvenire_contract.whiteListMint(
-            2, {"from": account, "value": total_cost})
+        avvenire_contract.whiteListMint(2, {"from": account, "value": total_cost})
 
 
 def test_whitelist_mint_past_collection_size(auction_set):
@@ -158,8 +148,7 @@ def test_whitelist_mint_past_collection_size(auction_set):
     assert avvenire_citizens_contract.totalSupply() == 15
 
     # End auction, seed whitelist and mint the remaining 5
-    whitelist = [accounts[1], accounts[2],
-                 accounts[3], accounts[4], accounts[5]]
+    whitelist = [accounts[1], accounts[2], accounts[3], accounts[4], accounts[5]]
     public_price_wei = Web3.toWei(PUBLIC_SALE_PRICE_ETH, "ether")
     whitelist_price_wei = (1 - WHITELIST_DISCOUNT) * public_price_wei
     whitelist_mint_cost = Web3.toWei(

@@ -26,7 +26,7 @@ def drop_interval(number_of_drops):
 def auction_set(fn_isolation):
     admin_account = get_account()
     dev_account = get_dev_account()
-    deploy_contract(3, 2, 20, 15, 5, dev_account, 2)
+    deploy_contract(3, 2, 20, 15, 5, dev_account, 2, 11)
     avvenire_citizens_contract = AvvenireCitizens[-1]
     avvenire_citizens_contract.setBaseURI(
         "https://ipfs.io/ipfs/QmUizisYNzj824jNxuiPTQ1ykBSEjmkp42wMZ7DVFvfZiK/",
@@ -144,8 +144,7 @@ def test_all_prices():
     # During drop intervals
     for drops in range(1, 9):
         drop_interval(1)
-        implied_price = round(auction_start_price_wei -
-                              (drop_per_step_wei * drops), 1)
+        implied_price = round(auction_start_price_wei - (drop_per_step_wei * drops), 1)
         assert avvenire_contract.getAuctionPrice() == implied_price
 
     # After all drops...
@@ -217,8 +216,7 @@ def test_refund():
     ):
         _account = accounts[i]
         avvenire_contract.auctionMint(
-            quantity_to_mint, {"from": _account,
-                               "value": Web3.toWei(2, "ether")}
+            quantity_to_mint, {"from": _account, "value": Web3.toWei(2, "ether")}
         )
         i = i + 1
 
@@ -229,8 +227,7 @@ def test_refund():
     assert public_price == Web3.toWei(0.5, "ether")
 
     # Set public price before refund
-    avvenire_contract.endAuctionAndSetupNonAuctionSaleInfo(
-        0, public_price, 500)
+    avvenire_contract.endAuctionAndSetupNonAuctionSaleInfo(0, public_price, 500)
 
     # *** Refunding ***
     avvenire_contract.refund(dev_account, {"from": admin_account})

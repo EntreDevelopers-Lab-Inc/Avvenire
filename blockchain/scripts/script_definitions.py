@@ -28,6 +28,7 @@ def deploy_contract(
     amount_for_team,
     dev_address,
     payment_to_devs,
+    number_of_traits,
 ):
     account = get_account()
     payment_to_devs_ETH = Web3.toWei(payment_to_devs, "ether")
@@ -36,7 +37,14 @@ def deploy_contract(
 
     # deploy avvenire citizens contract
     avvenire_citizens_contract = AvvenireCitizens.deploy(
-        "AvvenireCitizens", "AVC", "", "", dev_address, {"from": account}
+        "AvvenireCitizens",
+        "AVC",
+        "",
+        "",
+        dev_address,
+        collection_size,
+        number_of_traits,
+        {"from": account},
     )
 
     avvenire_market_contract = AvvenireCitizenMarket.deploy(

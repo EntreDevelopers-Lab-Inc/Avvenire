@@ -25,7 +25,7 @@ def public_mint(fn_isolation):
     # uint256 amountForTeam_,
     # address devAddress_,
     # uint256 paymentToDevs_
-    deploy_contract(3, 2, 20, 15, 5, dev_account, 2)
+    deploy_contract(3, 2, 20, 15, 5, dev_account, 2, 11)
 
     avvenire_contract = AvvenireTest[-1]
     avvenire_citizens_contract = AvvenireCitizens[-1]
@@ -59,8 +59,7 @@ def test_public_mint():
 
         # purposefully overpay for mint...
         avvenire_contract.publicSaleMint(
-            mint_quantity, PUBLIC_SALE_KEY, {
-                "from": account, "value": (mint_cost * 2)}
+            mint_quantity, PUBLIC_SALE_KEY, {"from": account, "value": (mint_cost * 2)}
         )
 
         balance_after_mint = account.balance()
@@ -84,8 +83,7 @@ def test_mint_before_start_time():
     with brownie.reverts():
         # Should throw a VirtualMachineError
         avvenire_contract.publicSaleMint(
-            mint_quantity, PUBLIC_SALE_KEY, {
-                "from": accounts[2], "value": mint_cost}
+            mint_quantity, PUBLIC_SALE_KEY, {"from": accounts[2], "value": mint_cost}
         )
 
 
@@ -102,8 +100,7 @@ def test_mint_incorrect_public_key():
     with brownie.reverts():
         # Should throw a VirtualMachineError
         avvenire_contract.publicSaleMint(
-            mint_quantity, incorrect_key, {
-                "from": accounts[2], "value": mint_cost}
+            mint_quantity, incorrect_key, {"from": accounts[2], "value": mint_cost}
         )
 
 

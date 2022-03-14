@@ -4,11 +4,14 @@ import brownie
 from brownie import AvvenireTest, AvvenireCitizens, AvvenireCitizenMarket, accounts
 from web3 import Web3
 
-from tools.TraitManager import CitizenMarketBroker
-
 from scripts.helpful_scripts import get_account
-from scripts.script_definitions import drop_interval
-from scripts.auction import setup_auction, perform_auction, end_auction, BASE_URI, LOAD_URI
+from scripts.auction import (
+    setup_auction,
+    perform_auction,
+    end_auction,
+    BASE_URI,
+    LOAD_URI,
+)
 from scripts.mint import mint_citizens_and_end
 
 
@@ -47,8 +50,7 @@ def test_direct_false_token_change():
         avvenire_citizens_contract.requestChange(0, {"from": account})
 
     # try and get the token uri, is it still the base uri?
-    token_uri = avvenire_citizens_contract.tokenURI(0)
-    assert token_uri == f"{BASE_URI}0"
+    assert avvenire_citizens_contract.tokenURI(0) == f"{BASE_URI}0"
 
 
 # get a normal character URI (mint a bunch of them and request if they exist)
@@ -89,14 +91,14 @@ def test_load_uri():
         [0, True, 2, 8],
         [0, True, 2, 9],
         [0, True, 2, 10],
-        [0, False, 2, 11]  # default effects
+        [0, False, 2, 11],  # default effects
     ]
 
     # request the combination from the market
-    print(
-        f"Cost to make changes: {avvenire_citizens_contract.getChangeCost()}")
+    print(f"Cost to make changes: {avvenire_citizens_contract.getChangeCost()}")
     avvenire_market_contract.combine(
-        0, trait_changes, {"from": account, "value": Web3.toWei(0.05, "ether")})
+        0, trait_changes, {"from": account, "value": Web3.toWei(0.05, "ether")}
+    )
 
     # check to make sure that the token uri is the loading uri
     assert avvenire_citizens_contract.tokenURI(0) == LOAD_URI
@@ -105,6 +107,7 @@ def test_load_uri():
     # make sure that the contracts did not receive any money (rest got refunded)
     assert avvenire_citizens_contract.balance() == 0
     assert avvenire_market_contract.balance() == 0
+
 
 # request a change --> have the admin update it
 # mint an NFT --> take the hair off, make sure that it returns a load URI
@@ -134,11 +137,12 @@ def test_character_uri_after_change():
         [0, True, 2, 8],
         [0, True, 2, 9],
         [0, True, 2, 10],
-        [0, False, 2, 11]  # default effects
+        [0, False, 2, 11],  # default effects
     ]
 
     # request the combination from the market
     avvenire_market_contract.combine(
-        0, trait_changes, {"from": account, "value": Web3.toWei(0.05, "ether")})
+        0, trait_changes, {"from": account, "value": Web3.toWei(0.05, "ether")}
+    )
 
     # make the changes as an admin

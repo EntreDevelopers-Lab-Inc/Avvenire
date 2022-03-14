@@ -66,12 +66,10 @@ contract AvvenireCitizenMarket is Ownable, AvvenireCitizenDataInterface {
         _;
     }
 
-
     /**
      * @notice a function that can request that a user is allowed to change the token
      * note: there is no way that we can get the citizens to actually
-    */
-
+     */
 
     /**
      * @notice a function to combine the token's parts
@@ -160,21 +158,15 @@ contract AvvenireCitizenMarket is Ownable, AvvenireCitizenDataInterface {
 
             //_refundIfOver(totalCost);
         }
-
         // request a character change
-<<<<<<< HEAD
-        if (changeCost > 0) {
-            // send the value of one change
-            avvenireCitizens.requestChange{value: changeCost}(citizenId);
-=======
         // send the value of one change
         avvenireCitizens.requestChange{value: changeCost}(citizenId);
->>>>>>> beta
 
         // add the amount paid to track the total cost
         totalCost += changeCost;
 
         // refund the rest of the transaction value if the transaction is over
+        // guarantees that msg.value is > totalCost
         _refundIfOver(totalCost);
     }
 

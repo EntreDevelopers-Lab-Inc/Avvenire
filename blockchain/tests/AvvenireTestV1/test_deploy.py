@@ -20,7 +20,7 @@ def test_deployment():
     # uint256 amountForTeam_,
     # address devAddress_,
     # uint256 paymentToDevs_
-    deploy_contract(3, 2, 20, 15, 5, dev_account, DEV_PAYMENT)
+    deploy_contract(3, 2, 20, 15, 5, dev_account, DEV_PAYMENT, 11)
     avvenire_contract = AvvenireTest[-1]
 
     assert avvenire_contract.maxPerAddressDuringAuction() == 3
@@ -36,9 +36,7 @@ def test_deployment():
     # Try to mint before start of auction...
     eth = Web3.toWei(1, "ether")
     with brownie.reverts():
-        assert avvenire_contract.whiteListMint(
-            1, {"from": dev_account, "value": eth})
+        assert avvenire_contract.whiteListMint(1, {"from": dev_account, "value": eth})
 
     with brownie.reverts():
-        assert avvenire_contract.auctionMint(
-            1, {"from": dev_account, "value": eth})
+        assert avvenire_contract.auctionMint(1, {"from": dev_account, "value": eth})
