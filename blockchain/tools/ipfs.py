@@ -1,4 +1,4 @@
-from .constants import PINATA_HEADERS, EXTENSION
+from .constants import PINATA_BASE_URL, PINATA_HEADERS, EXTENSION
 import ipfshttpclient
 import requests
 import io
@@ -21,4 +21,11 @@ def upload_to_ipfs(image):
     resp = requests.post(PINNING_ENDPOINT, headers=PINATA_HEADERS, body={
                          'hashToPin': image_hash})
 
-    return resp
+    # add some error handling for the response
+    if resp.status_code > 299:
+        return None
+
+    # make a pinata link with the image hash
+    pinata_link = f"{PINATA_BASE_URL}/image_hash"
+
+    return pinata_link

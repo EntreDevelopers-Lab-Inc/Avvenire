@@ -1,3 +1,4 @@
+from .scripts.helpful_scripts import get_server_account
 from .constants import BASE_URI, EXTENSION
 from .GenerativeArt.core.art import Art
 from .tools.ipfs import upload_to_ipfs
@@ -158,22 +159,24 @@ class CitizenCreator:
             art.paste({'full_path': file})
 
         # upload the image to ipfs
-        resp = upload_to_ipfs(art.image)
+        image_link = upload_to_ipfs(art.image)
 
-        # add some error checking for the response
-
-        # make the pinata link
-        pinata_link = f""
+        # need a image link to keep going
+        if not image_link:
+            return None
 
         # now that you have the pinata link, finish the metadata
+        self.metadata['image'] = image_link
 
-        # upload the metadata to local ipfs
+        # upload the metadata to ipfs
+        metadata_link = upload_to_ipfs(
+            bytes(json.dumps(self.metadata, indent=4)))
 
-        # upload the file hash to pinata
+        # need metadata link to continue
+        if not metadata_link:
+            return None
 
-        # return the pinata metadata --> will only need to set the image uri of the character's data after this
-
-        pass
+        return metadata_link
 
     # get only the files for composition
     @property
@@ -205,9 +208,8 @@ class CitizenMarketBroker:
         return traits
 
     # function to update a citizen
-    def update_citizen(self, citizen_data):
+    def update_citizen(self):
         citizen = self.get_citizen()
-        print(citizen)
 
         # check to make sure that the citizen has a change requested
         if not self.contract.tokenChangeRequests(self.citizen_id).changeRequested:
@@ -228,15 +230,14 @@ class CitizenMarketBroker:
         # create a citizen creator with the two bunches of traits
         citizen_creator = CitizenCreator(ipfs_data, citizen[4], sex)
 
-        # create the NEW citizen using generative art (using citizen creator)
-
         # upload the citizen to ipfs
+        uri = citizen_creator.upload_to_ipfs()
 
-        # get the ipfs uri
-
-        # create the citizen's data
+        # change the citizen uri
+        citizen[1] = uri
 
         # set the citizen data with the contract using the admin account
+        self.contract.setCitizenData(citizen)
 
         pass
 
