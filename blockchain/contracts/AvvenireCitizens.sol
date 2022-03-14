@@ -62,8 +62,8 @@ contract AvvenireCitizens is
     mapping(address => bool) public allowedContracts;
 
     // Needs to be set to immutable...
-    uint256 collectionSize;
-    uint256 numberOfTraits;
+    uint256 public collectionSize;
+    uint256 public numberOfTraits;
 
     // Designated # of citizens; **** Needs to be set to immutable following testings ****
     constructor(
@@ -84,7 +84,6 @@ contract AvvenireCitizens is
         // set the receiving address to the publisher of this contract
         receivingAddress = payable(msg.sender);
 
-        // allow this contract to interact with itself
         allowedContracts[msg.sender] = true;
 
         // Set mint to true
@@ -102,6 +101,7 @@ contract AvvenireCitizens is
     */
     modifier callerIsAllowed() {
         require(allowedContracts[msg.sender], "Not allowed to interact");
+        //require(tx.origin != msg.sender, "The caller is a user");
         _;
     }
 
@@ -550,11 +550,12 @@ contract AvvenireCitizens is
         external
         callerIsAllowed
     {
-        require(
-            totalSupply() <= (collectionSize * (1 + numberOfTraits)),
-            "Total Supply cannot exceed collection size and traits"
-        );
         _safeMint(address_, quantity_);
+
+        require(
+            totalSupply() <= collectionSize * (1 + numberOfTraits),
+            "Total supply cannot exceed colleciton size and traits"
+        );
     }
 
     /**
@@ -606,7 +607,7 @@ contract AvvenireCitizens is
                     "Change already requested"
                 );
             }
-
+            
             // if this is a trait, it must be free to be transferred
             if (tokenIdToTrait[tokenId].exists) {
                 require(
@@ -679,7 +680,7 @@ contract AvvenireCitizens is
      * @notice Sets the mutability of the contract (whether changes are accepted)
      * @param mutabilityMode_ allows the contract owner to change the mutability of the tokens
      */
-    function setMutablityMode(bool mutabilityMode_) external onlyOwner {
+    function setMutabilityMode(bool mutabilityMode_) external onlyOwner {
         // set te new mutability mode to this boolean
         mutabilityConfig.mutabilityMode = mutabilityMode_;
     }
@@ -784,4 +785,4 @@ contract AvvenireCitizens is
         (bool success, ) = msg.sender.call{value: address(this).balance}("");
         require(success, "team transfer failed");
     }
-}
+} // End of contract
