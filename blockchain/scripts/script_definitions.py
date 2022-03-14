@@ -12,6 +12,8 @@ from scripts.helpful_scripts import (
 )
 from web3 import Web3
 
+import time
+
 WHITELIST_DISCOUNT = 0.7
 
 # * unless mentioned in a comment, account variables in each script should be assume to be by the owner

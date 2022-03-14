@@ -95,5 +95,5 @@ def end_auction_and_enable_changes():
     end_auction(current_auction_price, 0)
 
     # set mutability mode to true and end the character mint
-    avvenire_citizens_contract.setMutablityMode(True, {"from": admin_account})
+    avvenire_citizens_contract.setMutabilityMode(True, {"from": admin_account})
     avvenire_citizens_contract.setCitizenMintActive(False, {"from": admin_account})
