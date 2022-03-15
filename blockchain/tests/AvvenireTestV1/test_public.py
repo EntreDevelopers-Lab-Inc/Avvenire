@@ -25,7 +25,7 @@ def public_mint(fn_isolation):
     # uint256 amountForTeam_,
     # address devAddress_,
     # uint256 paymentToDevs_
-    deploy_contract(3, 2, 20, 15, 5, dev_account, 2, 11)
+    deploy_contract(3, 2, 20, 15, 5, dev_account, 2)
 
     avvenire_contract = AvvenireTest[-1]
     avvenire_citizens_contract = AvvenireCitizens[-1]

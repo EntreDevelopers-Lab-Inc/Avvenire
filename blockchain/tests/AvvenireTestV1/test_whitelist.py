@@ -44,7 +44,7 @@ def no_auction():
     # uint256 amountForTeam_,
     # address devAddress_,
     # uint256 paymentToDevs_
-    deploy_contract(3, 2, 20, 15, 5, dev_account, 2, 11)
+    deploy_contract(3, 2, 20, 15, 5, dev_account, 2)
 
     avvenire_contract = AvvenireTest[-1]
     public_price_wei = Web3.toWei(PUBLIC_SALE_PRICE_ETH, "ether")

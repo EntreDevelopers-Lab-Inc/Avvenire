@@ -61,19 +61,13 @@ contract AvvenireCitizens is
     // mapping for allowing other contracts to interact with this one
     mapping(address => bool) public allowedContracts;
 
-    // Needs to be set to immutable...
-    uint256 public collectionSize;
-    uint256 public numberOfTraits;
-
     // Designated # of citizens; **** Needs to be set to immutable following testings ****
     constructor(
         string memory ERC721Name_,
         string memory ERC721AId_,
         string memory baseURI_,
         string memory loadURI_,
-        address devAddress_,
-        uint256 _collectionSize,
-        uint256 _numberOfTraits
+        address devAddress_
     ) ERC721A(ERC721Name_, ERC721AId_) {
         // set the mint URI
         baseURI = baseURI_;
@@ -91,9 +85,6 @@ contract AvvenireCitizens is
 
         // set the dev address for royalties and payment
         devConfig.devAddress = devAddress_;
-
-        collectionSize = _collectionSize;
-        numberOfTraits = _numberOfTraits;
     }
 
     /**
@@ -550,10 +541,6 @@ contract AvvenireCitizens is
         external
         callerIsAllowed
     {
-        require(
-            totalSupply() + quantity_ <= collectionSize * (1 + numberOfTraits),
-            "Total supply cannot exceed colleciton size and traits"
-        );
         _safeMint(address_, quantity_);
     }
 
@@ -606,7 +593,7 @@ contract AvvenireCitizens is
                     "Change already requested"
                 );
             }
-            
+
             // if this is a trait, it must be free to be transferred
             if (tokenIdToTrait[tokenId].exists) {
                 require(

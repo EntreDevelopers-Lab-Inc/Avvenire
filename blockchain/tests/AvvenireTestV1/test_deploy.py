@@ -20,7 +20,7 @@ def test_deployment():
     # uint256 amountForTeam_,
     # address devAddress_,
     # uint256 paymentToDevs_
-    deploy_contract(3, 2, 20, 15, 5, dev_account, DEV_PAYMENT, 11)
+    deploy_contract(3, 2, 20, 15, 5, dev_account, DEV_PAYMENT)
     avvenire_contract = AvvenireTest[-1]
 
     assert avvenire_contract.maxPerAddressDuringAuction() == 3

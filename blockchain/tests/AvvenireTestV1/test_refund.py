@@ -28,7 +28,7 @@ def drop_interval(number_of_drops):
 def post_auction(fn_isolation):
     admin_account = get_account()
     dev_account = get_dev_account()
-    deploy_contract(3, 2, 20, 15, 5, dev_account, 2, 11)
+    deploy_contract(3, 2, 20, 15, 5, dev_account, 2)
     avvenire_contract = AvvenireTest[-1]
     avvenire_citizens_contract = AvvenireCitizens[-1]
 

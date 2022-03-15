@@ -211,9 +211,9 @@ contract AvvenireCitizenMarket is Ownable, AvvenireCitizenDataInterface {
         avvenireCitizens.requestChange(tokenId);
     }
 
-    // ** NEEDS TO BE DELETED LATER **
+    // ********* NEEDS TO BE DELETED LATER ***********
     // SOLE PURPOSE IS FOR EXPLICIT TESTING
-    function requestChange(uint256 tokenId) public {
+    function requestChange(uint256 tokenId) external {
         _requestChange(tokenId);
     }
 

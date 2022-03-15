@@ -14,4 +14,6 @@ def get_dev_account():
     if network.show_active() in LOCAL_BLOCKCHAIN_ENVIRONMENTS:
         return accounts[1]
     else:
-        return accounts.load(config["wallets"]["DEVELOPMENT_KEY"], password=config["wallets"]["password"])
+        return accounts.load(
+            config["wallets"]["DEVELOPMENT_KEY"], password=config["wallets"]["password"]
+        )
