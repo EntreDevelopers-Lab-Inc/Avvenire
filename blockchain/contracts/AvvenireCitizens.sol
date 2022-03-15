@@ -14,6 +14,8 @@ import "@openzeppelin/contracts/utils/Strings.sol";
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 
 error TraitTypeDoesNotExist();
+error TransferFailed();
+error ChangeAlreadyRequested();
 
 // token mutator changes the way that an ERC721A contract interacts with tokens
 contract AvvenireCitizens is
@@ -156,7 +158,7 @@ contract AvvenireCitizens is
         // check if you can even request changes at the moment
         require(
             mutabilityConfig.mutabilityMode,
-            "Tokens are immutable"
+            "Tokens immutable"
         );
 
         // check if the token exists
@@ -165,14 +167,11 @@ contract AvvenireCitizens is
         // check that this is the rightful token owner
         require(
             ownerOf(tokenId) == tx.origin,
-            "Not the owner"
+            "Not owner"
         );
 
         // check if the token has already been requested to change
-        require(
-            !tokenChangeRequests[tokenId],
-            "Change already requested"
-        );
+        if (tokenChangeRequests[tokenId]) revert ChangeAlreadyRequested();
 
         _requestChange(tokenId); // call the internal function
     }
@@ -392,7 +391,7 @@ contract AvvenireCitizens is
             // ensure that the trait and citizen have the same sex
             require(
                 tokenIdToCitizen[citizenId].sex == tokenIdToTrait[traitId].sex,
-                "Cannot combine traits from opposite sexes"
+                "Opposite sexes"
             );
         }
 
@@ -779,6 +778,6 @@ contract AvvenireCitizens is
     function withdrawMoney() external onlyOwner nonReentrant {
         // Withdraw rest of the contract
         (bool success, ) = msg.sender.call{value: address(this).balance}("");
-        require(success, "team transfer failed");
+        if (!success) revert TransferFailed();
     }
 }
