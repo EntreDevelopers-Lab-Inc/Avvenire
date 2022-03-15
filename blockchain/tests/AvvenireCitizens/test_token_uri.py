@@ -27,7 +27,6 @@ def test_fake_token():
 
     # get the contract
     avvenire_citizens_contract = AvvenireCitizens[-1]
-
     # check the wrong token uri
     with brownie.reverts():
         # token 20 should have an issue, as only 0-19 are minted

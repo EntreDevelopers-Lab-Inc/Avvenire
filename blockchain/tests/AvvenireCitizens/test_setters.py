@@ -61,7 +61,7 @@ def test_set_allowed_permission(bool_):
 
 
 # *** Tests below need to have variables set to public to test ***
-# ALL PASSED.
+# ALL PASSED on implementation of 03/13/22
 
 # def test_set_receiving_address():
 #     avvenire_citizens_contract = AvvenireCitizens[-1]
