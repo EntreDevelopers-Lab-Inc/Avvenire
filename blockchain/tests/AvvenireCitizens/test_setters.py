@@ -10,7 +10,7 @@ from scripts.auction import *
 
 
 @pytest.fixture(autouse=True)
-def auction_set(fn_isolation):
+def auction_set(module_isolation):
     setup_auction()
     perform_auction()
 
