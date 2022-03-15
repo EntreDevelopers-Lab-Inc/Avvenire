@@ -207,6 +207,24 @@ class CitizenMarketBroker:
 
         return traits
 
+    # function to set a citizen's sex
+    def set_sex(self):
+        # get the citizen
+        citizen = self.get_citizen()
+
+        # get the ipfs data
+        ipfs_data = self.get_ipfs_data(citizen)
+
+        # IF the citizen's sex is not set already, set it
+        if citizen[3] == 0:
+            # set the sex
+            citizen[3] = SEX_ORDER.index(
+                ipfs_data['attributes'][0]['value']) + 1
+
+            # set the citizen's data
+            self.contract.setCitizenData(
+                citizen, {'from': get_server_account()})
+
     # function to update a citizen
     def update_citizen(self):
         citizen = self.get_citizen()
@@ -237,20 +255,7 @@ class CitizenMarketBroker:
         citizen[1] = uri
 
         # set the citizen data with the contract using the admin account
-        self.contract.setCitizenData(citizen)
-
-        pass
-
-    # function to update a trait (needs to be relocated to a trait manager --> will become a part of creating a citizen)
-    # on the API, citizen creations will be stored with the exact traits created and dropped --> will have this data
-    def update_trait(self, trait_id):
-        # get the trait
-
-        # upload the trait to ipfs
-
-        # create the trait's data
-
-        # set the trait's data using the admin account
+        self.contract.setCitizenData(citizen, {'from': get_server_account()})
 
         pass
 
@@ -275,6 +280,26 @@ class CitizenMarketBroker:
             return None
 
         return data
+
+
+# a class for managing on-chain traits
+class TraitManager:
+    def __init__(self, contract, trait_id):
+        # save the contract
+        self.contract = contract
+
+    # function to update a trait (needs to be relocated to a trait manager --> will become a part of creating a citizen)
+    # on the API, citizen creations will be stored with the exact traits created and dropped --> will have this data
+    def update_trait(self):
+        # get the trait
+
+        # upload the trait to ipfs
+
+        # create the trait's data
+
+        # set the trait's data using the admin account
+
+        pass
 
 
 '''

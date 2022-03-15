@@ -4,7 +4,7 @@ import brownie
 from brownie import AvvenireTest, AvvenireCitizens, AvvenireCitizenMarket, accounts
 from web3 import Web3
 
-from tools.TraitManager import CitizenMarketBroker
+# from tools.TraitManager import CitizenMarketBroker
 
 from scripts.helpful_scripts import get_account
 from scripts.script_definitions import drop_interval

@@ -59,7 +59,7 @@ contract AvvenireCitizens is
     mapping(uint256 => bool) public tokenChangeRequests;
 
     // mapping for allowing other contracts to interact with this one
-    mapping(address => bool) public allowedContracts;
+    mapping(address => bool) private allowedContracts;
 
     // Designated # of citizens; **** Needs to be set to immutable following testings ****
     constructor(
@@ -352,6 +352,7 @@ contract AvvenireCitizens is
      */
     function makeTraitTransferable(uint256 traitId, bool exists) internal {
         // only execute if the trait exists (want to account for default case)
+        // if the trait doesn't exist yet, you want to mint all of them at once
         if ((exists) && (traitId != 0))
         {
             // set the ownership to the transaction origin

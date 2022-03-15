@@ -11,7 +11,7 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 
 contract AvvenireCitizenMarket is Ownable, AvvenireCitizenDataInterface {
     // store the avvenireCitizens contract
-    AvvenireCitizensInterface public avvenireCitizens;
+    AvvenireCitizensWithMappingInterface public avvenireCitizens;
 
     // struct for storing a trait change
     struct TraitChange {
@@ -41,7 +41,7 @@ contract AvvenireCitizenMarket is Ownable, AvvenireCitizenDataInterface {
     @param avvenireCitizensContractAddress the address for the existing avvvenireCitizens contract  
      */
     constructor(address avvenireCitizensContractAddress) {
-        avvenireCitizens = AvvenireCitizensInterface(
+        avvenireCitizens = AvvenireCitizensWithMappingInterface(
             avvenireCitizensContractAddress
         );
     }
@@ -153,7 +153,7 @@ contract AvvenireCitizenMarket is Ownable, AvvenireCitizenDataInterface {
             (bool success,) = address(avvenireCitizens).call{value: totalCost}("");
             require(success, "Insufficient funds for new traits minted.");
 
-            // mint the citzens
+            // mint the citzens --> this will only set ownership, will not indicate how to set traits and sexes
             avvenireCitizens.safeMint(tx.origin, toMint);
         }
 
@@ -198,7 +198,7 @@ contract AvvenireCitizenMarket is Ownable, AvvenireCitizenDataInterface {
         external
         onlyOwner
     {
-        avvenireCitizens = AvvenireCitizensInterface(contractAddress);
+        avvenireCitizens = AvvenireCitizensWithMappingInterface(contractAddress);
     }
 
     /**
