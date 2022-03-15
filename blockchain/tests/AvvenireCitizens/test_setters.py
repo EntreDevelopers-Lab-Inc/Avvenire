@@ -57,9 +57,7 @@ def test_set_allowed_permission(bool_):
     avvenire_citizens_contract = AvvenireCitizens[-1]
     admin_account = get_account()
     account_to_change = accounts[3]
-    avvenire_citizens_contract.setTokenTradeBeforeChange(
-        account_to_change, bool_, {"from": admin_account}
-    )
+    avvenire_citizens_contract.setTokenTradeBeforeChange(bool_, {"from": admin_account})
 
 
 # *** Tests below need to have variables set to public to test ***
