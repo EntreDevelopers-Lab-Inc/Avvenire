@@ -29,6 +29,7 @@ interface AvvenireCitizenDataInterface {
     // struct for storing trait data for the citizen (used ONLY in the citizen struct)
     struct Trait {
         uint256 tokenId; // for mapping traits to their tokens
+        uint256 originCitizen; // for mapping traits to their previous citizen owners
         string uri;
         bool free; // stores if the trait is free from the citizen (defaults to false)
         bool exists; // checks existence (for minting vs transferring)

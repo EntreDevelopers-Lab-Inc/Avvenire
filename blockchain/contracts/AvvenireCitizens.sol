@@ -235,14 +235,19 @@ contract AvvenireCitizens is
 
     /**
      * @notice internal function for getting the default trait (mostly for creating new citizens, waste of compute for creating new traits)
+     * @param originCitizen for backwards ipfs mapping
+     * @param sex for compatibility
+     * @param traitType for compatibility
+     * @param exists for tracking if the trait actually exists
      */
-    function baseTrait(Sex sex, TraitType traitType, bool exists)
+    function baseTrait(uint256 originCitizen, Sex sex, TraitType traitType, bool exists)
         internal
         returns (Trait memory)
     {
         return
             Trait({
                 tokenId: 0, // there will be no traits with tokenId 0, as that must be the first citizen (cannot have traits without minting the first citizen)
+                originCitizen: originCitizen,
                 uri: "",
                 free: false,
                 exists: exists,  // allow setting the existence
@@ -263,38 +268,19 @@ contract AvvenireCitizens is
             exists: true,
             sex: Sex.NULL,  // must be unisex for mint
             traits: Traits({
-                background: baseTrait(Sex.NULL, TraitType.BACKGROUND, false),  // minting with a default background
-                body: baseTrait(Sex.NULL, TraitType.BODY, true),
-                tattoo: baseTrait(Sex.NULL, TraitType.TATTOO, false),  // minting with no tattoos
-                eyes: baseTrait(Sex.NULL, TraitType.EYES, true),
-                mouth: baseTrait(Sex.NULL, TraitType.MOUTH, true),
-                mask: baseTrait(Sex.NULL, TraitType.MASK, false),  // mint with no masks
-                necklace: baseTrait(Sex.NULL, TraitType.NECKLACE, false),  // mint with no necklaces
-                clothing: baseTrait(Sex.NULL, TraitType.CLOTHING, true),
-                earrings: baseTrait(Sex.NULL, TraitType.EARRINGS, false),  // mint with no earrings
-                hair: baseTrait(Sex.NULL, TraitType.HAIR, true),
-                effect: baseTrait(Sex.NULL, TraitType.EFFECT, false)  // mint with no effects
+                background: baseTrait(0, Sex.NULL, TraitType.BACKGROUND, false),  // minting with a default background
+                body: baseTrait(tokenId, Sex.NULL, TraitType.BODY, true),
+                tattoo: baseTrait(0, Sex.NULL, TraitType.TATTOO, false),  // minting with no tattoos
+                eyes: baseTrait(tokenId, Sex.NULL, TraitType.EYES, true),
+                mouth: baseTrait(tokenId, Sex.NULL, TraitType.MOUTH, true),
+                mask: baseTrait(0, Sex.NULL, TraitType.MASK, false),  // mint with no masks
+                necklace: baseTrait(0, Sex.NULL, TraitType.NECKLACE, false),  // mint with no necklaces
+                clothing: baseTrait(tokenId, Sex.NULL, TraitType.CLOTHING, true),
+                earrings: baseTrait(0, Sex.NULL, TraitType.EARRINGS, false),  // mint with no earrings
+                hair: baseTrait(tokenId, Sex.NULL, TraitType.HAIR, true),
+                effect: baseTrait(0, Sex.NULL, TraitType.EFFECT, false)  // mint with no effects
             })
         });
-    }
-
-    /**
-     * @notice internal function to create a new trait (called after token transfer --> in safe mint)
-     * @param tokenId (for binding the token id)
-     */
-    function createNewTrait(uint256 tokenId) internal {
-        // create a new trait and put it in the mapping --> just set the token id, that it exists and that it is free
-        tokenIdToTrait[tokenId] = Trait({
-            tokenId: tokenId,
-            uri: "",
-            free: true,
-            exists: true,
-            sex: Sex.NULL,
-            traitType: TraitType.NULL
-        });
-
-        // everytime a new trait is created, a change must be requested, as there is no data bound to it yet
-        _requestChange(tokenId);
     }
 
     /**
@@ -313,6 +299,7 @@ contract AvvenireCitizens is
             // this trait does not exist, just set it to the default struct
             Trait memory trait = Trait({
                 tokenId: traitId,
+                originCitizen: 0,  // no need for an origin citizen, it's a default
                 uri: "",
                 free: false,
                 exists: false,
@@ -647,7 +634,20 @@ contract AvvenireCitizens is
                     createNewCitizen(tokenId);
                 } else {
                     // create a new trait if the citizen mint is inactive, and there is no trait mapping to the token id
-                    createNewTrait(tokenId); // no way to know the trait type on token transferm so just set it to null
+                    // no way to know the trait type on token transferm so just set it to null
+                    // create a new trait and put it in the mapping --> just set the token id, that it exists and that it is free
+                    tokenIdToTrait[tokenId] = Trait({
+                        tokenId: tokenId,
+                        originCitizen: 0,  // must set the origin citizen to null, as we have no data
+                        uri: "",
+                        free: true,
+                        exists: true,
+                        sex: Sex.NULL,
+                        traitType: TraitType.NULL
+                    });
+
+                    // everytime a new trait is created, a change must be requested, as there is no data bound to it yet
+                    _requestChange(tokenId);
                 }
             }
         }

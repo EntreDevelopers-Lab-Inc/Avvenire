@@ -63,15 +63,11 @@ contract AvvenireCitizenMarket is Ownable, AvvenireCitizenDataInterface {
             "You do not own this token."
         );
 
+        // make sure the citizen has a sex
+        require(avvenireCitizens.tokenIdToCitizen(citizenId).sex != Sex.NULL, "Must initialize the citizen before changing it.");
+
         _;
     }
-
-
-    /**
-     * @notice a function that can request that a user is allowed to change the token
-     * note: there is no way that we can get the citizens to actually
-    */
-
 
     /**
      * @notice a function to combine the token's parts
@@ -169,6 +165,20 @@ contract AvvenireCitizenMarket is Ownable, AvvenireCitizenDataInterface {
     }
 
     /**
+     * @notice a function to initialize the citizen (just requests a change to set the sex from ipfs)
+     * @param citizenId gives the contract a citizen to look for
+    */
+    function initializeCitizen(uint256 citizenId) external
+    {
+        // make sure the sex is null, or the citizen has already been initialized
+        require(avvenireCitizens.tokenIdToCitizen(citizenId).sex == Sex.NULL, "This citizen has already been initialized.");
+
+        // just request a change --> sets the sex
+        // this function will perform all ownership and mutability checks in the other contract
+        avvenireCitizens.requestChange(citizenId);
+    }
+
+    /**
      * @notice bind a trait to a citizen with some light logic
      * ASSUME that the trait has already been checked that it wants to be changed
      * @param citizenId for locating the citizen
@@ -179,7 +189,7 @@ contract AvvenireCitizenMarket is Ownable, AvvenireCitizenDataInterface {
         uint256 toMint,
         TraitChange memory traitChange
     ) internal {
-        if (traitChange.traitId == 0) {
+        if (avvenireCitizens.tokenIdToCitizen(citizenId).tokenId == 0) {
             toMint += 1;
         } else {
             avvenireCitizens.bind(
