@@ -1,7 +1,7 @@
 // SPDX-License-Identifier: MIT
 
 /**
- * @title token mutating contract for ERC721A
+ * @title Avvenire Citizens Contract
  */
 pragma solidity ^0.8.4;
 
@@ -14,6 +14,9 @@ import "@openzeppelin/contracts/utils/Strings.sol";
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 
 error TraitTypeDoesNotExist();
+error TransferFailed();
+error ChangeAlreadyRequested();
+error NotSender();
 
 // token mutator changes the way that an ERC721A contract interacts with tokens
 contract AvvenireCitizens is
@@ -59,7 +62,7 @@ contract AvvenireCitizens is
     mapping(uint256 => bool) public tokenChangeRequests;
 
     // mapping for allowing other contracts to interact with this one
-    mapping(address => bool) public allowedContracts;
+    mapping(address => bool) private allowedContracts;
 
     // Designated # of citizens; **** Needs to be set to immutable following testings ****
     constructor(
@@ -91,8 +94,12 @@ contract AvvenireCitizens is
       Modifier to check if the contract is allowed to call this contract
     */
     modifier callerIsAllowed() {
+<<<<<<< HEAD
         require(allowedContracts[msg.sender], "Not allowed to interact");
         //require(tx.origin != msg.sender, "The caller is a user");
+=======
+        if (!allowedContracts[msg.sender]) revert NotSender();
+>>>>>>> beta
         _;
     }
 
@@ -148,16 +155,33 @@ contract AvvenireCitizens is
      */
     function requestChange(uint256 tokenId) external payable callerIsAllowed {
         // check if you can even request changes at the moment
+<<<<<<< HEAD
         require(mutabilityConfig.mutabilityMode, "Tokens are immutable");
+=======
+        require(
+            mutabilityConfig.mutabilityMode,
+            "Tokens immutable"
+        );
+>>>>>>> beta
 
         // check if the token exists
         if (!_exists(tokenId)) revert URIQueryForNonexistentToken();
 
         // check that this is the rightful token owner
+<<<<<<< HEAD
         require(ownerOf(tokenId) == tx.origin, "Not the owner");
 
         // check if the token has already been requested to change
         require(!tokenChangeRequests[tokenId], "Change already requested");
+=======
+        require(
+            ownerOf(tokenId) == tx.origin,
+            "Not owner"
+        );
+
+        // check if the token has already been requested to change
+        if (tokenChangeRequests[tokenId]) revert ChangeAlreadyRequested();
+>>>>>>> beta
 
         _requestChange(tokenId); // call the internal function
     }
@@ -220,8 +244,12 @@ contract AvvenireCitizens is
 
     /**
      * @notice internal function for getting the default trait (mostly for creating new citizens, waste of compute for creating new traits)
+     * @param originCitizenId for backwards ipfs mapping
+     * @param sex for compatibility
+     * @param traitType for compatibility
+     * @param exists for tracking if the trait actually exists
      */
-    function baseTrait(Sex sex, TraitType traitType)
+    function baseTrait(uint256 originCitizenId, Sex sex, TraitType traitType, bool exists)
         internal
         returns (Trait memory)
     {
@@ -230,9 +258,14 @@ contract AvvenireCitizens is
                 tokenId: 0, // there will be no traits with tokenId 0, as that must be the first citizen (cannot have traits without minting the first citizen)
                 uri: "",
                 free: false,
+<<<<<<< HEAD
                 exists: (uint256(traitType) == 0), // this makes a null trait type false
+=======
+                exists: exists,  // allow setting the existence
+>>>>>>> beta
                 sex: sex,
-                traitType: traitType
+                traitType: traitType,
+                originCitizenId: originCitizenId
             });
     }
 
@@ -248,6 +281,7 @@ contract AvvenireCitizens is
             exists: true,
             sex: Sex.NULL, // must be unisex for mint
             traits: Traits({
+<<<<<<< HEAD
                 background: baseTrait(Sex.NULL, TraitType.NULL), // minting with a default background
                 body: baseTrait(Sex.NULL, TraitType.BODY),
                 tattoo: baseTrait(Sex.NULL, TraitType.NULL), // minting with no tattoos
@@ -259,27 +293,21 @@ contract AvvenireCitizens is
                 earrings: baseTrait(Sex.NULL, TraitType.NULL), // mint with no earrings
                 hair: baseTrait(Sex.NULL, TraitType.HAIR),
                 effect: baseTrait(Sex.NULL, TraitType.NULL) // mint with no effects
+=======
+                background: baseTrait(0, Sex.NULL, TraitType.BACKGROUND, false),  // minting with a default background
+                body: baseTrait(tokenId, Sex.NULL, TraitType.BODY, true),
+                tattoo: baseTrait(0, Sex.NULL, TraitType.TATTOO, false),  // minting with no tattoos
+                eyes: baseTrait(tokenId, Sex.NULL, TraitType.EYES, true),
+                mouth: baseTrait(tokenId, Sex.NULL, TraitType.MOUTH, true),
+                mask: baseTrait(0, Sex.NULL, TraitType.MASK, false),  // mint with no masks
+                necklace: baseTrait(0, Sex.NULL, TraitType.NECKLACE, false),  // mint with no necklaces
+                clothing: baseTrait(tokenId, Sex.NULL, TraitType.CLOTHING, true),
+                earrings: baseTrait(0, Sex.NULL, TraitType.EARRINGS, false),  // mint with no earrings
+                hair: baseTrait(tokenId, Sex.NULL, TraitType.HAIR, true),
+                effect: baseTrait(0, Sex.NULL, TraitType.EFFECT, false)  // mint with no effects
+>>>>>>> beta
             })
         });
-    }
-
-    /**
-     * @notice internal function to create a new trait (called after token transfer --> in safe mint)
-     * @param tokenId (for binding the token id)
-     */
-    function createNewTrait(uint256 tokenId) internal {
-        // create a new trait and put it in the mapping --> just set the token id, that it exists and that it is free
-        tokenIdToTrait[tokenId] = Trait({
-            tokenId: tokenId,
-            uri: "",
-            free: true,
-            exists: true,
-            sex: Sex.NULL,
-            traitType: TraitType.NULL
-        });
-
-        // everytime a new trait is created, a change must be requested, as there is no data bound to it yet
-        _requestChange(tokenId);
     }
 
     /**
@@ -298,6 +326,7 @@ contract AvvenireCitizens is
             // this trait does not exist, just set it to the default struct
             Trait memory trait = Trait({
                 tokenId: traitId,
+                originCitizenId: 0,  // no need for an origin citizen, it's a default
                 uri: "",
                 free: false,
                 exists: false,
@@ -337,7 +366,9 @@ contract AvvenireCitizens is
      */
     function makeTraitTransferable(uint256 traitId, bool exists) internal {
         // only execute if the trait exists (want to account for default case)
-        if ((exists) && (traitId != 0)) {
+        // if the trait doesn't exist yet, you want to mint all of them at once
+        if ((exists) && (traitId != 0))
+        {
             // set the ownership to the transaction origin
             _ownerships[traitId].addr = tx.origin;
 
@@ -384,11 +415,13 @@ contract AvvenireCitizens is
             // ensure that the trait and citizen have the same sex
             require(
                 tokenIdToCitizen[citizenId].sex == tokenIdToTrait[traitId].sex,
-                "Cannot combine traits from opposite sexes"
+                "Opposite sexes"
             );
         }
 
         // check each of the types and bind them accordingly
+        // this logic costs gas, as these are already checked in the market contract
+        // this should be here though. 11 integer checks should be ok, as it needs to bind to the correct place
         if (traitType == TraitType.BACKGROUND) {
             // make the old trait transferrable
             makeTraitTransferable(
@@ -637,7 +670,20 @@ contract AvvenireCitizens is
                     createNewCitizen(tokenId);
                 } else {
                     // create a new trait if the citizen mint is inactive, and there is no trait mapping to the token id
-                    createNewTrait(tokenId); // no way to know the trait type on token transferm so just set it to null
+                    // no way to know the trait type on token transferm so just set it to null
+                    // create a new trait and put it in the mapping --> just set the token id, that it exists and that it is free
+                    tokenIdToTrait[tokenId] = Trait({
+                        tokenId: tokenId,
+                        originCitizenId: 0,  // must set the origin citizen to null, as we have no data
+                        uri: "",
+                        free: true,
+                        exists: true,
+                        sex: Sex.NULL,
+                        traitType: TraitType.NULL
+                    });
+
+                    // everytime a new trait is created, a change must be requested, as there is no data bound to it yet
+                    _requestChange(tokenId);
                 }
             }
         }
@@ -769,6 +815,6 @@ contract AvvenireCitizens is
     function withdrawMoney() external onlyOwner nonReentrant {
         // Withdraw rest of the contract
         (bool success, ) = msg.sender.call{value: address(this).balance}("");
-        require(success, "team transfer failed");
+        if (!success) revert TransferFailed();
     }
 } // End of contract

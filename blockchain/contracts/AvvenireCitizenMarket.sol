@@ -11,7 +11,7 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 
 contract AvvenireCitizenMarket is Ownable, AvvenireCitizenDataInterface {
     // store the avvenireCitizens contract
-    AvvenireCitizensInterface public avvenireCitizens;
+    AvvenireCitizensWithMappingInterface public avvenireCitizens;
 
     // struct for storing a trait change
     struct TraitChange {
@@ -41,7 +41,7 @@ contract AvvenireCitizenMarket is Ownable, AvvenireCitizenDataInterface {
     @param avvenireCitizensContractAddress the address for the existing avvvenireCitizens contract  
      */
     constructor(address avvenireCitizensContractAddress) {
-        avvenireCitizens = AvvenireCitizensInterface(
+        avvenireCitizens = AvvenireCitizensWithMappingInterface(
             avvenireCitizensContractAddress
         );
     }
@@ -63,13 +63,31 @@ contract AvvenireCitizenMarket is Ownable, AvvenireCitizenDataInterface {
             "You do not own this token."
         );
 
+        // make sure the citizen has a sex
+        require(avvenireCitizens.tokenIdToCitizen(citizenId).sex != Sex.NULL, "Must initialize the citizen before changing it.");
+
         _;
     }
 
     /**
+<<<<<<< HEAD
      * @notice a function that can request that a user is allowed to change the token
      * note: there is no way that we can get the citizens to actually
      */
+=======
+     * @notice a function to initialize the citizen (just requests a change to set the sex from ipfs)
+     * @param citizenId gives the contract a citizen to look for
+    */
+    function initializeCitizen(uint256 citizenId) external
+    {
+        // make sure the sex is null, or the citizen has already been initialized
+        require(avvenireCitizens.tokenIdToCitizen(citizenId).sex == Sex.NULL, "This citizen has already been initialized.");
+
+        // just request a change --> sets the sex
+        // this function will perform all ownership and mutability checks in the other contract
+        avvenireCitizens.requestChange(citizenId);
+    }
+>>>>>>> beta
 
     /**
      * @notice a function to combine the token's parts
@@ -86,7 +104,10 @@ contract AvvenireCitizenMarket is Ownable, AvvenireCitizenDataInterface {
         payable
         canChange(citizenId)
     {
-        // have some amount to mint
+        // keep track of the ones to mint
+        TraitChange[11] memory newTraits;
+
+        // track new trait count
         uint256 toMint;
 
         // get the cost of requesting one change
@@ -99,47 +120,47 @@ contract AvvenireCitizenMarket is Ownable, AvvenireCitizenDataInterface {
         // each trait's mergability will be checked on binding (to reduce gas costs, access the mapping on the frontend before using this function)
         // if changing and traitId == 0, add it to the list that need to be minted, else bind the trait directly
         if (traitChanges.backgroundChange.toChange) {
-            _bindTrait(citizenId, toMint, traitChanges.backgroundChange);
+            _bindTrait(citizenId, avvenireCitizens.tokenIdToCitizen(citizenId).traits.background, newTraits, toMint, traitChanges.backgroundChange);
         }
 
         if (traitChanges.bodyChange.toChange) {
-            _bindTrait(citizenId, toMint, traitChanges.bodyChange);
+            _bindTrait(citizenId, avvenireCitizens.tokenIdToCitizen(citizenId).traits.body, newTraits, toMint, traitChanges.bodyChange);
         }
 
         if (traitChanges.tattooChange.toChange) {
-            _bindTrait(citizenId, toMint, traitChanges.tattooChange);
+            _bindTrait(citizenId, avvenireCitizens.tokenIdToCitizen(citizenId).traits.tattoo, newTraits, toMint, traitChanges.tattooChange);
         }
 
         if (traitChanges.eyesChange.toChange) {
-            _bindTrait(citizenId, toMint, traitChanges.eyesChange);
+            _bindTrait(citizenId, avvenireCitizens.tokenIdToCitizen(citizenId).traits.eyes, newTraits, toMint, traitChanges.eyesChange);
         }
 
         if (traitChanges.mouthChange.toChange) {
-            _bindTrait(citizenId, toMint, traitChanges.mouthChange);
+            _bindTrait(citizenId, avvenireCitizens.tokenIdToCitizen(citizenId).traits.mouth, newTraits, toMint, traitChanges.mouthChange);
         }
 
         if (traitChanges.maskChange.toChange) {
-            _bindTrait(citizenId, toMint, traitChanges.maskChange);
+            _bindTrait(citizenId, avvenireCitizens.tokenIdToCitizen(citizenId).traits.mask, newTraits, toMint, traitChanges.maskChange);
         }
 
         if (traitChanges.necklaceChange.toChange) {
-            _bindTrait(citizenId, toMint, traitChanges.necklaceChange);
+            _bindTrait(citizenId, avvenireCitizens.tokenIdToCitizen(citizenId).traits.necklace, newTraits, toMint, traitChanges.necklaceChange);
         }
 
         if (traitChanges.clothingChange.toChange) {
-            _bindTrait(citizenId, toMint, traitChanges.clothingChange);
+            _bindTrait(citizenId, avvenireCitizens.tokenIdToCitizen(citizenId).traits.clothing, newTraits, toMint, traitChanges.clothingChange);
         }
 
         if (traitChanges.earringsChange.toChange) {
-            _bindTrait(citizenId, toMint, traitChanges.earringsChange);
+            _bindTrait(citizenId, avvenireCitizens.tokenIdToCitizen(citizenId).traits.earrings, newTraits, toMint, traitChanges.earringsChange);
         }
 
         if (traitChanges.hairChange.toChange) {
-            _bindTrait(citizenId, toMint, traitChanges.hairChange);
+            _bindTrait(citizenId, avvenireCitizens.tokenIdToCitizen(citizenId).traits.hair, newTraits, toMint, traitChanges.hairChange);
         }
 
         if (traitChanges.effectChange.toChange) {
-            _bindTrait(citizenId, toMint, traitChanges.effectChange);
+            _bindTrait(citizenId, avvenireCitizens.tokenIdToCitizen(citizenId).traits.effect, newTraits, toMint, traitChanges.effectChange);
         }
 
         // if there are any to mint, do so
@@ -153,8 +174,41 @@ contract AvvenireCitizenMarket is Ownable, AvvenireCitizenDataInterface {
             );
             require(success, "Insufficient funds for new traits minted.");
 
-            // mint the citzens
+            // mint the citzens --> this will only set ownership, will not indicate how to set traits and sexes
+            uint256 startTokenId = avvenireCitizens.getTotalSupply();
             avvenireCitizens.safeMint(tx.origin, toMint);
+<<<<<<< HEAD
+=======
+
+            // this can be implied with toMint, as we minted exactly that many
+            // uint256 pastLimit = avvenireCitizens.getTotalSupply();
+
+            // iterate between the start token id and the limit --> set the trait data to the correct citizen, sex, and trait type --> only the URI will need to be set
+            Trait memory trait;
+            uint256 tokenId;
+
+            for (uint256 i = 0; i < toMint; i += 1)
+            {
+                // set the trait id
+                tokenId = startTokenId + i;
+
+                // get the old trait information (some has been set already)
+                trait = avvenireCitizens.tokenIdToTrait(tokenId);
+
+                // set the trait information (stores less memory, as these are smaller than traits, and they have the important information already set)
+                trait.originCitizenId = citizenId;
+                trait.sex = newTraits[i].sex;
+                trait.traitType = newTraits[i].traitType;
+
+                // push the trait onto the data contract
+                // need to do this to differentiate the new traits created (for which properties)
+                // in an accessory (tattoo) contract, if the token URIs are set, we can set those here too, but we don't have them for freshly minted tokens (as the trait's values, not types, are on ipfs and have NO relation to the tokenId)
+                // would need to manufacture a relationship between token id and trait uri to bind the uri here
+                // still need to update the uri, so keep the update as true
+                avvenireCitizens.setTraitData(trait, true);
+            }
+        }
+>>>>>>> beta
 
             //_refundIfOver(totalCost);
         }
@@ -178,12 +232,20 @@ contract AvvenireCitizenMarket is Ownable, AvvenireCitizenDataInterface {
      */
     function _bindTrait(
         uint256 citizenId,
+        Trait memory oldTrait,
+        TraitChange[11] memory newTraits,
         uint256 toMint,
         TraitChange memory traitChange
     ) internal {
-        if (traitChange.traitId == 0) {
+        if ((oldTrait.tokenId == 0) && (oldTrait.exists)) {
+            // add the trait to the newTraits array
+            newTraits[toMint] = traitChange;
+
+            // increment toMint to make the count accurate
             toMint += 1;
+
         } else {
+            // can bind without remorse, as there will be no need to mint anything
             avvenireCitizens.bind(
                 citizenId,
                 traitChange.traitId,
@@ -200,7 +262,7 @@ contract AvvenireCitizenMarket is Ownable, AvvenireCitizenDataInterface {
         external
         onlyOwner
     {
-        avvenireCitizens = AvvenireCitizensInterface(contractAddress);
+        avvenireCitizens = AvvenireCitizensWithMappingInterface(contractAddress);
     }
 
     /**

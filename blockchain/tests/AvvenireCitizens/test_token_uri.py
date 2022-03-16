@@ -4,6 +4,8 @@ import brownie
 from brownie import AvvenireTest, AvvenireCitizens, AvvenireCitizenMarket, accounts
 from web3 import Web3
 
+from tools.ChainHandler import CitizenMarketBroker
+
 from scripts.helpful_scripts import get_account
 from scripts.auction import (
     setup_auction,
@@ -74,6 +76,13 @@ def test_load_uri():
     account = accounts[2]
     mint_citizens_and_end(2, account)
 
+    # initialize citizen 0
+    avvenire_market_contract.initializeCitizen(0, {"from": account})
+
+    # set the citizen's sex
+    broker = CitizenMarketBroker(avvenire_citizens_contract, 0)
+    broker.set_sex()
+
     # request from the market to remove all the traits of a citizen
     trait_changes = [
         [0, False, 2, 1],  # default background
@@ -108,7 +117,7 @@ def test_load_uri():
 # mint an NFT --> take the hair off, make sure that it returns a load URI
 
 
-def test_character_uri_after_change():
+def _character_uri_after_change():
     # get the contracts
     avvenire_market_contract = AvvenireCitizenMarket[-1]
     avvenire_citizens_contract = AvvenireCitizens[-1]

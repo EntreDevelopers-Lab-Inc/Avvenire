@@ -4,6 +4,9 @@ website/static/js/constants.js
 # batch files
 *.bat
 
+# executables
+*.exe
+
 # wsgi (these just point to a location, so we want this to be mutable)
 *.wsgi
 
