@@ -161,12 +161,12 @@ class CitizenCreator:
         files = [f"{self.sex}/{file}" for file in self.composition_files]
 
         # create a piece of art, initializing with the first file
-        art = Art({'full_path': os.path.join(ART_FOLDER, files[0])})
+        art = Art({'full_path': os.path.join(ART_FOLDER, self.sex, files[0])})
 
         # iterate over the files
         for file in files[1:]:
             # paste each file onto the original piece of art
-            art.paste({'full_path': os.path.join(ART_FOLDER, file)})
+            art.paste({'full_path': os.path.join(ART_FOLDER, self.sex, file)})
 
         # upload the image to ipfs
         image_link = upload_to_ipfs(art.image)
@@ -203,11 +203,14 @@ class CitizenMarketBroker:
         # store the contract
         self.contract = contract
 
+        # store the citizen id
+        self.citizen_id = citizen_id
+
     # get the citizen
     def get_citizen(self):
         # need to connect to other contract to get the citizen
-        citizen = self.contract.avvenireCitizens.tokenIdToCitizen(
-            self.citizen_id)
+        citizen = list(self.contract.tokenIdToCitizen(
+            self.citizen_id))
         return citizen
 
     # get the traits of the citizen
@@ -221,6 +224,7 @@ class CitizenMarketBroker:
     def set_sex(self):
         # get the citizen
         citizen = self.get_citizen()
+        print(citizen)
 
         # get the ipfs data
         ipfs_data = self.get_ipfs_data(citizen)
@@ -228,12 +232,12 @@ class CitizenMarketBroker:
         # IF the citizen's sex is not set already, set it
         if citizen[3] == 0:
             # set the sex
-            citizen[3] = SEX_ORDER.index(
-                ipfs_data['attributes'][0]['value']) + 1
+            citizen[3] = int(SEX_ORDER.index(
+                ipfs_data['attributes'][0]['value'])) + 1
 
-            # set the citizen's data
+            # set the citizen's data --> no need to update further, as the citizen's data is already stored
             self.contract.setCitizenData(
-                citizen, {'from': get_server_account()})
+                citizen, False, {'from': get_server_account()})
 
     # function to update a citizen
     def update_citizen(self):
@@ -264,8 +268,9 @@ class CitizenMarketBroker:
         # change the citizen uri
         citizen[1] = uri
 
-        # set the citizen data with the contract using the admin account
-        self.contract.setCitizenData(citizen, {'from': get_server_account()})
+        # set the citizen data with the contract using the admin account --> no need for more changes, set those to false
+        self.contract.setCitizenData(
+            citizen, False, {'from': get_server_account()})
 
         pass
 
@@ -302,7 +307,7 @@ class TraitManager:
     # on the API, citizen creations will be stored with the exact traits created and dropped --> will have this data
     def update_trait(self):
         # get the trait
-        trait = self.contract.tokenIdToTrait(trait_id)
+        trait = self.contract.tokenIdToTrait(self.trait_id)
 
         # get the trait data from ipfs by linking it to the origin citizen
         resp = requests.get(f"{BASE_URI}/{trait[6]}")
@@ -321,6 +326,9 @@ class TraitManager:
         file_dict = {trait_files['trait_type']: trait_files['file']
                      for trait_files in citizen_data['trait_files']}
 
+        # get the trait sex
+        sex = SEX_ORDER[trait[4] - 1]
+
         # get the trait data depending on the trait type
         trait_type = TRAIT_ORDER[trait[5] - 1]
         file = file_dict[trait_type]
@@ -331,7 +339,7 @@ class TraitManager:
             attribute, file, trait_type)
 
         # get the image (just create some art with only one file)
-        art = Art({'full_path': os.path.join(ART_FOLDER, file)})
+        art = Art({'full_path': os.path.join(ART_FOLDER, sex, file)})
 
         # upload the image to ifpfs
         art_link = upload_to_ipfs(art.image)

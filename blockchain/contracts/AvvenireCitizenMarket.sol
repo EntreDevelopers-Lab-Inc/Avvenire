@@ -70,6 +70,20 @@ contract AvvenireCitizenMarket is Ownable, AvvenireCitizenDataInterface {
     }
 
     /**
+     * @notice a function to initialize the citizen (just requests a change to set the sex from ipfs)
+     * @param citizenId gives the contract a citizen to look for
+    */
+    function initializeCitizen(uint256 citizenId) external
+    {
+        // make sure the sex is null, or the citizen has already been initialized
+        require(avvenireCitizens.tokenIdToCitizen(citizenId).sex == Sex.NULL, "This citizen has already been initialized.");
+
+        // just request a change --> sets the sex
+        // this function will perform all ownership and mutability checks in the other contract
+        avvenireCitizens.requestChange(citizenId);
+    }
+
+    /**
      * @notice a function to combine the token's parts
      * this must be payable in order to request changes to each individual component
      * IF the file gets too big, this can be an array, but that would be suboptimal, as it would not require that only one of each trait could be passed
@@ -194,20 +208,6 @@ contract AvvenireCitizenMarket is Ownable, AvvenireCitizenDataInterface {
 
         // refund the rest of the transaction value if the transaction is over
         _refundIfOver(totalCost);
-    }
-
-    /**
-     * @notice a function to initialize the citizen (just requests a change to set the sex from ipfs)
-     * @param citizenId gives the contract a citizen to look for
-    */
-    function initializeCitizen(uint256 citizenId) external
-    {
-        // make sure the sex is null, or the citizen has already been initialized
-        require(avvenireCitizens.tokenIdToCitizen(citizenId).sex == Sex.NULL, "This citizen has already been initialized.");
-
-        // just request a change --> sets the sex
-        // this function will perform all ownership and mutability checks in the other contract
-        avvenireCitizens.requestChange(citizenId);
     }
 
     /**
