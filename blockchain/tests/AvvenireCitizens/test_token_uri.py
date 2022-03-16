@@ -22,15 +22,11 @@ def auction_set(fn_isolation):
 
 # try to get the uri for a non-existent token
 def test_fake_token():
-    # perform the auction
-    perform_auction()
-
     # get the contract
     avvenire_citizens_contract = AvvenireCitizens[-1]
-    # check the wrong token uri
     with brownie.reverts():
-        # token 20 should have an issue, as only 0-19 are minted
-        assert avvenire_citizens_contract.tokenURI(20)
+        # token 0 should have an issue since no tokens have been minted
+        assert avvenire_citizens_contract.tokenURI(0)
 
 
 # try to get a token uri by interacting with the main contract directly

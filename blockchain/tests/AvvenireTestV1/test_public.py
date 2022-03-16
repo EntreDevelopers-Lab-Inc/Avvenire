@@ -112,7 +112,7 @@ def test_public_mint_past_collection_size():
     total_balance = 0
     mint_cost = public_sale_price_wei * mint_quantity
     chain.sleep(PUBLIC_SALE_START_TIME_FROM_EPOCH + 1)
-    chain.mine()
+    chain.mine(1)
 
     # Mint all 20 NFTs in the collection
     for count in range(1, 5):
@@ -139,10 +139,9 @@ def test_team_mint_past_collection_size():
     public_sale_price_wei = Web3.toWei(PUBLIC_SALE_PRICE_ETH, "ether")
     admin_account = get_account()
     mint_quantity = 5
-    total_balance = 0
     mint_cost = public_sale_price_wei * mint_quantity
     chain.sleep(PUBLIC_SALE_START_TIME_FROM_EPOCH + 1)
-    chain.mine()
+    chain.mine(1)
 
     # Mint all 20 NFTs in the collection
     for count in range(1, 5):

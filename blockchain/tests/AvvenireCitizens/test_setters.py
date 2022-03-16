@@ -12,7 +12,7 @@ from scripts.auction import *
 @pytest.fixture(autouse=True)
 def auction_set(module_isolation):
     setup_auction()
-    perform_auction()
+    # perform_auction()
 
 
 @pytest.mark.parametrize("bool_", [True, False])
@@ -26,9 +26,19 @@ def test_set_mutability_mode(bool_):
 
 def test_ownership_of():
     avvenire_citizens_contract = AvvenireCitizens[-1]
+    avvenire_auction_contract = AvvenireTest[-1]
     admin_account = get_account()
+    account = accounts[5]
+    cost = Web3.toWei(1, "ether")
 
-    avvenire_citizens_contract.getOwnershipData(1, {"from": admin_account})
+    # Mint an NFT at every interval...
+    avvenire_auction_contract.auctionMint(1, {"from": account, "value": cost})
+
+    (addr, start_time_stamp, burned) = avvenire_citizens_contract.getOwnershipData(
+        0, {"from": admin_account}
+    )
+    assert addr == account
+    assert burned == 0
 
 
 def test_set_mutability_cost():
