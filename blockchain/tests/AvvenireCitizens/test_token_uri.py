@@ -9,7 +9,7 @@ from tools.ChainHandler import CitizenMarketBroker
 from scripts.helpful_scripts import get_account
 from scripts.script_definitions import drop_interval
 from scripts.auction import setup_auction, perform_auction, end_auction, BASE_URI, LOAD_URI
-from scripts.mint import mint_citizens_and_end
+from scripts.mint import mint_citizens_and_end, mint_citizens_and_initialize
 
 
 @pytest.fixture(autouse=True)
@@ -75,26 +75,20 @@ def test_load_uri():
 
     # mint an nft
     account = accounts[2]
-    mint_citizens_and_end(2, account)
 
-    # initialize citizen 0
-    avvenire_market_contract.initializeCitizen(0, {'from': account})
-
-    # set the citizen's sex
-    broker = CitizenMarketBroker(avvenire_citizens_contract, 0)
-    broker.set_sex()
+    mint_citizens_and_initialize(2, account)
 
     # request from the market to remove all the traits of a citizen
     trait_changes = [
         [0, False, 2, 1],  # default background
         [0, True, 2, 2],
-        [0, True, 2, 3],
+        [0, False, 2, 3],  # default tattoo
         [0, True, 2, 4],
         [0, True, 2, 5],
-        [0, True, 2, 6],
-        [0, True, 2, 7],
+        [0, False, 2, 6],  # no mask
+        [0, False, 2, 7],  # no necklaces
         [0, True, 2, 8],
-        [0, True, 2, 9],
+        [0, False, 2, 9],  # no earrings
         [0, True, 2, 10],
         [0, False, 2, 11]  # default effects
     ]
@@ -113,21 +107,17 @@ def test_load_uri():
     assert avvenire_citizens_contract.balance() == 0
     assert avvenire_market_contract.balance() == 0
 
+
 # request a change --> have the admin update it
 # mint an NFT --> take the hair off, make sure that it returns a load URI
-
-
-def _character_uri_after_change():
+def test_character_uri_after_change():
     # get the contracts
-    avvenire_market_contract = AvvenireCitizenMarket[-1]
     avvenire_citizens_contract = AvvenireCitizens[-1]
-
-    # get the admin account
-    admin_account = get_account()
+    avvenire_market_contract = AvvenireCitizenMarket[-1]
 
     # mint an nft
     account = accounts[2]
-    mint_citizens_and_end(2, account)
+    broker = mint_citizens_and_initialize(2, account)
 
     # request from the market to remove all the traits of a citizen --> should be stored on the backend --> will be able to set it later
     trait_changes = [
@@ -149,3 +139,10 @@ def _character_uri_after_change():
         0, trait_changes, {"from": account, "value": Web3.toWei(0.05, "ether")})
 
     # make the changes as an admin
+    broker_citizen = broker.update_citizen()
+
+    # get the new citizen from the chain and see if it matches
+    chain_citizen = avvenire_citizens_contract.tokenIdToCitizen(0)
+
+    # make sure the citizens are the same
+    assert broker_citizen == chain_citizen
