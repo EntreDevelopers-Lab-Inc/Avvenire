@@ -1,4 +1,8 @@
-from .constants import PINATA_BASE_URL, PINATA_HEADERS, EXTENSION
+try:
+    from blockchain.constants import PINATA_BASE_URL, PINATA_HEADERS, EXTENSION
+except ImportError:
+    from constants import PINATA_BASE_URL, PINATA_HEADERS, EXTENSION
+
 import ipfshttpclient
 import requests
 import io
@@ -7,10 +11,15 @@ import io
 PINNING_ENDPOINT = 'https://api.pinata.cloud/pinning/pinByHash'
 
 
-def upload_to_ipfs(image):
+def upload_to_ipfs(image, extension=EXTENSION):
     # get the image bytes
     buf = io.BytesIO()
-    image.save(buf, format=EXTENSION)
+
+    if extension:
+        image.save(buf, format=extension)
+    else:
+        image.save(buf)
+
     art_bytes = buf.getvalue()
 
     # create a hash using bytecode and upload it to the local ipfs node

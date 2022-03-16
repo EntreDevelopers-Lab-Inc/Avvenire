@@ -1,9 +1,19 @@
-from .scripts.helpful_scripts import get_server_account
-from .constants import BASE_URI, EXTENSION
-from .GenerativeArt.core.art import Art
-from .tools.ipfs import upload_to_ipfs
 import requests
+import json
+import os
 
+# import modules selectively to see if you are in test or production mode
+try:
+    from blockchain.scripts.helpful_scripts import get_server_account
+    from blockchain.constants import BASE_URI, EXTENSION
+    from blockchain.GenerativeArt.core.art import Art
+    from blockchain.tools.ipfs import upload_to_ipfs
+
+except ImportError:
+    from scripts.helpful_scripts import get_server_account
+    from constants import BASE_URI, EXTENSION
+    from GenerativeArt.core.art import Art
+    from tools.ipfs import upload_to_ipfs
 
 # create a trait order
 TRAIT_ORDER = ['Background', 'Body', 'Tattoo', 'Eyes', 'Mouth',
@@ -15,8 +25,8 @@ SEX_ORDER = ['Male', 'Female']
 # set the default
 DEFAULT_FILE = f"DEFAULT.{EXTENSION}"
 
-# set the export folder
-EXPORT_FOLDER = 'temp'
+# set the folder with the art
+ART_FOLDER = f"{os.getcwd()}GenerativeArt"
 
 
 # make a class that can create citizens by comparing ipfs to on-chain data
@@ -80,7 +90,7 @@ class CitizenCreator:
             trait_type = TRAIT_ORDER[trait[5] - 1]
 
             # imply the file default information based on the trait type and sex
-            return {'name': 'Default', 'file': f"{trait_type}/{DEFAULT_FILE}", 'attributes': {'trait_type': trait_type, 'value': 'Default'}}
+            return create_trait(trait_type, f"{trait_type}/{DEFAULT_FILE}", trait_type)
 
     # create a way to get the metadata
     def get_metadata(self):
@@ -151,12 +161,12 @@ class CitizenCreator:
         files = [f"{self.sex}/{file}" for file in self.composition_files]
 
         # create a piece of art, initializing with the first file
-        art = Art({'full_path': files[0]})
+        art = Art({'full_path': os.path.join(ART_FOLDER, files[0])})
 
         # iterate over the files
         for file in files[1:]:
             # paste each file onto the original piece of art
-            art.paste({'full_path': file})
+            art.paste({'full_path': os.path.join(ART_FOLDER, file)})
 
         # upload the image to ipfs
         image_link = upload_to_ipfs(art.image)
@@ -292,14 +302,58 @@ class TraitManager:
     # on the API, citizen creations will be stored with the exact traits created and dropped --> will have this data
     def update_trait(self):
         # get the trait
+        trait = self.contract.tokenIdToTrait(trait_id)
 
-        # upload the trait to ipfs
+        # get the trait data from ipfs by linking it to the origin citizen
+        resp = requests.get(f"{BASE_URI}/{trait[6]}")
 
-        # create the trait's data
+        # check if we got anything
+        if resp.status_code > 299:
+            print(f"Unable to get the data for trait: {trait}")
+            return
+
+        # get the citizen data
+        citizen_data = resp.json()
+
+        # get dictionaries for the attributes and files
+        attribute_dict = {attribute['trait_type']: attribute['value']
+                          for attribute in citizen_data['attributes']}
+        file_dict = {trait_files['trait_type']: trait_files['file']
+                     for trait_files in citizen_data['trait_files']}
+
+        # get the trait data depending on the trait type
+        trait_type = TRAIT_ORDER[trait[5] - 1]
+        file = file_dict[trait_type]
+        attribute = attribute_dict[trait_type]
+
+        # create the metadata
+        metadata = create_trait(
+            attribute, file, trait_type)
+
+        # get the image (just create some art with only one file)
+        art = Art({'full_path': os.path.join(ART_FOLDER, file)})
+
+        # upload the image to ifpfs
+        art_link = upload_to_ipfs(art.image)
+
+        # set the image associated with the trait
+        metadata['image'] = art_link
+
+        # upload the metadata to ipfs
+        metadata_link = upload_to_ipfs
+
+        # change the trait's uri (rest can stay the same)
+        trait[1] = metadata_link
 
         # set the trait's data using the admin account
+        self.contract.setTraitsData(trait, {'from': get_server_account()})
 
         pass
+
+
+# function for standardizing trait data
+def create_trait(name, file, trait_type):
+    return {'name': name, 'file': file, 'attributes': {'trait_type': trait_type, 'value': name}}
 
 
 '''

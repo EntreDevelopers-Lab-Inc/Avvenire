@@ -16,6 +16,7 @@ import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 error TraitTypeDoesNotExist();
 error TransferFailed();
 error ChangeAlreadyRequested();
+error NotSender();
 
 // token mutator changes the way that an ERC721A contract interacts with tokens
 contract AvvenireCitizens is
@@ -94,10 +95,7 @@ contract AvvenireCitizens is
       Modifier to check if the contract is allowed to call this contract
     */
     modifier callerIsAllowed() {
-        require(
-            allowedContracts[msg.sender],
-            "Not allowed to interact"
-        );
+        if (!allowedContracts[msg.sender]) revert NotSender();
         _;
     }
 
@@ -234,24 +232,24 @@ contract AvvenireCitizens is
 
     /**
      * @notice internal function for getting the default trait (mostly for creating new citizens, waste of compute for creating new traits)
-     * @param originCitizen for backwards ipfs mapping
+     * @param originCitizenId for backwards ipfs mapping
      * @param sex for compatibility
      * @param traitType for compatibility
      * @param exists for tracking if the trait actually exists
      */
-    function baseTrait(uint256 originCitizen, Sex sex, TraitType traitType, bool exists)
+    function baseTrait(uint256 originCitizenId, Sex sex, TraitType traitType, bool exists)
         internal
         returns (Trait memory)
     {
         return
             Trait({
                 tokenId: 0, // there will be no traits with tokenId 0, as that must be the first citizen (cannot have traits without minting the first citizen)
-                originCitizen: originCitizen,
                 uri: "",
                 free: false,
                 exists: exists,  // allow setting the existence
                 sex: sex,
-                traitType: traitType
+                traitType: traitType,
+                originCitizenId: originCitizenId
             });
     }
 
@@ -298,7 +296,7 @@ contract AvvenireCitizens is
             // this trait does not exist, just set it to the default struct
             Trait memory trait = Trait({
                 tokenId: traitId,
-                originCitizen: 0,  // no need for an origin citizen, it's a default
+                originCitizenId: 0,  // no need for an origin citizen, it's a default
                 uri: "",
                 free: false,
                 exists: false,
@@ -396,6 +394,8 @@ contract AvvenireCitizens is
         }
 
         // check each of the types and bind them accordingly
+        // this logic costs gas, as these are already checked in the market contract
+        // this should be here though. 11 integer checks should be ok, as it needs to bind to the correct place
         if (traitType == TraitType.BACKGROUND) {
             // make the old trait transferrable
             makeTraitTransferable(
@@ -637,7 +637,7 @@ contract AvvenireCitizens is
                     // create a new trait and put it in the mapping --> just set the token id, that it exists and that it is free
                     tokenIdToTrait[tokenId] = Trait({
                         tokenId: tokenId,
-                        originCitizen: 0,  // must set the origin citizen to null, as we have no data
+                        originCitizenId: 0,  // must set the origin citizen to null, as we have no data
                         uri: "",
                         free: true,
                         exists: true,
