@@ -68,7 +68,7 @@ def test_character_URI():
 
 # request a change --> see if it returns the load uri
 # mint an NFT --> take the hair off, make sure that it returns a load URI
-def test_load_uri():
+def _load_uri():
     # get the contracts
     avvenire_market_contract = AvvenireCitizenMarket[-1]
     avvenire_citizens_contract = AvvenireCitizens[-1]
@@ -110,7 +110,7 @@ def test_load_uri():
 # mint an NFT --> take the hair off, make sure that it returns a load URI
 
 
-def test_character_uri_after_change():
+def _character_uri_after_change():
     # get the contracts
     avvenire_market_contract = AvvenireCitizenMarket[-1]
     avvenire_citizens_contract = AvvenireCitizens[-1]
