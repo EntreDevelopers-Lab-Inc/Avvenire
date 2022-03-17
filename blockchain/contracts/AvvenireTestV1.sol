@@ -25,6 +25,7 @@ contract AvvenireTest is Ownable, ReentrancyGuard {
     // dev payment information
     uint256 paymentToDevs; // can decrement this to 0 after being paid
     address devAddress;
+    bool areDevsPaid;
 
     // avvenire citizens contract
     AvvenireCitizensInterface avvenireCitizens;
