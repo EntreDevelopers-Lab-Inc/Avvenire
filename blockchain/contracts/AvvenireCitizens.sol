@@ -81,7 +81,6 @@ contract AvvenireCitizens is
         // set the receiving address to the publisher of this contract
         receivingAddress = payable(msg.sender);
 
-        // allow this contract to interact with itself
         allowedContracts[msg.sender] = true;
 
         // Set mint to true
@@ -95,18 +94,20 @@ contract AvvenireCitizens is
       Modifier to check if the contract is allowed to call this contract
     */
     modifier callerIsAllowed() {
+<<<<<<< HEAD
+        require(allowedContracts[msg.sender], "Not allowed to interact");
+        //require(tx.origin != msg.sender, "The caller is a user");
+=======
         if (!allowedContracts[msg.sender]) revert NotSender();
+>>>>>>> beta
         _;
     }
 
     /**
      * modifier to check if it is the devs
-    */
+     */
     modifier onlyDevs() {
-        require(
-            msg.sender == devConfig.devAddress,
-            "Not devs"
-        );
+        require(msg.sender == devConfig.devAddress, "Not devs");
         _;
     }
 
@@ -142,10 +143,10 @@ contract AvvenireCitizens is
     }
 
     /** @notice a function that gives the change cost
-    */
-    function getChangeCost() public view returns(uint256)
-    {
-        return (mutabilityConfig.mutabilityCost * ((100 + devConfig.devRoyaltyPercent) / 100));
+     */
+    function getChangeCost() public view returns (uint256) {
+        return (mutabilityConfig.mutabilityCost *
+            ((100 + devConfig.devRoyaltyPercent) / 100));
     }
 
     /**
@@ -154,15 +155,25 @@ contract AvvenireCitizens is
      */
     function requestChange(uint256 tokenId) external payable callerIsAllowed {
         // check if you can even request changes at the moment
+<<<<<<< HEAD
+        require(mutabilityConfig.mutabilityMode, "Tokens are immutable");
+=======
         require(
             mutabilityConfig.mutabilityMode,
             "Tokens immutable"
         );
+>>>>>>> beta
 
         // check if the token exists
         if (!_exists(tokenId)) revert URIQueryForNonexistentToken();
 
         // check that this is the rightful token owner
+<<<<<<< HEAD
+        require(ownerOf(tokenId) == tx.origin, "Not the owner");
+
+        // check if the token has already been requested to change
+        require(!tokenChangeRequests[tokenId], "Change already requested");
+=======
         require(
             ownerOf(tokenId) == tx.origin,
             "Not owner"
@@ -170,6 +181,7 @@ contract AvvenireCitizens is
 
         // check if the token has already been requested to change
         if (tokenChangeRequests[tokenId]) revert ChangeAlreadyRequested();
+>>>>>>> beta
 
         _requestChange(tokenId); // call the internal function
     }
@@ -178,8 +190,8 @@ contract AvvenireCitizens is
         // take some payment for this transaction if there is some cost set
         if (mutabilityConfig.mutabilityCost > 0) {
             // cannot require that the amount due is paid, as this function is used in when minting traits from safe mint
-                // even making safeMint payable would be useless, as this can only check the value of one trait, not many
-                // seems nonsensical to make safemint payable with require statements, as only allowed contracts can call it, and we would be checking ourselves at the cost of users (when we could instead write one require statement at the end of a transaction in an allowed contract)
+            // even making safeMint payable would be useless, as this can only check the value of one trait, not many
+            // seems nonsensical to make safemint payable with require statements, as only allowed contracts can call it, and we would be checking ourselves at the cost of users (when we could instead write one require statement at the end of a transaction in an allowed contract)
 
             (bool success, ) = receivingAddress.call{
                 value: mutabilityConfig.mutabilityCost
@@ -246,7 +258,11 @@ contract AvvenireCitizens is
                 tokenId: 0, // there will be no traits with tokenId 0, as that must be the first citizen (cannot have traits without minting the first citizen)
                 uri: "",
                 free: false,
+<<<<<<< HEAD
+                exists: (uint256(traitType) == 0), // this makes a null trait type false
+=======
                 exists: exists,  // allow setting the existence
+>>>>>>> beta
                 sex: sex,
                 traitType: traitType,
                 originCitizenId: originCitizenId
@@ -263,8 +279,21 @@ contract AvvenireCitizens is
             tokenId: tokenId,
             uri: "", // keep this blank to keep the user from paying excess gas before decomposition (the tokenURI function will handle for blank URIs)
             exists: true,
-            sex: Sex.NULL,  // must be unisex for mint
+            sex: Sex.NULL, // must be unisex for mint
             traits: Traits({
+<<<<<<< HEAD
+                background: baseTrait(Sex.NULL, TraitType.NULL), // minting with a default background
+                body: baseTrait(Sex.NULL, TraitType.BODY),
+                tattoo: baseTrait(Sex.NULL, TraitType.NULL), // minting with no tattoos
+                eyes: baseTrait(Sex.NULL, TraitType.EYES),
+                mouth: baseTrait(Sex.NULL, TraitType.MOUTH),
+                mask: baseTrait(Sex.NULL, TraitType.MASK), // mint with no masks
+                necklace: baseTrait(Sex.NULL, TraitType.NULL), // mint with no necklaces
+                clothing: baseTrait(Sex.NULL, TraitType.CLOTHING),
+                earrings: baseTrait(Sex.NULL, TraitType.NULL), // mint with no earrings
+                hair: baseTrait(Sex.NULL, TraitType.HAIR),
+                effect: baseTrait(Sex.NULL, TraitType.NULL) // mint with no effects
+=======
                 background: baseTrait(0, Sex.NULL, TraitType.BACKGROUND, false),  // minting with a default background
                 body: baseTrait(tokenId, Sex.NULL, TraitType.BODY, true),
                 tattoo: baseTrait(0, Sex.NULL, TraitType.TATTOO, false),  // minting with no tattoos
@@ -276,6 +305,7 @@ contract AvvenireCitizens is
                 earrings: baseTrait(0, Sex.NULL, TraitType.EARRINGS, false),  // mint with no earrings
                 hair: baseTrait(tokenId, Sex.NULL, TraitType.HAIR, true),
                 effect: baseTrait(0, Sex.NULL, TraitType.EFFECT, false)  // mint with no effects
+>>>>>>> beta
             })
         });
     }
@@ -345,7 +375,6 @@ contract AvvenireCitizens is
             // set the trait to free (should be tradable and combinable)
             tokenIdToTrait[traitId].free = true;
         }
-
     }
 
     /**
@@ -381,10 +410,7 @@ contract AvvenireCitizens is
         // if binding non-empty trait, must require the correct sex and ensure that the tokenId exists
         if (traitId != 0) {
             // check if the trait exists
-            require(
-                tokenIdToTrait[traitId].exists,
-                "Trait doesn't exist"
-            );
+            require(tokenIdToTrait[traitId].exists, "Trait doesn't exist");
 
             // ensure that the trait and citizen have the same sex
             require(
@@ -399,7 +425,8 @@ contract AvvenireCitizens is
         if (traitType == TraitType.BACKGROUND) {
             // make the old trait transferrable
             makeTraitTransferable(
-                tokenIdToCitizen[citizenId].traits.background.tokenId, tokenIdToCitizen[citizenId].traits.background.exists
+                tokenIdToCitizen[citizenId].traits.background.tokenId,
+                tokenIdToCitizen[citizenId].traits.background.exists
             );
 
             // set the new trait
@@ -413,7 +440,8 @@ contract AvvenireCitizens is
         } else if (traitType == TraitType.BODY) {
             // make the old trait transferrable
             makeTraitTransferable(
-                tokenIdToCitizen[citizenId].traits.body.tokenId, tokenIdToCitizen[citizenId].traits.body.exists
+                tokenIdToCitizen[citizenId].traits.body.tokenId,
+                tokenIdToCitizen[citizenId].traits.body.exists
             );
 
             // set the new trait
@@ -423,7 +451,8 @@ contract AvvenireCitizens is
         } else if (traitType == TraitType.TATTOO) {
             // make the old trait transferrable
             makeTraitTransferable(
-                tokenIdToCitizen[citizenId].traits.tattoo.tokenId, tokenIdToCitizen[citizenId].traits.tattoo.exists
+                tokenIdToCitizen[citizenId].traits.tattoo.tokenId,
+                tokenIdToCitizen[citizenId].traits.tattoo.exists
             );
 
             // set the new trait
@@ -433,7 +462,8 @@ contract AvvenireCitizens is
         } else if (traitType == TraitType.EYES) {
             // make the old trait transferrable
             makeTraitTransferable(
-                tokenIdToCitizen[citizenId].traits.eyes.tokenId, tokenIdToCitizen[citizenId].traits.eyes.exists
+                tokenIdToCitizen[citizenId].traits.eyes.tokenId,
+                tokenIdToCitizen[citizenId].traits.eyes.exists
             );
 
             // set the new trait
@@ -443,7 +473,8 @@ contract AvvenireCitizens is
         } else if (traitType == TraitType.MOUTH) {
             // make the old trait transferrable
             makeTraitTransferable(
-                tokenIdToCitizen[citizenId].traits.mouth.tokenId, tokenIdToCitizen[citizenId].traits.mouth.exists
+                tokenIdToCitizen[citizenId].traits.mouth.tokenId,
+                tokenIdToCitizen[citizenId].traits.mouth.exists
             );
 
             // set the new trait
@@ -453,7 +484,8 @@ contract AvvenireCitizens is
         } else if (traitType == TraitType.MASK) {
             // make the old trait transferrable
             makeTraitTransferable(
-                tokenIdToCitizen[citizenId].traits.mask.tokenId, tokenIdToCitizen[citizenId].traits.mask.exists
+                tokenIdToCitizen[citizenId].traits.mask.tokenId,
+                tokenIdToCitizen[citizenId].traits.mask.exists
             );
 
             // set the new trait
@@ -463,7 +495,8 @@ contract AvvenireCitizens is
         } else if (traitType == TraitType.NECKLACE) {
             // make the old trait transferrable
             makeTraitTransferable(
-                tokenIdToCitizen[citizenId].traits.necklace.tokenId, tokenIdToCitizen[citizenId].traits.necklace.exists
+                tokenIdToCitizen[citizenId].traits.necklace.tokenId,
+                tokenIdToCitizen[citizenId].traits.necklace.exists
             );
 
             // set the new trait
@@ -477,7 +510,8 @@ contract AvvenireCitizens is
         } else if (traitType == TraitType.CLOTHING) {
             // make the old trait transferrable
             makeTraitTransferable(
-                tokenIdToCitizen[citizenId].traits.clothing.tokenId, tokenIdToCitizen[citizenId].traits.clothing.exists
+                tokenIdToCitizen[citizenId].traits.clothing.tokenId,
+                tokenIdToCitizen[citizenId].traits.clothing.exists
             );
 
             // set the new trait
@@ -491,7 +525,8 @@ contract AvvenireCitizens is
         } else if (traitType == TraitType.EARRINGS) {
             // make the old trait transferrable
             makeTraitTransferable(
-                tokenIdToCitizen[citizenId].traits.earrings.tokenId, tokenIdToCitizen[citizenId].traits.earrings.exists
+                tokenIdToCitizen[citizenId].traits.earrings.tokenId,
+                tokenIdToCitizen[citizenId].traits.earrings.exists
             );
 
             // set the new trait
@@ -505,7 +540,8 @@ contract AvvenireCitizens is
         } else if (traitType == TraitType.HAIR) {
             // make the old trait transferrable
             makeTraitTransferable(
-                tokenIdToCitizen[citizenId].traits.hair.tokenId, tokenIdToCitizen[citizenId].traits.hair.exists
+                tokenIdToCitizen[citizenId].traits.hair.tokenId,
+                tokenIdToCitizen[citizenId].traits.hair.exists
             );
 
             // set the new trait
@@ -515,7 +551,8 @@ contract AvvenireCitizens is
         } else if (traitType == TraitType.EFFECT) {
             // make the old trait transferrable
             makeTraitTransferable(
-                tokenIdToCitizen[citizenId].traits.effect.tokenId, tokenIdToCitizen[citizenId].traits.effect.exists
+                tokenIdToCitizen[citizenId].traits.effect.tokenId,
+                tokenIdToCitizen[citizenId].traits.effect.exists
             );
 
             // set the new trait
@@ -675,7 +712,7 @@ contract AvvenireCitizens is
      * @notice Sets the mutability of the contract (whether changes are accepted)
      * @param mutabilityMode_ allows the contract owner to change the mutability of the tokens
      */
-    function setMutablityMode(bool mutabilityMode_) external onlyOwner {
+    function setMutabilityMode(bool mutabilityMode_) external onlyOwner {
         // set te new mutability mode to this boolean
         mutabilityConfig.mutabilityMode = mutabilityMode_;
     }
@@ -780,4 +817,4 @@ contract AvvenireCitizens is
         (bool success, ) = msg.sender.call{value: address(this).balance}("");
         if (!success) revert TransferFailed();
     }
-}
+} // End of contract

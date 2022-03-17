@@ -7,9 +7,20 @@ from web3 import Web3
 from tools.ChainHandler import CitizenMarketBroker
 
 from scripts.helpful_scripts import get_account
+<< << << < HEAD
 from scripts.script_definitions import drop_interval
 from scripts.auction import setup_auction, perform_auction, end_auction, BASE_URI, LOAD_URI
 from scripts.mint import mint_citizens_and_end, mint_citizens_and_initialize
+== == == =
+from scripts.auction import (
+    setup_auction,
+    perform_auction,
+    end_auction,
+    BASE_URI,
+    LOAD_URI,
+)
+from scripts.mint import mint_citizens_and_end
+>>>>>> > beta
 
 
 @pytest.fixture(autouse=True)
@@ -19,16 +30,11 @@ def auction_set(fn_isolation):
 
 # try to get the uri for a non-existent token
 def test_fake_token():
-    # perform the auction
-    perform_auction()
-
     # get the contract
     avvenire_citizens_contract = AvvenireCitizens[-1]
-
-    # check the wrong token uri
     with brownie.reverts():
-        # token 20 should have an issue, as only 0-19 are minted
-        assert avvenire_citizens_contract.tokenURI(20)
+        # token 0 should have an issue since no tokens have been minted
+        assert avvenire_citizens_contract.tokenURI(0)
 
 
 # try to get a token uri by interacting with the main contract directly
@@ -47,8 +53,7 @@ def test_direct_false_token_change():
         avvenire_citizens_contract.requestChange(0, {"from": account})
 
     # try and get the token uri, is it still the base uri?
-    token_uri = avvenire_citizens_contract.tokenURI(0)
-    assert token_uri == f"{BASE_URI}0"
+    assert avvenire_citizens_contract.tokenURI(0) == f"{BASE_URI}0"
 
 
 # get a normal character URI (mint a bunch of them and request if they exist)
@@ -76,9 +81,19 @@ def test_load_uri():
     # mint an nft
     account = accounts[2]
 
-    mint_citizens_and_initialize(2, account)
 
-    # request from the market to remove all the traits of a citizen
+<< << << < HEAD
+    mint_citizens_and_initialize(2, account)
+== == == =
+# initialize citizen 0
+    avvenire_market_contract.initializeCitizen(0, {"from": account})
+
+    # set the citizen's sex
+    broker = CitizenMarketBroker(avvenire_citizens_contract, 0)
+    broker.set_sex()
+>>>>>> > beta
+
+# request from the market to remove all the traits of a citizen
     trait_changes = [
         [0, False, 2, 1],  # default background
         [0, True, 2, 2],
@@ -90,14 +105,15 @@ def test_load_uri():
         [0, True, 2, 8],
         [0, False, 2, 9],  # no earrings
         [0, True, 2, 10],
-        [0, False, 2, 11]  # default effects
+        [0, False, 2, 11],  # default effects
     ]
 
     # request the combination from the market
     print(
         f"Cost to make changes: {avvenire_citizens_contract.getChangeCost()}")
     avvenire_market_contract.combine(
-        0, trait_changes, {"from": account, "value": Web3.toWei(0.05, "ether")})
+        0, trait_changes, {"from": account, "value": Web3.toWei(0.05, "ether")}
+    )
 
     # check to make sure that the token uri is the loading uri
     assert avvenire_citizens_contract.tokenURI(0) == LOAD_URI
@@ -131,7 +147,7 @@ def test_character_uri_after_change():
         [0, True, 2, 8],
         [0, False, 2, 9],  # default earrings
         [0, True, 2, 10],
-        [0, False, 2, 11]  # default effects
+        [0, False, 2, 11],  # default effects
     ]
 
     # request the combination from the market

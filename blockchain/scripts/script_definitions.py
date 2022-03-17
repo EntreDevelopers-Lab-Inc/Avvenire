@@ -12,6 +12,8 @@ from scripts.helpful_scripts import (
 )
 from web3 import Web3
 
+import time
+
 WHITELIST_DISCOUNT = 0.7
 
 # * unless mentioned in a comment, account variables in each script should be assume to be by the owner
@@ -36,7 +38,12 @@ def deploy_contract(
 
     # deploy avvenire citizens contract
     avvenire_citizens_contract = AvvenireCitizens.deploy(
-        "AvvenireCitizens", "AVC", "", "", dev_address, {"from": account}
+        "AvvenireCitizens",
+        "AVC",
+        "",
+        "",
+        dev_address,
+        {"from": account},
     )
 
     avvenire_market_contract = AvvenireCitizenMarket.deploy(

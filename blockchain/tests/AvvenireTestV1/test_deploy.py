@@ -36,9 +36,7 @@ def test_deployment():
     # Try to mint before start of auction...
     eth = Web3.toWei(1, "ether")
     with brownie.reverts():
-        assert avvenire_contract.whiteListMint(
-            1, {"from": dev_account, "value": eth})
+        assert avvenire_contract.whiteListMint(1, {"from": dev_account, "value": eth})
 
     with brownie.reverts():
-        assert avvenire_contract.auctionMint(
-            1, {"from": dev_account, "value": eth})
+        assert avvenire_contract.auctionMint(1, {"from": dev_account, "value": eth})

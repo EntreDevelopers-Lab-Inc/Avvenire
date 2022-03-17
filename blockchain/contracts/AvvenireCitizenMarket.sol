@@ -49,7 +49,7 @@ contract AvvenireCitizenMarket is Ownable, AvvenireCitizenDataInterface {
     /**
      * @notice a modifier to check if the citizen can be changed (as all changes require a citizen)
      * @param citizenId represents the citizen's id
-    */
+     */
     modifier canChange(uint256 citizenId) {
         // make sure that tokens are mutable
         require(
@@ -70,6 +70,11 @@ contract AvvenireCitizenMarket is Ownable, AvvenireCitizenDataInterface {
     }
 
     /**
+<<<<<<< HEAD
+     * @notice a function that can request that a user is allowed to change the token
+     * note: there is no way that we can get the citizens to actually
+     */
+=======
      * @notice a function to initialize the citizen (just requests a change to set the sex from ipfs)
      * @param citizenId gives the contract a citizen to look for
     */
@@ -82,6 +87,7 @@ contract AvvenireCitizenMarket is Ownable, AvvenireCitizenDataInterface {
         // this function will perform all ownership and mutability checks in the other contract
         avvenireCitizens.requestChange(citizenId);
     }
+>>>>>>> beta
 
     /**
      * @notice a function to combine the token's parts
@@ -163,12 +169,16 @@ contract AvvenireCitizenMarket is Ownable, AvvenireCitizenDataInterface {
             totalCost += toMint * changeCost;
 
             // for every new trait to mint, a change will be requested, so send the appropriate amount of eth (do so directly, as safe mint is not payable)
-            (bool success,) = address(avvenireCitizens).call{value: totalCost}("");
+            (bool success, ) = address(avvenireCitizens).call{value: totalCost}(
+                ""
+            );
             require(success, "Insufficient funds for new traits minted.");
 
             // mint the citzens --> this will only set ownership, will not indicate how to set traits and sexes
             uint256 startTokenId = avvenireCitizens.getTotalSupply();
             avvenireCitizens.safeMint(tx.origin, toMint);
+<<<<<<< HEAD
+=======
 
             // this can be implied with toMint, as we minted exactly that many
             // uint256 pastLimit = avvenireCitizens.getTotalSupply();
@@ -198,7 +208,10 @@ contract AvvenireCitizenMarket is Ownable, AvvenireCitizenDataInterface {
                 avvenireCitizens.setTraitData(trait, true);
             }
         }
+>>>>>>> beta
 
+            //_refundIfOver(totalCost);
+        }
         // request a character change
         // send the value of one change
         avvenireCitizens.requestChange{value: changeCost}(citizenId);
@@ -207,6 +220,7 @@ contract AvvenireCitizenMarket is Ownable, AvvenireCitizenDataInterface {
         totalCost += changeCost;
 
         // refund the rest of the transaction value if the transaction is over
+        // guarantees that msg.value is > totalCost
         _refundIfOver(totalCost);
     }
 
@@ -258,18 +272,17 @@ contract AvvenireCitizenMarket is Ownable, AvvenireCitizenDataInterface {
         avvenireCitizens.requestChange(tokenId);
     }
 
-    // ** NEEDS TO BE DELETED LATER **
+    // ********* NEEDS TO BE DELETED LATER ***********
     // SOLE PURPOSE IS FOR EXPLICIT TESTING
-    function requestChange(uint256 tokenId) public {
+    function requestChange(uint256 tokenId) external {
         _requestChange(tokenId);
     }
 
     /**
      * @notice refunds excess eth
-     * @param cost is the amount required for the change
-    */
-    function _refundIfOver(uint256 cost) internal
-    {
+     * @param cost the amount required for the change
+     */
+    function _refundIfOver(uint256 cost) internal {
         // make sure the msg sent enough eth
         require(msg.value > cost, "Insufficient funds.");
 
@@ -277,5 +290,4 @@ contract AvvenireCitizenMarket is Ownable, AvvenireCitizenDataInterface {
             payable(msg.sender).transfer(msg.value - cost); // pay the user the excess
         }
     }
-
 }

@@ -144,8 +144,7 @@ def test_all_prices():
     # During drop intervals
     for drops in range(1, 9):
         drop_interval(1)
-        implied_price = round(auction_start_price_wei -
-                              (drop_per_step_wei * drops), 1)
+        implied_price = round(auction_start_price_wei - (drop_per_step_wei * drops), 1)
         assert avvenire_contract.getAuctionPrice() == implied_price
 
     # After all drops...
@@ -180,68 +179,66 @@ def test_mint_after_auction_amount():
         )
 
 
-# Only testable in local environment...
-def test_refund():
-    avvenire_contract = AvvenireTest[-1]
-    avvenire_citizens_contract = AvvenireCitizens[-1]
-    dev_account = get_dev_account()
-    admin_account = get_account()
+# # Only testable in local environment...
+# def test_refund():
+#     avvenire_contract = AvvenireTest[-1]
+#     avvenire_citizens_contract = AvvenireCitizens[-1]
+#     dev_account = get_dev_account()
+#     admin_account = get_account()
 
-    if network.show_active() in LOCAL_BLOCKCHAIN_ENVIRONMENTS:
-        chain.sleep(SALE_START_TIME)
-        chain.mine(1)
-    else:
-        time.sleep(SALE_START_TIME + 5)
+#     if network.show_active() in LOCAL_BLOCKCHAIN_ENVIRONMENTS:
+#         chain.sleep(SALE_START_TIME)
+#         chain.mine(1)
+#     else:
+#         time.sleep(SALE_START_TIME + 5)
 
-    # Mint the teams portion...
-    avvenire_contract.teamMint()
+#     # Mint the teams portion...
+#     avvenire_contract.teamMint()
 
-    # Mint three NFTs.  Cost is 1 ETH per NFT
-    avvenire_contract.auctionMint(
-        3, {"from": dev_account, "value": Web3.toWei(3.5, "ether")}
-    )
+#     # Mint three NFTs.  Cost is 1 ETH per NFT
+#     avvenire_contract.auctionMint(
+#         3, {"from": dev_account, "value": Web3.toWei(3.5, "ether")}
+#     )
 
-    # Record before_refund
-    before_refund_balance_ether = Web3.fromWei(dev_account.balance(), "ether")
-    print(f"Balance before refund: {before_refund_balance_ether}")
+#     # Record before_refund
+#     before_refund_balance_ether = Web3.fromWei(dev_account.balance(), "ether")
+#     print(f"Balance before refund: {before_refund_balance_ether}")
 
-    # Drops auction price to 0.5 ETH
-    drop_interval(5)
+#     # Drops auction price to 0.5 ETH
+#     drop_interval(5)
 
-    # Mint the rest of the NFTs
-    i = 2
-    quantity_to_mint = 3
-    while (
-        avvenire_citizens_contract.totalSupply() + quantity_to_mint
-        <= avvenire_contract.amountForAuctionAndTeam()
-    ):
-        _account = accounts[i]
-        avvenire_contract.auctionMint(
-            quantity_to_mint, {"from": _account,
-                               "value": Web3.toWei(2, "ether")}
-        )
-        i = i + 1
+#     # Mint the rest of the NFTs
+#     i = 2
+#     quantity_to_mint = 3
+#     while (
+#         avvenire_citizens_contract.totalSupply() + quantity_to_mint
+#         <= avvenire_contract.amountForAuctionAndTeam()
+#     ):
+#         _account = accounts[i]
+#         avvenire_contract.auctionMint(
+#             quantity_to_mint, {"from": _account, "value": Web3.toWei(2, "ether")}
+#         )
+#         i = i + 1
 
-    # Make sure the price is 0.5
-    public_price = avvenire_contract.getAuctionPrice()
+#     # Make sure the price is 0.5
+#     public_price = avvenire_contract.getAuctionPrice()
 
-    # Make sure behavior goes as expected
-    assert public_price == Web3.toWei(0.5, "ether")
+#     # Make sure behavior goes as expected
+#     assert public_price == Web3.toWei(0.5, "ether")
 
-    # Set public price before refund
-    avvenire_contract.endAuctionAndSetupNonAuctionSaleInfo(
-        0, public_price, 500)
+#     # Set public price before refund
+#     avvenire_contract.endAuctionAndSetupNonAuctionSaleInfo(0, public_price, 500)
 
-    # *** Refunding ***
-    avvenire_contract.refund(dev_account, {"from": admin_account})
+#     # *** Refunding ***
+#     avvenire_contract.refund(dev_account, {"from": admin_account})
 
-    after_refund_balance_ether = Web3.fromWei(dev_account.balance(), "ether")
-    print(f"Balance after refund {after_refund_balance_ether}")
+#     after_refund_balance_ether = Web3.fromWei(dev_account.balance(), "ether")
+#     print(f"Balance after refund {after_refund_balance_ether}")
 
-    refund_amount = after_refund_balance_ether - before_refund_balance_ether
+#     refund_amount = after_refund_balance_ether - before_refund_balance_ether
 
-    print(f"Refund Amount: {refund_amount}")
+#     print(f"Refund Amount: {refund_amount}")
 
-    # Account paid 3 ETH to mint 3 NFTS
-    # Public price is 0.5 ETH.  Should be refunded 1.5 ETH
-    assert refund_amount == 1.5
+#     # Account paid 3 ETH to mint 3 NFTS
+#     # Public price is 0.5 ETH.  Should be refunded 1.5 ETH
+#     assert refund_amount == 1.5
