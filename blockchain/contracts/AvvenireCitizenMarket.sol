@@ -64,30 +64,30 @@ contract AvvenireCitizenMarket is Ownable, AvvenireCitizenDataInterface {
         );
 
         // make sure the citizen has a sex
-        require(avvenireCitizens.tokenIdToCitizen(citizenId).sex != Sex.NULL, "Must initialize the citizen before changing it.");
+        require(
+            avvenireCitizens.tokenIdToCitizen(citizenId).sex != Sex.NULL,
+            "Must initialize the citizen before changing it."
+        );
 
         _;
     }
 
     /**
-<<<<<<< HEAD
      * @notice a function that can request that a user is allowed to change the token
      * note: there is no way that we can get the citizens to actually
      */
-=======
-     * @notice a function to initialize the citizen (just requests a change to set the sex from ipfs)
-     * @param citizenId gives the contract a citizen to look for
-    */
-    function initializeCitizen(uint256 citizenId) external
-    {
+
+    function initializeCitizen(uint256 citizenId) external {
         // make sure the sex is null, or the citizen has already been initialized
-        require(avvenireCitizens.tokenIdToCitizen(citizenId).sex == Sex.NULL, "This citizen has already been initialized.");
+        require(
+            avvenireCitizens.tokenIdToCitizen(citizenId).sex == Sex.NULL,
+            "This citizen has already been initialized."
+        );
 
         // just request a change --> sets the sex
         // this function will perform all ownership and mutability checks in the other contract
         avvenireCitizens.requestChange(citizenId);
     }
->>>>>>> beta
 
     /**
      * @notice a function to combine the token's parts
@@ -120,47 +120,113 @@ contract AvvenireCitizenMarket is Ownable, AvvenireCitizenDataInterface {
         // each trait's mergability will be checked on binding (to reduce gas costs, access the mapping on the frontend before using this function)
         // if changing and traitId == 0, add it to the list that need to be minted, else bind the trait directly
         if (traitChanges.backgroundChange.toChange) {
-            _bindTrait(citizenId, avvenireCitizens.tokenIdToCitizen(citizenId).traits.background, newTraits, toMint, traitChanges.backgroundChange);
+            _bindTrait(
+                citizenId,
+                avvenireCitizens.tokenIdToCitizen(citizenId).traits.background,
+                newTraits,
+                toMint,
+                traitChanges.backgroundChange
+            );
         }
 
         if (traitChanges.bodyChange.toChange) {
-            _bindTrait(citizenId, avvenireCitizens.tokenIdToCitizen(citizenId).traits.body, newTraits, toMint, traitChanges.bodyChange);
+            _bindTrait(
+                citizenId,
+                avvenireCitizens.tokenIdToCitizen(citizenId).traits.body,
+                newTraits,
+                toMint,
+                traitChanges.bodyChange
+            );
         }
 
         if (traitChanges.tattooChange.toChange) {
-            _bindTrait(citizenId, avvenireCitizens.tokenIdToCitizen(citizenId).traits.tattoo, newTraits, toMint, traitChanges.tattooChange);
+            _bindTrait(
+                citizenId,
+                avvenireCitizens.tokenIdToCitizen(citizenId).traits.tattoo,
+                newTraits,
+                toMint,
+                traitChanges.tattooChange
+            );
         }
 
         if (traitChanges.eyesChange.toChange) {
-            _bindTrait(citizenId, avvenireCitizens.tokenIdToCitizen(citizenId).traits.eyes, newTraits, toMint, traitChanges.eyesChange);
+            _bindTrait(
+                citizenId,
+                avvenireCitizens.tokenIdToCitizen(citizenId).traits.eyes,
+                newTraits,
+                toMint,
+                traitChanges.eyesChange
+            );
         }
 
         if (traitChanges.mouthChange.toChange) {
-            _bindTrait(citizenId, avvenireCitizens.tokenIdToCitizen(citizenId).traits.mouth, newTraits, toMint, traitChanges.mouthChange);
+            _bindTrait(
+                citizenId,
+                avvenireCitizens.tokenIdToCitizen(citizenId).traits.mouth,
+                newTraits,
+                toMint,
+                traitChanges.mouthChange
+            );
         }
 
         if (traitChanges.maskChange.toChange) {
-            _bindTrait(citizenId, avvenireCitizens.tokenIdToCitizen(citizenId).traits.mask, newTraits, toMint, traitChanges.maskChange);
+            _bindTrait(
+                citizenId,
+                avvenireCitizens.tokenIdToCitizen(citizenId).traits.mask,
+                newTraits,
+                toMint,
+                traitChanges.maskChange
+            );
         }
 
         if (traitChanges.necklaceChange.toChange) {
-            _bindTrait(citizenId, avvenireCitizens.tokenIdToCitizen(citizenId).traits.necklace, newTraits, toMint, traitChanges.necklaceChange);
+            _bindTrait(
+                citizenId,
+                avvenireCitizens.tokenIdToCitizen(citizenId).traits.necklace,
+                newTraits,
+                toMint,
+                traitChanges.necklaceChange
+            );
         }
 
         if (traitChanges.clothingChange.toChange) {
-            _bindTrait(citizenId, avvenireCitizens.tokenIdToCitizen(citizenId).traits.clothing, newTraits, toMint, traitChanges.clothingChange);
+            _bindTrait(
+                citizenId,
+                avvenireCitizens.tokenIdToCitizen(citizenId).traits.clothing,
+                newTraits,
+                toMint,
+                traitChanges.clothingChange
+            );
         }
 
         if (traitChanges.earringsChange.toChange) {
-            _bindTrait(citizenId, avvenireCitizens.tokenIdToCitizen(citizenId).traits.earrings, newTraits, toMint, traitChanges.earringsChange);
+            _bindTrait(
+                citizenId,
+                avvenireCitizens.tokenIdToCitizen(citizenId).traits.earrings,
+                newTraits,
+                toMint,
+                traitChanges.earringsChange
+            );
         }
 
         if (traitChanges.hairChange.toChange) {
-            _bindTrait(citizenId, avvenireCitizens.tokenIdToCitizen(citizenId).traits.hair, newTraits, toMint, traitChanges.hairChange);
+            _bindTrait(
+                citizenId,
+                avvenireCitizens.tokenIdToCitizen(citizenId).traits.hair,
+                newTraits,
+                toMint,
+                traitChanges.hairChange
+            );
         }
 
         if (traitChanges.effectChange.toChange) {
-            _bindTrait(citizenId, avvenireCitizens.tokenIdToCitizen(citizenId).traits.effect, newTraits, toMint, traitChanges.effectChange);
+            _bindTrait(
+                citizenId,
+                avvenireCitizens.tokenIdToCitizen(citizenId).traits.effect,
+                newTraits,
+                toMint,
+                traitChanges.effectChange
+            );
         }
 
         // if there are any to mint, do so
@@ -177,8 +243,6 @@ contract AvvenireCitizenMarket is Ownable, AvvenireCitizenDataInterface {
             // mint the citzens --> this will only set ownership, will not indicate how to set traits and sexes
             uint256 startTokenId = avvenireCitizens.getTotalSupply();
             avvenireCitizens.safeMint(tx.origin, toMint);
-<<<<<<< HEAD
-=======
 
             // this can be implied with toMint, as we minted exactly that many
             // uint256 pastLimit = avvenireCitizens.getTotalSupply();
@@ -187,8 +251,7 @@ contract AvvenireCitizenMarket is Ownable, AvvenireCitizenDataInterface {
             Trait memory trait;
             uint256 tokenId;
 
-            for (uint256 i = 0; i < toMint; i += 1)
-            {
+            for (uint256 i = 0; i < toMint; i += 1) {
                 // set the trait id
                 tokenId = startTokenId + i;
 
@@ -208,10 +271,8 @@ contract AvvenireCitizenMarket is Ownable, AvvenireCitizenDataInterface {
                 avvenireCitizens.setTraitData(trait, true);
             }
         }
->>>>>>> beta
 
-            //_refundIfOver(totalCost);
-        }
+        //_refundIfOver(totalCost);
         // request a character change
         // send the value of one change
         avvenireCitizens.requestChange{value: changeCost}(citizenId);
@@ -243,7 +304,6 @@ contract AvvenireCitizenMarket is Ownable, AvvenireCitizenDataInterface {
 
             // increment toMint to make the count accurate
             toMint += 1;
-
         } else {
             // can bind without remorse, as there will be no need to mint anything
             avvenireCitizens.bind(
@@ -262,7 +322,9 @@ contract AvvenireCitizenMarket is Ownable, AvvenireCitizenDataInterface {
         external
         onlyOwner
     {
-        avvenireCitizens = AvvenireCitizensWithMappingInterface(contractAddress);
+        avvenireCitizens = AvvenireCitizensWithMappingInterface(
+            contractAddress
+        );
     }
 
     /**
