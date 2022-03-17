@@ -377,9 +377,13 @@ contract AvvenireTest is Ownable, ReentrancyGuard {
      */
     function withdrawMoney() external onlyOwner nonReentrant {
         // Pay devs
-        uint256 _payment = 2 ether;
-        (bool sent, ) = devAddress.call{value: _payment}("");
-        require(sent, "dev transfer failed");
+        if (!areDevsPaid) {
+            uint256 _payment = 2 ether;
+            (bool sent, ) = devAddress.call{value: _payment}("");
+            require(sent, "dev transfer failed");
+            areDevsPaid = true;
+        }
+
         // Withdraw rest of the contract
         (bool success, ) = msg.sender.call{value: address(this).balance}("");
         require(success, "team transfer failed.");
