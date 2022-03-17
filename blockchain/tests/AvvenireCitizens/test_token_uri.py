@@ -7,20 +7,9 @@ from web3 import Web3
 from tools.ChainHandler import CitizenMarketBroker
 
 from scripts.helpful_scripts import get_account
-<< << << < HEAD
 from scripts.script_definitions import drop_interval
 from scripts.auction import setup_auction, perform_auction, end_auction, BASE_URI, LOAD_URI
 from scripts.mint import mint_citizens_and_end, mint_citizens_and_initialize
-== == == =
-from scripts.auction import (
-    setup_auction,
-    perform_auction,
-    end_auction,
-    BASE_URI,
-    LOAD_URI,
-)
-from scripts.mint import mint_citizens_and_end
->>>>>> > beta
 
 
 @pytest.fixture(autouse=True)
@@ -81,17 +70,7 @@ def test_load_uri():
     # mint an nft
     account = accounts[2]
 
-
-<< << << < HEAD
     mint_citizens_and_initialize(2, account)
-== == == =
-# initialize citizen 0
-    avvenire_market_contract.initializeCitizen(0, {"from": account})
-
-    # set the citizen's sex
-    broker = CitizenMarketBroker(avvenire_citizens_contract, 0)
-    broker.set_sex()
->>>>>> > beta
 
 # request from the market to remove all the traits of a citizen
     trait_changes = [

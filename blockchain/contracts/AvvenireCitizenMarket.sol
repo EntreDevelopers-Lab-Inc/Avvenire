@@ -70,11 +70,6 @@ contract AvvenireCitizenMarket is Ownable, AvvenireCitizenDataInterface {
     }
 
     /**
-<<<<<<< HEAD
-     * @notice a function that can request that a user is allowed to change the token
-     * note: there is no way that we can get the citizens to actually
-     */
-=======
      * @notice a function to initialize the citizen (just requests a change to set the sex from ipfs)
      * @param citizenId gives the contract a citizen to look for
     */
@@ -87,8 +82,6 @@ contract AvvenireCitizenMarket is Ownable, AvvenireCitizenDataInterface {
         // this function will perform all ownership and mutability checks in the other contract
         avvenireCitizens.requestChange(citizenId);
     }
->>>>>>> beta
-
     /**
      * @notice a function to combine the token's parts
      * this must be payable in order to request changes to each individual component
@@ -177,8 +170,6 @@ contract AvvenireCitizenMarket is Ownable, AvvenireCitizenDataInterface {
             // mint the citzens --> this will only set ownership, will not indicate how to set traits and sexes
             uint256 startTokenId = avvenireCitizens.getTotalSupply();
             avvenireCitizens.safeMint(tx.origin, toMint);
-<<<<<<< HEAD
-=======
 
             // this can be implied with toMint, as we minted exactly that many
             // uint256 pastLimit = avvenireCitizens.getTotalSupply();
@@ -208,10 +199,7 @@ contract AvvenireCitizenMarket is Ownable, AvvenireCitizenDataInterface {
                 avvenireCitizens.setTraitData(trait, true);
             }
         }
->>>>>>> beta
 
-            //_refundIfOver(totalCost);
-        }
         // request a character change
         // send the value of one change
         avvenireCitizens.requestChange{value: changeCost}(citizenId);

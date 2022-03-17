@@ -94,12 +94,7 @@ contract AvvenireCitizens is
       Modifier to check if the contract is allowed to call this contract
     */
     modifier callerIsAllowed() {
-<<<<<<< HEAD
-        require(allowedContracts[msg.sender], "Not allowed to interact");
-        //require(tx.origin != msg.sender, "The caller is a user");
-=======
         if (!allowedContracts[msg.sender]) revert NotSender();
->>>>>>> beta
         _;
     }
 
@@ -155,25 +150,15 @@ contract AvvenireCitizens is
      */
     function requestChange(uint256 tokenId) external payable callerIsAllowed {
         // check if you can even request changes at the moment
-<<<<<<< HEAD
-        require(mutabilityConfig.mutabilityMode, "Tokens are immutable");
-=======
         require(
             mutabilityConfig.mutabilityMode,
             "Tokens immutable"
         );
->>>>>>> beta
 
         // check if the token exists
         if (!_exists(tokenId)) revert URIQueryForNonexistentToken();
 
         // check that this is the rightful token owner
-<<<<<<< HEAD
-        require(ownerOf(tokenId) == tx.origin, "Not the owner");
-
-        // check if the token has already been requested to change
-        require(!tokenChangeRequests[tokenId], "Change already requested");
-=======
         require(
             ownerOf(tokenId) == tx.origin,
             "Not owner"
@@ -181,7 +166,6 @@ contract AvvenireCitizens is
 
         // check if the token has already been requested to change
         if (tokenChangeRequests[tokenId]) revert ChangeAlreadyRequested();
->>>>>>> beta
 
         _requestChange(tokenId); // call the internal function
     }
@@ -258,11 +242,7 @@ contract AvvenireCitizens is
                 tokenId: 0, // there will be no traits with tokenId 0, as that must be the first citizen (cannot have traits without minting the first citizen)
                 uri: "",
                 free: false,
-<<<<<<< HEAD
-                exists: (uint256(traitType) == 0), // this makes a null trait type false
-=======
                 exists: exists,  // allow setting the existence
->>>>>>> beta
                 sex: sex,
                 traitType: traitType,
                 originCitizenId: originCitizenId
@@ -281,19 +261,6 @@ contract AvvenireCitizens is
             exists: true,
             sex: Sex.NULL, // must be unisex for mint
             traits: Traits({
-<<<<<<< HEAD
-                background: baseTrait(Sex.NULL, TraitType.NULL), // minting with a default background
-                body: baseTrait(Sex.NULL, TraitType.BODY),
-                tattoo: baseTrait(Sex.NULL, TraitType.NULL), // minting with no tattoos
-                eyes: baseTrait(Sex.NULL, TraitType.EYES),
-                mouth: baseTrait(Sex.NULL, TraitType.MOUTH),
-                mask: baseTrait(Sex.NULL, TraitType.MASK), // mint with no masks
-                necklace: baseTrait(Sex.NULL, TraitType.NULL), // mint with no necklaces
-                clothing: baseTrait(Sex.NULL, TraitType.CLOTHING),
-                earrings: baseTrait(Sex.NULL, TraitType.NULL), // mint with no earrings
-                hair: baseTrait(Sex.NULL, TraitType.HAIR),
-                effect: baseTrait(Sex.NULL, TraitType.NULL) // mint with no effects
-=======
                 background: baseTrait(0, Sex.NULL, TraitType.BACKGROUND, false),  // minting with a default background
                 body: baseTrait(tokenId, Sex.NULL, TraitType.BODY, true),
                 tattoo: baseTrait(0, Sex.NULL, TraitType.TATTOO, false),  // minting with no tattoos
@@ -305,7 +272,6 @@ contract AvvenireCitizens is
                 earrings: baseTrait(0, Sex.NULL, TraitType.EARRINGS, false),  // mint with no earrings
                 hair: baseTrait(tokenId, Sex.NULL, TraitType.HAIR, true),
                 effect: baseTrait(0, Sex.NULL, TraitType.EFFECT, false)  // mint with no effects
->>>>>>> beta
             })
         });
     }
