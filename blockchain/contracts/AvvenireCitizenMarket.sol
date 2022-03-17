@@ -229,16 +229,15 @@ contract AvvenireCitizenMarket is Ownable, AvvenireCitizenDataInterface {
 
             // increment toMint to make the count accurate
             toMint += 1;
-
-        } else {
-            // can bind without remorse, as there will be no need to mint anything
-            avvenireCitizens.bind(
-                citizenId,
-                traitChange.traitId,
-                traitChange.sex,
-                traitChange.traitType
-            );
         }
+
+        // always need to bind a new trait, or notthing will happen (after all, this is the core purpose of the function)
+        avvenireCitizens.bind(
+            citizenId,
+            traitChange.traitId,
+            traitChange.sex,
+            traitChange.traitType
+        );
     }
 
     /**

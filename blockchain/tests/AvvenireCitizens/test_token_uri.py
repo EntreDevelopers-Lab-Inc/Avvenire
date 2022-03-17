@@ -52,7 +52,7 @@ def test_direct_false_token_change():
 
 
 # get a normal character URI (mint a bunch of them and request if they exist)
-def test_character_URI():
+def test_base_URI():
     # get the admin account and the contract
     avvenire_citizens_contract = AvvenireCitizens[-1]
 
@@ -123,13 +123,13 @@ def test_character_uri_after_change():
     trait_changes = [
         [0, False, 2, 1],  # default background
         [0, True, 2, 2],
-        [0, True, 2, 3],
+        [0, False, 2, 3],  # default tattoos
         [0, True, 2, 4],
         [0, True, 2, 5],
-        [0, True, 2, 6],
-        [0, True, 2, 7],
+        [0, False, 2, 6],  # default masks
+        [0, False, 2, 7],  # default necklaces
         [0, True, 2, 8],
-        [0, True, 2, 9],
+        [0, False, 2, 9],  # default earrings
         [0, True, 2, 10],
         [0, False, 2, 11]  # default effects
     ]
@@ -137,12 +137,20 @@ def test_character_uri_after_change():
     # request the combination from the market
     avvenire_market_contract.combine(
         0, trait_changes, {"from": account, "value": Web3.toWei(0.05, "ether")})
+    drop_interval(1)
+
+    # this should make all the citizens traits default
+    chain_citizen = avvenire_citizens_contract.tokenIdToCitizen(0)
+    chain_traits = chain_citizen[4]
+    for trait in chain_traits:
+        assert trait[3] is False  # make sure it doesn't exist
 
     # make the changes as an admin
     broker_citizen = broker.update_citizen()
 
     # get the new citizen from the chain and see if it matches
     chain_citizen = avvenire_citizens_contract.tokenIdToCitizen(0)
+    print(chain_citizen)
 
     # make sure the citizens are the same
     assert broker_citizen == chain_citizen
