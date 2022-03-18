@@ -133,18 +133,6 @@ class CitizenCreator:
                 # set the file and attribute
                 new_file = ipfs_file
                 new_attribute = ipfs_attribute
-            # if the ipfs file is a default and the new one exists, use the chain trait
-            elif (ipfs_file == DEFAULT_FILE) and (new_trait_exists):
-                # set the file and attribute
-                new_file = chain_file
-                new_attribute = chain_attribute
-            # if the ipfs file is NOT a default, and the new one does not exist, the trait has been removed, add the chain trait
-            elif (ipfs_file != DEFAULT_FILE) and (not new_trait_exists):
-                # set the new trait to the default, which is the the current chain trait
-                # set the file and attribute
-                new_file = chain_file
-                new_attribute = chain_attribute
-            # if the ipfs trait is not the same as the chain trait, the traits have been swapped
             else:
                 # set the file and attribute
                 new_file = chain_file

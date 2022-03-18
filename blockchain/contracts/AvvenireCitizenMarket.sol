@@ -82,6 +82,7 @@ contract AvvenireCitizenMarket is Ownable, AvvenireCitizenDataInterface {
         // this function will perform all ownership and mutability checks in the other contract
         avvenireCitizens.requestChange(citizenId);
     }
+
     /**
      * @notice a function to combine the token's parts
      * this must be payable in order to request changes to each individual component

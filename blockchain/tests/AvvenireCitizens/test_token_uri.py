@@ -115,6 +115,7 @@ def test_character_uri_after_change():
     broker = mint_citizens_and_initialize(2, account)
 
     # request from the market to remove all the traits of a citizen --> should be stored on the backend --> will be able to set it later
+    # DID WE JUST SET IT ALL TO FEMALES?
     trait_changes = [
         [0, False, 2, 1],  # default background
         [0, True, 2, 2],
@@ -149,3 +150,6 @@ def test_character_uri_after_change():
 
     # make sure the citizens are the same
     assert broker_citizen == chain_citizen
+
+    # make sure traits have been minted
+    avvenire_citizens_contract.getTotalSupply() == 7
