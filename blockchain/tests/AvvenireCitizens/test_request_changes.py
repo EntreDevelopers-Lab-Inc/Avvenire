@@ -28,7 +28,7 @@ def test_token_change_before_mutable():
 
     # request a change (will later be from an accessory contract) --> should fail, as not mutable
     with brownie.reverts():
-        assert avvenire_market_contract.requestChange(0, {"from": account})
+        assert avvenire_market_contract.initializeCitizen(0, {"from": account})
 
 
 # test the change of a non-existed token
@@ -49,7 +49,7 @@ def test_non_existent_token_change():
 
     # request a change (will later be from an accessory contract) --> should fail, as not no token exists
     with brownie.reverts():
-        assert avvenire_market_contract.requestChange(1, {"from": account})
+        assert avvenire_market_contract.initializeCitizen(1, {"from": account})
 
 
 # REQUEST CHANGE WILL ALWAYS THROW AN ERROR IF THE ACCOUNT IS NOT AN ALLOWED ACCOUNT
@@ -72,7 +72,7 @@ def test_request_by_nonowner():
 
     with brownie.reverts():
         # Try to change 0 from accounts[2] when the owner is accounts[1]
-        assert avvenire_market_contract.requestChange(0, {"from": accounts[2]})
+        assert avvenire_market_contract.initializeCitizen(0, {"from": accounts[2]})
 
 
 def test_request_after_existing_request():
@@ -86,11 +86,50 @@ def test_request_after_existing_request():
 
     # Confirm that the owner of NFT #0 is Account[1]
     assert avvenire_citizens_contract.ownerOf(0) == accounts[1]
-    avvenire_market_contract.requestChange(0, {"from": accounts[1]})
+    avvenire_market_contract.initializeCitizen(0, {"from": accounts[1]})
 
     # Should throw error... Existing change request outstanding
     with brownie.reverts():
-        assert avvenire_market_contract.requestChange(0, {"from": accounts[1]})
+        assert avvenire_market_contract.initializeCitizen(0, {"from": accounts[1]})
+
+
+def test_request_change_with_cost():
+    avvenire_citizens_contract = AvvenireCitizens[-1]
+    avvenire_contract = AvvenireTest[-1]
+    avvenire_market_contract = AvvenireCitizenMarket[-1]
+    admin_account = get_account()
+    test_account = accounts[2]
+    dev_account = get_dev_account()
+
+    mint_cost = Web3.toWei(1, "ether")
+    avvenire_contract.auctionMint(1, {"from": test_account, "value": mint_cost})
+    end_auction_and_enable_changes()
+    assert avvenire_citizens_contract.ownerOf(0) == test_account
+
+    request_cost = Web3.toWei(0.25, "ether")
+    avvenire_citizens_contract.setMutabilityCost(request_cost, {"from": admin_account})
+
+    avvenire_citizens_contract.setDevRoyalty(50, {"from": dev_account})
+
+    # Try to request change with right amount...
+    avvenire_market_contract.initializeCitizen(
+        0, {"from": test_account, "value": request_cost}
+    )
+
+    # # Try to request change with extra amount...
+    # overpayment = Web3.toWei(0.5, "ether")
+    # balance_before_request = test_account.balance()
+    # avvenire_market_contract.initializeCitizen(
+    #     0, {"from": test_account, "value": overpayment}
+    # )
+    # assert test_account.balance() == balance_before_request - request_cost
+
+    # # Try to request change with too little amount...
+    # underpayment = Web3.toWei(0.1, "ether")
+    # with brownie.reverts():
+    #     avvenire_market_contract.initializeCitizen(
+    #         0, {"from": test_account, "value": underpayment}
+    #     )
 
 
 # test the rest from an accessory contract

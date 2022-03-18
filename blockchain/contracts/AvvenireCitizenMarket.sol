@@ -77,7 +77,7 @@ contract AvvenireCitizenMarket is Ownable, AvvenireCitizenDataInterface {
      * note: there is no way that we can get the citizens to actually
      */
 
-    function initializeCitizen(uint256 citizenId) external {
+    function initializeCitizen(uint256 citizenId) external payable {
         // make sure the sex is null, or the citizen has already been initialized
         require(
             avvenireCitizens.tokenIdToCitizen(citizenId).sex == Sex.NULL,
@@ -86,7 +86,7 @@ contract AvvenireCitizenMarket is Ownable, AvvenireCitizenDataInterface {
 
         // just request a change --> sets the sex
         // this function will perform all ownership and mutability checks in the other contract
-        avvenireCitizens.requestChange(citizenId);
+        avvenireCitizens.requestChange{value: msg.value}(citizenId);
     }
 
     /**
@@ -332,13 +332,7 @@ contract AvvenireCitizenMarket is Ownable, AvvenireCitizenDataInterface {
      * @param tokenId the id of the token that should be changed
      */
     function _requestChange(uint256 tokenId) internal {
-        avvenireCitizens.requestChange(tokenId);
-    }
-
-    // ********* NEEDS TO BE DELETED LATER ***********
-    // SOLE PURPOSE IS FOR EXPLICIT TESTING
-    function requestChange(uint256 tokenId) external {
-        _requestChange(tokenId);
+        avvenireCitizens.requestChange{value: msg.value}(tokenId);
     }
 
     /**

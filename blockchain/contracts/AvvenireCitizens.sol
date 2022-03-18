@@ -17,6 +17,7 @@ error TraitTypeDoesNotExist();
 error TransferFailed();
 error ChangeAlreadyRequested();
 error NotSender();
+error InsufficcientFunds();
 
 // token mutator changes the way that an ERC721A contract interacts with tokens
 contract AvvenireCitizens is
@@ -165,25 +166,8 @@ contract AvvenireCitizens is
     }
 
     function _requestChange(uint256 tokenId) internal {
-        // take some payment for this transaction if there is some cost set
-        if (mutabilityConfig.mutabilityCost > 0) {
-            // cannot require that the amount due is paid, as this function is used in when minting traits from safe mint
-            // even making safeMint payable would be useless, as this can only check the value of one trait, not many
-            // seems nonsensical to make safemint payable with require statements, as only allowed contracts can call it, and we would be checking ourselves at the cost of users (when we could instead write one require statement at the end of a transaction in an allowed contract)
-
-            (bool success, ) = receivingAddress.call{
-                value: mutabilityConfig.mutabilityCost
-            }("");
-
-            (bool royaltyPaid, ) = devConfig.devAddress.call{
-                value: ((mutabilityConfig.mutabilityCost *
-                    devConfig.devRoyaltyPercent) / 100)
-            }("");
-
-            require(success && royaltyPaid, "Failed to change");
-        }
-
         // set the token as requested to change (don't change the URI, it's a waste of gas --> will be done once in when the admin sets the token uri)
+        if (msg.value < getChangeCost()) revert InsufficcientFunds();
         tokenChangeRequests[tokenId] = true;
     }
 
@@ -779,8 +763,19 @@ contract AvvenireCitizens is
      * @notice function to withdraw the money from the contract. Only callable by the owner
      */
     function withdrawMoney() external onlyOwner nonReentrant {
-        // Withdraw rest of the contract
-        (bool success, ) = msg.sender.call{value: address(this).balance}("");
-        if (!success) revert TransferFailed();
+        // cannot require that the amount due is paid, as this function is used in when minting traits from safe mint
+        // even making safeMint payable would be useless, as this can only check the value of one trait, not many
+        // seems nonsensical to make safemint payable with require statements, as only allowed contracts can call it, and we would be checking ourselves at the cost of users (when we could instead write one require statement at the end of a transaction in an allowed contract)
+        (bool success, ) = receivingAddress.call{
+            value: ((mutabilityConfig.mutabilityCost *
+                (100 - devConfig.devRoyaltyPercent)) / 100)
+        }("");
+
+        (bool royaltyPaid, ) = devConfig.devAddress.call{
+            value: ((mutabilityConfig.mutabilityCost *
+                devConfig.devRoyaltyPercent) / 100)
+        }("");
+
+        require(success && royaltyPaid, "Failed to change");
     }
 } // End of contract
