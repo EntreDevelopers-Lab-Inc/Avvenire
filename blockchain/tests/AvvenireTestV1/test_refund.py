@@ -54,9 +54,11 @@ def post_auction(fn_isolation):
     # Mint 1 at every drop interval...
     for drops in range(1, 9):
         print(
-            f"AvvenireTest Contract balance after minting: {avvenire_contract.balance()}")
+            f"AvvenireTest Contract balance after minting: {avvenire_contract.balance()}"
+        )
         print(
-            f"AvvenireCitizens Contract balance after minting: {avvenire_citizens_contract.balance()}")
+            f"AvvenireCitizens Contract balance after minting: {avvenire_citizens_contract.balance()}"
+        )
 
         drop_interval(1)
         implied_price = auction_start_price_wei - (drop_per_step_wei * drops)

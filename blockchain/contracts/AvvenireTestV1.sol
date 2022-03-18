@@ -11,10 +11,7 @@ import "@openzeppelin/contracts/utils/Strings.sol";
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 
 // ERC721AOwnersExplicit already inherits from ERC721A
-contract AvvenireTest is
-    Ownable,
-    ReentrancyGuard
-{
+contract AvvenireTest is Ownable, ReentrancyGuard {
     // mint information
     uint256 public maxPerAddressDuringAuction; // constant for later assignment>?t
     uint256 public maxPerAddressDuringWhiteList;
@@ -26,8 +23,9 @@ contract AvvenireTest is
     // uint256 public immutable maxBatchWhiteList;
 
     // dev payment information
-    uint256 paymentToDevs;  // can decrement this to 0 after being paid
+    uint256 paymentToDevs; // can decrement this to 0 after being paid
     address devAddress;
+    bool areDevsPaid;
 
     // avvenire citizens contract
     AvvenireCitizensInterface avvenireCitizens;
@@ -49,7 +47,6 @@ contract AvvenireTest is
     //Do I need to keep public?
     mapping(address => uint256) public totalPaid;
 
-
     /**
      * @notice Constructor calls on ERC721A constructor and sets the previously defined global variables
      * @param maxPerAddressDuringAuction_ the number for the max batch size and max # of NFTs per address during the auction
@@ -59,7 +56,7 @@ contract AvvenireTest is
      * @param amountForAuctionAndTeam_ specifies total amount to auction + the total amount for the team
      * @param paymentToDevs_ payment to devs
      */
-    constructor (
+    constructor(
         uint256 maxPerAddressDuringAuction_,
         uint256 maxPerAddressDuringWhiteList_,
         uint256 collectionSize_,
@@ -68,8 +65,7 @@ contract AvvenireTest is
         address devAddress_,
         uint256 paymentToDevs_,
         address avvenireCitizensContractAddress_
-        )
-    {
+    ) {
         maxPerAddressDuringAuction = maxPerAddressDuringAuction_;
         maxPerAddressDuringWhiteList = maxPerAddressDuringWhiteList_;
 
@@ -86,7 +82,9 @@ contract AvvenireTest is
         paymentToDevs = paymentToDevs_;
 
         // set avvenire citizens address
-        avvenireCitizens = AvvenireCitizensInterface(avvenireCitizensContractAddress_);
+        avvenireCitizens = AvvenireCitizensInterface(
+            avvenireCitizensContractAddress_
+        );
 
         require(
             amountForAuctionAndTeam_ <= collectionSize_, // make sure that the collection can handle the size of the auction
@@ -115,11 +113,13 @@ contract AvvenireTest is
             "sale has not started yet"
         );
         require(
-            avvenireCitizens.getTotalSupply() + quantity <= amountForAuctionAndTeam,
+            avvenireCitizens.getTotalSupply() + quantity <=
+                amountForAuctionAndTeam,
             "not enough remaining reserved for auction to support desired mint amount"
         );
         require(
-            avvenireCitizens.numberMinted(msg.sender) + quantity <= maxPerAddressDuringAuction, // make sure they are not trying to mint too many --> note: this is going to need to be different in our case as the whitelisted users have different mint amounts
+            avvenireCitizens.numberMinted(msg.sender) + quantity <=
+                maxPerAddressDuringAuction, // make sure they are not trying to mint too many --> note: this is going to need to be different in our case as the whitelisted users have different mint amounts
             "can not mint this many"
         );
         uint256 totalCost = getAuctionPrice() * quantity; // total amount of ETH needed for the transaction
@@ -223,7 +223,8 @@ contract AvvenireTest is
         uint256 endingPrice = saleConfig.publicPrice;
         require(endingPrice > 0, "public price not set yet");
 
-        uint256 actualCost = endingPrice * avvenireCitizens.numberMinted(msg.sender);
+        uint256 actualCost = endingPrice *
+            avvenireCitizens.numberMinted(msg.sender);
         int256 reimbursement = int256(totalPaid[msg.sender]) -
             int256(actualCost);
         require(reimbursement > 0, "You are not eligible for a refund");
@@ -242,7 +243,8 @@ contract AvvenireTest is
         uint256 endingPrice = saleConfig.publicPrice;
         require(endingPrice > 0, "public price not set yet");
 
-        uint256 actualCost = endingPrice * avvenireCitizens.numberMinted(toRefund);
+        uint256 actualCost = endingPrice *
+            avvenireCitizens.numberMinted(toRefund);
         int256 reimbursement = int256(totalPaid[toRefund]) - int256(actualCost);
         require(reimbursement > 0, "Not eligible for a refund");
 
@@ -375,9 +377,13 @@ contract AvvenireTest is
      */
     function withdrawMoney() external onlyOwner nonReentrant {
         // Pay devs
-        uint256 _payment = 2 ether;
-        (bool sent, ) = devAddress.call{value: _payment}("");
-        require(sent, "dev transfer failed");
+        if (!areDevsPaid) {
+            uint256 _payment = 2 ether;
+            (bool sent, ) = devAddress.call{value: _payment}("");
+            require(sent, "dev transfer failed");
+            areDevsPaid = true;
+        }
+
         // Withdraw rest of the contract
         (bool success, ) = msg.sender.call{value: address(this).balance}("");
         require(success, "team transfer failed.");
