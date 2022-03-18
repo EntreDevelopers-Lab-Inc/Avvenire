@@ -45,7 +45,6 @@ function connect() {
     return;
   }
 
-  // window.ethereum.enable();
   window.ethereum
     .request({ method: 'eth_requestAccounts' })
     .then(handleAccountsChanged)
@@ -60,6 +59,9 @@ function connect() {
     });
 
     setChain();
+
+    // now that we are connected, hide the button
+    $('#connect-btn').hide();
 }
 
 
