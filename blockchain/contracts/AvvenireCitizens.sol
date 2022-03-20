@@ -132,8 +132,7 @@ contract AvvenireCitizens is
     /** @notice a function that gives the change cost
      */
     function getChangeCost() public view returns (uint256) {
-        return (mutabilityConfig.mutabilityCost *
-            ((100 + devConfig.devRoyaltyPercent) / 100));
+        return ((mutabilityConfig.mutabilityCost * (100 + devConfig.devRoyaltyPercent))  / 100);
     }
 
     /**

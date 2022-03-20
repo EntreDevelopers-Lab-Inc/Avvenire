@@ -40,6 +40,7 @@ def test_direct_false_token_change():
     # user tries to change token directly (hitting modifier)
     with brownie.reverts():
         avvenire_citizens_contract.requestChange(0, {"from": account})
+    drop_interval(1)
 
     # try and get the token uri, is it still the base uri?
     assert avvenire_citizens_contract.tokenURI(0) == f"{BASE_URI}0"
@@ -62,6 +63,8 @@ def test_base_URI():
 
 # request a change --> see if it returns the load uri
 # mint an NFT --> take the hair off, make sure that it returns a load URI
+@pytest.mark.flaky(reruns=5)
+# @pytest.mark.timeout(60)
 def test_load_uri():
     # get the contracts
     avvenire_market_contract = AvvenireCitizenMarket[-1]
@@ -93,6 +96,7 @@ def test_load_uri():
     avvenire_market_contract.combine(
         0, trait_changes, {"from": account, "value": Web3.toWei(0.05, "ether")}
     )
+    drop_interval(1)
 
     # check to make sure that the token uri is the loading uri
     assert avvenire_citizens_contract.tokenURI(0) == LOAD_URI
@@ -105,6 +109,8 @@ def test_load_uri():
 
 # request a change --> have the admin update it
 # mint an NFT --> take the hair off, make sure that it returns a load URI
+@pytest.mark.flaky(reruns=5)
+#@pytest.mark.timeout(60)
 def test_character_uri_after_change():
     # get the contracts
     avvenire_citizens_contract = AvvenireCitizens[-1]
@@ -143,6 +149,7 @@ def test_character_uri_after_change():
 
     # make the changes as an admin
     broker_citizen = broker.update_citizen()
+    drop_interval(1)
 
     # get the new citizen from the chain and see if it matches
     chain_citizen = avvenire_citizens_contract.tokenIdToCitizen(0)
