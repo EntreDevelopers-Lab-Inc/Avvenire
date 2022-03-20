@@ -129,9 +129,10 @@ def test_request_change_with_cost(single_mint, set_mut_cost):
 
     assert balance_before_change - mint_account.balance() == REQUEST_COST
     assert avvenire_citizens_contract.tokenChangeRequests(0) == True
+    assert avvenire_citizens_contract.balance() == REQUEST_COST
 
 
-def test_request_change_with_underpayment():
+def test_request_change_with_underpayment(single_mint, set_mut_cost):
     avvenire_market_contract = AvvenireCitizenMarket[-1]
     avvenire_citizens_contract = AvvenireCitizens[-1]
     mint_account = accounts[2]
@@ -147,6 +148,28 @@ def test_request_change_with_underpayment():
 
     assert balance_before_change == mint_account.balance()
     assert avvenire_citizens_contract.tokenChangeRequests(0) == False
+
+
+def test_request_change_with_dev_royalty(single_mint, set_mut_cost):
+    avvenire_market_contract = AvvenireCitizenMarket[-1]
+    avvenire_citizens_contract = AvvenireCitizens[-1]
+    mint_account = accounts[2]
+
+    dev_account = get_dev_account()
+    avvenire_citizens_contract = AvvenireCitizens[-1]
+    avvenire_citizens_contract.setDevRoyalty(50, {"from": dev_account})
+
+    change_cost = avvenire_citizens_contract.getChangeCost()
+    balance_before_change = mint_account.balance()
+
+    # Try to request change with change cost...
+    avvenire_market_contract.initializeCitizen(
+        0, {"from": mint_account, "value": change_cost}
+    )
+
+    assert balance_before_change - mint_account.balance() == change_cost
+    assert avvenire_citizens_contract.tokenChangeRequests(0) == True
+    assert avvenire_citizens_contract.balance() == change_cost
 
 
 # test the rest from an accessory contract
