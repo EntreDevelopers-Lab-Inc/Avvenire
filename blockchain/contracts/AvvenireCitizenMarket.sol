@@ -78,10 +78,9 @@ contract AvvenireCitizenMarket is
     }
 
     /**
-     * @notice a function that can request that a user is allowed to change the token
-     * note: there is no way that we can get the citizens to actually
+     * @notice a function to initialize the citizen (just requests a change to set the sex from ipfs)
+     * @param citizenId gives the contract a citizen to look for
      */
-
     function initializeCitizen(uint256 citizenId) external payable {
         // make sure the sex is null, or the citizen has already been initialized
         require(
@@ -91,7 +90,9 @@ contract AvvenireCitizenMarket is
 
         // just request a change --> sets the sex
         // this function will perform all ownership and mutability checks in the other contract
-        avvenireCitizens.requestChange{value: msg.value}(citizenId);
+        avvenireCitizens.requestChange{value: avvenireCitizens.getChangeCost()}(
+            citizenId
+        );
     }
 
     /**
@@ -277,7 +278,6 @@ contract AvvenireCitizenMarket is
             }
         }
 
-        //_refundIfOver(totalCost);
         // request a character change
         // send the value of one change
         avvenireCitizens.requestChange{value: changeCost}(citizenId);
@@ -309,15 +309,15 @@ contract AvvenireCitizenMarket is
 
             // increment toMint to make the count accurate
             toMint += 1;
-        } else {
-            // can bind without remorse, as there will be no need to mint anything
-            avvenireCitizens.bind(
-                citizenId,
-                traitChange.traitId,
-                traitChange.sex,
-                traitChange.traitType
-            );
         }
+
+        // always need to bind a new trait, or notthing will happen (after all, this is the core purpose of the function)
+        avvenireCitizens.bind(
+            citizenId,
+            traitChange.traitId,
+            traitChange.sex,
+            traitChange.traitType
+        );
     }
 
     /**
@@ -330,14 +330,6 @@ contract AvvenireCitizenMarket is
         avvenireCitizens = AvvenireCitizensWithMappingInterface(
             contractAddress
         );
-    }
-
-    /**
-     * @notice internal function to request a change
-     * @param tokenId the id of the token that should be changed
-     */
-    function _requestChange(uint256 tokenId) internal {
-        avvenireCitizens.requestChange{value: msg.value}(tokenId);
     }
 
     /**

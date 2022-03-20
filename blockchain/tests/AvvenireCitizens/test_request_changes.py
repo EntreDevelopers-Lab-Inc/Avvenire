@@ -9,6 +9,7 @@ from scripts.helpful_scripts import get_account
 
 from scripts.script_definitions import drop_interval
 from scripts.auction import *
+from scripts.trading import setup_fees
 
 REQUEST_COST = Web3.toWei(0.25, "ether")
 
@@ -172,4 +173,38 @@ def test_request_change_with_dev_royalty(single_mint, set_mut_cost):
     assert avvenire_citizens_contract.balance() == change_cost
 
 
-# test the rest from an accessory contract
+# test paying the royalty
+def test_pay_royalty():
+    # get the contracts
+    citizen_contract = AvvenireCitizens[-1]
+    market_contract = AvvenireCitizenMarket[-1]
+    auction_contract = AvvenireTest[-1]
+
+    # start the auction and set the fees
+    cost = Web3.toWei(1, "ether")
+    auction_contract.auctionMint(1, {"from": accounts[1], "value": cost})
+    end_auction_and_enable_changes()
+    setup_fees()
+
+    # get the fees
+    fees = citizen_contract.getChangeCost()
+
+    # initialize the citizen with the fees
+    market_contract.initializeCitizen(0, {"from": accounts[1], "value": fees})
+
+
+# test NOT paying the royalty
+def test_not_pay_royalty():
+    # get the contracts
+    market_contract = AvvenireCitizenMarket[-1]
+    auction_contract = AvvenireTest[-1]
+
+    # start the auction and set the fees
+    cost = Web3.toWei(1, "ether")
+    auction_contract.auctionMint(1, {"from": accounts[1], "value": cost})
+    end_auction_and_enable_changes()
+    setup_fees()
+
+    # initialize the citizen with the fees
+    with brownie.reverts():
+        market_contract.initializeCitizen(0, {"from": accounts[1]})

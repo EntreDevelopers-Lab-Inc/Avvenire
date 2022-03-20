@@ -125,11 +125,14 @@ def end_auction(ending_auction_price, time_from_epoch):
         public_sale_start_time = chain.time() + time_from_epoch
     else:
         most_recent_block = Web3.eth.get_block("latest")
-        public_sale_start_time = most_recent_block["timestamp"] + time_from_epoch
+        public_sale_start_time = most_recent_block["timestamp"] + \
+            time_from_epoch
 
     avvenire_contract.endAuctionAndSetupNonAuctionSaleInfo(
-        whitelist_price, ending_auction_price, public_sale_start_time, {"from": account}
+        whitelist_price, ending_auction_price, public_sale_start_time, {
+            "from": account}
     )
+    drop_interval(1)
 
 
 def drop_interval(number_of_drops):

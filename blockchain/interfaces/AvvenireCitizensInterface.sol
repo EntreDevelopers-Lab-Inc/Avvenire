@@ -9,6 +9,15 @@ import "../interfaces/AvvenireCitizenDataInterface.sol";
 import "@openzeppelin/contracts/token/ERC721/IERC721.sol";
 
 interface AvvenireCitizensInterface is AvvenireCitizenDataInterface, IERC721 {
+    // mutability config stuct
+    struct MutabilityConfig {
+        bool mutabilityMode; // initially set the contract to be immutable, this will keep people from trying to use the function before it is released
+        // payment information
+        uint256 mutabilityCost; // the amount that it costs to make a change (initializes to 0)
+        // trading information
+        bool tradeBeforeChange; // initially set to false, don't want people to tokens that are pending changes
+    }
+
     // other functions
     function getTotalSupply() external returns (uint256);
 
@@ -41,4 +50,6 @@ interface AvvenireCitizensWithMappingInterface is AvvenireCitizensInterface {
     function tokenIdToCitizen(uint256) external view returns (Citizen memory);
 
     function tokenIdToTrait(uint256) external view returns (Trait memory);
+
+    function mutabilityConfig() external view returns (MutabilityConfig memory);
 }

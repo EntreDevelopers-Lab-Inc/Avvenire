@@ -35,14 +35,6 @@ contract AvvenireCitizens is
 
     address payable receivingAddress; // the address that collects the cost of the mutation
 
-    struct MutabilityConfig {
-        bool mutabilityMode; // initially set the contract to be immutable, this will keep people from trying to use the function before it is released
-        // payment information
-        uint256 mutabilityCost; // the amount that it costs to make a change (initializes to 0)
-        // trading information
-        bool tradeBeforeChange; // initially set to false, don't want people to tokens that are pending changes
-    }
-
     MutabilityConfig public mutabilityConfig;
 
     // dev payment
@@ -141,8 +133,8 @@ contract AvvenireCitizens is
     /** @notice a function that gives the change cost
      */
     function getChangeCost() public view returns (uint256) {
-        return (mutabilityConfig.mutabilityCost *
-            ((100 + devConfig.devRoyaltyPercent) / 100));
+        return ((mutabilityConfig.mutabilityCost *
+            (100 + devConfig.devRoyaltyPercent)) / 100);
     }
 
     /**

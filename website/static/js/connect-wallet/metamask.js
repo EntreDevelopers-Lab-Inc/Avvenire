@@ -39,17 +39,23 @@ async function setChain() {
 // MetaMask will reject any additional requests while the first is still
 // pending.
 function connect() {
+  if (window.ethereum == undefined)
+  {
+    alert('No wallet found,.')
+    return;
+  }
+
   // window.ethereum.enable();
-  ethereum
+  window.ethereum
     .request({ method: 'eth_requestAccounts' })
     .then(handleAccountsChanged)
     .catch((err) => {
       if (err.code === 4001) {
         // EIP-1193 userRejectedRequest error
         // If this happens, the user rejected the connection request.
-        console.log('Please connect wallet.');
+        alert('Please connect wallet.');
       } else {
-        console.error(err);
+        alert(err);
       }
     });
 
@@ -102,31 +108,35 @@ function loadDocument() {
     }
 }
 
-/**********************************************************/
-/* Handle chain (network) and chainChanged (per EIP-1193) */
-/**********************************************************/
-ethereum.on('chainChanged', handleChainChanged);
+// only set up the document if the window is ethereum
+if (window.ethereum != undefined)
+{
+  /**********************************************************/
+  /* Handle chain (network) and chainChanged (per EIP-1193) */
+  /**********************************************************/
+  window.ethereum.on('chainChanged', handleChainChanged);
 
 
-/***********************************************************/
-/* Handle user accounts and accountsChanged (per EIP-1193) */
-/***********************************************************/
+  /***********************************************************/
+  /* Handle user accounts and accountsChanged (per EIP-1193) */
+  /***********************************************************/
 
-ethereum
-  .request({ method: 'eth_accounts' })
-  .then(handleAccountsChanged)
-  .catch((err) => {
-    // Some unexpected error.
-    // For backwards compatibility reasons, if no accounts are available,
-    // eth_accounts will return an empty array.
-    console.error(err);
-  });
+  window,ethereum
+    .request({ method: 'eth_accounts' })
+    .then(handleAccountsChanged)
+    .catch((err) => {
+      // Some unexpected error.
+      // For backwards compatibility reasons, if no accounts are available,
+      // eth_accounts will return an empty array.
+      console.error(err);
+    });
 
-// Note that this event is emitted on page load.
-// If the array of accounts is non-empty, you're already
-// connected.
-ethereum.on('accountsChanged', handleAccountsChanged);
+  // Note that this event is emitted on page load.
+  // If the array of accounts is non-empty, you're already
+  // connected.
+  window.ethereum.on('accountsChanged', handleAccountsChanged);
 
+  // call the load document function
+  loadDocument();
+}
 
-// call the load document function
-loadDocument();
