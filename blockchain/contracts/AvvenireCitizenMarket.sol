@@ -8,8 +8,13 @@ pragma solidity ^0.8.4;
 import "../interfaces/AvvenireCitizensInterface.sol";
 import "../interfaces/AvvenireCitizenDataInterface.sol";
 import "@openzeppelin/contracts/access/Ownable.sol";
+import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 
-contract AvvenireCitizenMarket is Ownable, AvvenireCitizenDataInterface {
+contract AvvenireCitizenMarket is
+    Ownable,
+    AvvenireCitizenDataInterface,
+    ReentrancyGuard
+{
     // store the avvenireCitizens contract
     AvvenireCitizensWithMappingInterface public avvenireCitizens;
 
@@ -339,7 +344,7 @@ contract AvvenireCitizenMarket is Ownable, AvvenireCitizenDataInterface {
      * @notice refunds excess eth
      * @param cost the amount required for the change
      */
-    function _refundIfOver(uint256 cost) internal {
+    function _refundIfOver(uint256 cost) internal nonReentrant {
         // make sure the msg sent enough eth
         require(msg.value > cost, "Insufficient funds.");
 
