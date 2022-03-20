@@ -75,7 +75,7 @@ def test_load_uri():
 
     mint_citizens_and_initialize(2, account)
 
-# request from the market to remove all the traits of a citizen
+    # request from the market to remove all the traits of a citizen
     trait_changes = [
         [0, False, 2, 1],  # default background
         [0, True, 2, 2],

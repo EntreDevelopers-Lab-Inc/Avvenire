@@ -73,14 +73,14 @@ contract AvvenireCitizenMarket is Ownable, AvvenireCitizenDataInterface {
      * @notice a function to initialize the citizen (just requests a change to set the sex from ipfs)
      * @param citizenId gives the contract a citizen to look for
     */
-    function initializeCitizen(uint256 citizenId) external
+    function initializeCitizen(uint256 citizenId) external payable
     {
         // make sure the sex is null, or the citizen has already been initialized
         require(avvenireCitizens.tokenIdToCitizen(citizenId).sex == Sex.NULL, "This citizen has already been initialized.");
 
         // just request a change --> sets the sex
         // this function will perform all ownership and mutability checks in the other contract
-        avvenireCitizens.requestChange(citizenId);
+        avvenireCitizens.requestChange{value: avvenireCitizens.getChangeCost()}(citizenId);
     }
 
     /**
@@ -251,20 +251,6 @@ contract AvvenireCitizenMarket is Ownable, AvvenireCitizenDataInterface {
         onlyOwner
     {
         avvenireCitizens = AvvenireCitizensWithMappingInterface(contractAddress);
-    }
-
-    /**
-     * @notice internal function to request a change
-     * @param tokenId the id of the token that should be changed
-     */
-    function _requestChange(uint256 tokenId) internal {
-        avvenireCitizens.requestChange(tokenId);
-    }
-
-    // ********* NEEDS TO BE DELETED LATER ***********
-    // SOLE PURPOSE IS FOR EXPLICIT TESTING
-    function requestChange(uint256 tokenId) external {
-        _requestChange(tokenId);
     }
 
     /**
