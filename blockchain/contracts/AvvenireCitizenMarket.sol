@@ -87,12 +87,12 @@ contract AvvenireCitizenMarket is
             avvenireCitizens.tokenIdToCitizen(citizenId).sex == Sex.NULL,
             "This citizen has already been initialized."
         );
+        uint256 cost = avvenireCitizens.getChangeCost();
+        _refundIfOver(cost);
 
         // just request a change --> sets the sex
         // this function will perform all ownership and mutability checks in the other contract
-        avvenireCitizens.requestChange{value: avvenireCitizens.getChangeCost()}(
-            citizenId
-        );
+        avvenireCitizens.requestChange{value: cost}(citizenId);
     }
 
     /**
@@ -338,7 +338,7 @@ contract AvvenireCitizenMarket is
      */
     function _refundIfOver(uint256 cost) internal nonReentrant {
         // make sure the msg sent enough eth
-        require(msg.value > cost, "Insufficient funds.");
+        require(msg.value >= cost, "Insufficient funds.");
 
         if (msg.value > cost) {
             payable(msg.sender).transfer(msg.value - cost); // pay the user the excess
