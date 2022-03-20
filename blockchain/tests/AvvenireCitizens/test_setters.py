@@ -5,7 +5,6 @@ from brownie import AvvenireTest, AvvenireCitizens, AvvenireCitizenMarket, accou
 from web3 import Web3
 from scripts.helpful_scripts import get_account
 
-from scripts.script_definitions import drop_interval
 from scripts.auction import *
 
 
@@ -13,6 +12,16 @@ from scripts.auction import *
 def auction_set(module_isolation):
     setup_auction()
     # perform_auction()
+
+
+@pytest.fixture
+def single_mint():
+    avvenire_auction_contract = AvvenireTest[-1]
+    test_account = accounts[2]
+
+    mint_cost = Web3.toWei(1, "ether")
+    avvenire_auction_contract.auctionMint(1, {"from": test_account, "value": mint_cost})
+    end_auction_and_enable_changes()
 
 
 @pytest.mark.parametrize("bool_", [True, False])
@@ -66,8 +75,15 @@ def test_trade_before_change(bool_):
 def test_set_allowed_permission(bool_):
     avvenire_citizens_contract = AvvenireCitizens[-1]
     admin_account = get_account()
-    account_to_change = accounts[3]
     avvenire_citizens_contract.setTokenTradeBeforeChange(bool_, {"from": admin_account})
+
+
+# ******* MOST IMPORTANT SETTERS of the avvenire citizens contract ********
+
+
+def test_set_trait_data(single_mint):
+    avvenire_auction_contract = AvvenireTest[-1]
+    avvenire_citizens_contract = AvvenireCitizens[-1]
 
 
 # *** Tests below need to have variables set to public to test ***
