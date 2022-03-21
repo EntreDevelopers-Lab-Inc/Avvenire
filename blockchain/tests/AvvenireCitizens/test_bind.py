@@ -45,8 +45,9 @@ def test_false_trait():
     ]
 
     # test combination of fake trait
-    with brownie.reverts():
-        market_contract.combine(0, trait_changes, {'from': account})
+    # with brownie.reverts():
+    with pytest.raises():
+        market_contract.combine(0, trait_changes, {"from": account})
 
 
 # bind a real trait to the wrong sex
@@ -75,7 +76,7 @@ def test_wrong_combination():
     ]
 
     # put on default hair
-    market_contract.combine(0, male_trait_changes, {'from': account})
+    market_contract.combine(0, male_trait_changes, {"from": account})
 
     # set the new trait id
     new_trait_id = citizens_contract.getTotalSupply() - 1
@@ -99,4 +100,4 @@ def test_wrong_combination():
         [0, False, 2, 11],
     ]
     with brownie.reverts():
-        market_contract.combine(2, female_trait_changes, {'from': account})
+        market_contract.combine(2, female_trait_changes, {"from": account})
