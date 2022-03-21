@@ -112,14 +112,14 @@ class CitizenCreator:
         # if there is not a uri, but it exists, get the data from ipfs
         elif trait[3]:
             return create_trait(
-                self.ipfs_traits[trait_type], self.ipfs_files[trait_type], trait_type
+                self.ipfs_traits[trait_type], self.ipfs_files[trait_type], trait_type, self.sex
             )
         # if no uri, and it doesn't exist, set it to the default
         else:
             # imply the file default information based on the trait type and sex
             # first argument (name) will never be used, as no name will be set
             return create_trait(
-                f"Default {trait_type}", f"{trait_type}/{DEFAULT_FILE}", trait_type
+                f"Default {trait_type}", f"{trait_type}/{DEFAULT_FILE}", trait_type, self.sex
             )
 
     # create a way to get the metadata
@@ -136,32 +136,16 @@ class CitizenCreator:
 
         # iterate over all of the files in both trait lists
         for i in range(len(TRAIT_ORDER)):
-            # get the ipfs file
-            ipfs_file = self.ipfs_data["trait_files"][i]["file"]
-            ipfs_attribute = self.ipfs_data["attributes"][i]
-
             # get the chain file
             chain_file = self.chain_traits[i]["file"]
             chain_attribute = self.chain_traits[i]["name"]
 
-            # figure out if the new trait exists
-            new_trait_exists = self.chain_data[i][3]
-
-            # if the ipfs trait and the chain trait are the same, just use that file
-            if ipfs_file == chain_file:
-                # set the file and attribute
-                new_file = ipfs_file
-                new_attribute = ipfs_attribute
-            else:
-                # set the file and attribute
-                new_file = chain_file
-                new_attribute = chain_attribute
-
             # add the new file to files
-            files.append({"trait_type": TRAIT_ORDER[i], "file": new_file})
+            files.append({"trait_type": TRAIT_ORDER[i], "file": chain_file})
 
             # add the new attribute to the attributes
-            attributes.append(new_attribute)
+            attributes.append(
+                {'trait_type': TRAIT_ORDER[i], 'value': chain_attribute})
 
             # make a metadata dict for the new citizen
             metadata_dict = {
@@ -368,15 +352,15 @@ class TraitManager:
         }
 
         # get the trait sex (which will already be set automatically by the market contract)
-        sex = SEX_ORDER[trait[4] - 1]
+        sex = SEX_ORDER[trait[4] - 2]
 
         # get the trait data depending on the trait type
-        trait_type = TRAIT_ORDER[trait[5] - 1]
+        trait_type = TRAIT_ORDER[trait[5] - 2]
         file = file_dict[trait_type]
         attribute = attribute_dict[trait_type]
 
         # create the metadata
-        metadata = create_trait(attribute, file, trait_type)
+        metadata = create_trait(attribute, file, trait_type, sex)
 
         # get the image (just create some art with only one file)
         art = Art({"full_path": os.path.join(ART_FOLDER, sex, file)})
@@ -395,17 +379,18 @@ class TraitManager:
         trait[1] = metadata_link
 
         # set the trait's data using the admin account (set change update to false, as the trait has been updated)
-        self.contract.setTraitData(trait, False, {"from": get_server_account()})
+        self.contract.setTraitData(
+            trait, False, {"from": get_server_account()})
 
         pass
 
 
 # function for standardizing trait data
-def create_trait(name, file, trait_type):
+def create_trait(name, file, trait_type, sex):
     return {
         "name": name,
         "file": file,
-        "attributes": {"trait_type": trait_type, "value": name},
+        "attributes": [{'Sex': sex}, {"trait_type": trait_type, "value": name}],
     }
 
 

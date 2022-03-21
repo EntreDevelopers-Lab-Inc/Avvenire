@@ -80,9 +80,9 @@ def test_wrong_combination():
     # set the new trait id
     new_trait_id = citizens_contract.getTotalSupply() - 1
 
-    # update the hair's uri, newly minted trait has id 5
+    # update the hair's uri
     trait_manager = TraitManager(citizens_contract, new_trait_id)
-    trait_manager.update_trait()
+    trait_manager.update_trait()  # this is updating the effect
 
     # put the male hair on a female
     female_trait_changes = [
