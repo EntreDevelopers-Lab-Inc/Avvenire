@@ -46,7 +46,7 @@ def test_false_trait():
 
     # test combination of fake trait
     # with brownie.reverts():
-    with pytest.raises():
+    with pytest.reverts():
         market_contract.combine(0, trait_changes, {"from": account})
 
 
