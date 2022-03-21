@@ -263,10 +263,12 @@ class CitizenMarketBroker:
         # IF the citizen's sex is not set already, set it
         if citizen[3] == 0:
             # set the sex
-            citizen[3] = int(SEX_ORDER.index(ipfs_data["attributes"][0]["value"])) + 1
+            citizen[3] = int(SEX_ORDER.index(
+                ipfs_data["attributes"][0]["value"])) + 1
 
             # set the citizen's data --> no need to update further, as the citizen's data is already stored
-            self.contract.setCitizenData(citizen, False, {"from": get_server_account()})
+            self.contract.setCitizenData(
+                citizen, False, {"from": get_server_account()})
 
     # function to update a citizen
     def update_citizen(self):
@@ -300,7 +302,8 @@ class CitizenMarketBroker:
         citizen[1] = uri
 
         # set the citizen data with the contract using the admin account --> no need for more changes, set those to false
-        self.contract.setCitizenData(citizen, False, {"from": get_server_account()})
+        self.contract.setCitizenData(
+            citizen, False, {"from": get_server_account()})
 
         # return reconverted version of citizen for better understanding
         return tuple(citizen)
@@ -334,11 +337,14 @@ class TraitManager:
         # save the contract
         self.contract = contract
 
+        # saev the trait id
+        self.trait_id = trait_id
+
     # function to update a trait (needs to be relocated to a trait manager --> will become a part of creating a citizen)
     # on the API, citizen creations will be stored with the exact traits created and dropped --> will have this data
     def update_trait(self):
         # get the trait
-        trait = self.contract.tokenIdToTrait(self.trait_id)
+        trait = list(self.contract.tokenIdToTrait(self.trait_id))
 
         # get the trait data from ipfs by linking it to the origin citizen
         resp = requests.get(f"{BASE_URI}{trait[6]}")
@@ -361,7 +367,7 @@ class TraitManager:
             for trait_files in citizen_data["trait_files"]
         }
 
-        # get the trait sex
+        # get the trait sex (which will already be set automatically by the market contract)
         sex = SEX_ORDER[trait[4] - 1]
 
         # get the trait data depending on the trait type
@@ -382,13 +388,14 @@ class TraitManager:
         metadata["image"] = art_link
 
         # upload the metadata to ipfs
-        metadata_link = upload_to_ipfs
+        metadata_bytes = json.dumps(metadata, indent=4).encode('utf-8')
+        metadata_link = upload_to_ipfs(metadata_bytes, extension=None)
 
         # change the trait's uri (rest can stay the same)
         trait[1] = metadata_link
 
-        # set the trait's data using the admin account
-        self.contract.setTraitsData(trait, {"from": get_server_account()})
+        # set the trait's data using the admin account (set change update to false, as the trait has been updated)
+        self.contract.setTraitData(trait, False, {"from": get_server_account()})
 
         pass
 

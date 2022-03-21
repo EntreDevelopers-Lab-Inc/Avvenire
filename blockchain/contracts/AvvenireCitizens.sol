@@ -357,7 +357,7 @@ contract AvvenireCitizens is
             // ensure that the trait and citizen have the same sex
             require(
                 tokenIdToCitizen[citizenId].sex == tokenIdToTrait[traitId].sex,
-                "Opposite sexes"
+                "Sex mismatch"
             );
         }
 

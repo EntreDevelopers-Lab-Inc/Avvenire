@@ -7,12 +7,17 @@ from scripts.script_definitions import drop_interval
 from scripts.auction import end_auction_and_enable_changes
 
 
-# mint some citizens to an account and end it
-def mint_citizens_and_end(amount, account):
+# mint some citizens
+def mint_citizens(amount, account):
     avvenire_auction_contract = AvvenireTest[-1]
     cost = Web3.toWei(amount, "ether")
     avvenire_auction_contract.auctionMint(
         amount, {"from": account, "value": cost})
+
+
+# mint some citizens to an account and end it
+def mint_citizens_and_end(amount, account):
+    mint_citizens(amount, account)
     # end the auction
     end_auction_and_enable_changes()
 
