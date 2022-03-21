@@ -84,6 +84,9 @@ def test_wrong_combination():
     trait_manager = TraitManager(citizens_contract, new_trait_id)
     trait_manager.update_trait()  # this is updating the effect
 
+    print(f"New trait id: {new_trait_id}")
+    print(citizens_contract.tokenIdToTrait(new_trait_id))
+
     # put the male hair on a female
     female_trait_changes = [
         [0, False, 3, 1],
@@ -100,3 +103,33 @@ def test_wrong_combination():
     ]
     with brownie.reverts():
         market_contract.combine(2, female_trait_changes, {'from': account})
+
+
+# test adding a new background
+
+
+# test changing body
+
+
+# test adding a tattoo
+
+
+# test changing eyes
+
+
+# test changing mouth
+
+
+# test changing mask
+
+
+# test changing necklace
+
+
+# test changing clothing
+
+
+# test changing hair
+
+
+# test changing effect
