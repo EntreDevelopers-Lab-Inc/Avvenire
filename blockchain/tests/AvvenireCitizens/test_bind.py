@@ -1,7 +1,12 @@
-import pytest
-import brownie
+import pytest, brownie
 
-from brownie import AvvenireTest, AvvenireCitizens, AvvenireCitizenMarket, accounts
+from brownie import (
+    AvvenireTest,
+    AvvenireCitizens,
+    AvvenireCitizenMarket,
+    accounts,
+    exceptions,
+)
 from web3 import Web3
 
 from tools.ChainHandler import CitizenMarketBroker, TraitManager
@@ -46,7 +51,7 @@ def test_false_trait():
 
     # test combination of fake trait
     # with brownie.reverts():
-    with pytest.reverts():
+    with pytest.raises(exceptions.VirtualMachineError):
         market_contract.combine(0, trait_changes, {"from": account})
 
 
