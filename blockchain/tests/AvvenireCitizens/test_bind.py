@@ -50,7 +50,7 @@ def test_false_trait():
 
 
 # bind a real trait to the wrong sex
-def test_wrong_combination():
+def test_wrong_sex():
     # keep track of the contracts
     market_contract = AvvenireCitizenMarket[-1]
     citizens_contract = AvvenireCitizens[-1]
@@ -77,8 +77,17 @@ def test_wrong_combination():
     # put on default hair
     market_contract.combine(0, male_trait_changes, {'from': account})
 
+    # make sure that the trait came off of the citizen
+
     # set the new trait id
     new_trait_id = citizens_contract.getTotalSupply() - 1
+
+    # check out the initialization
+    print(citizens_contract.tokenIdToCitizen(2))
+
+    # get the trait data
+    new_trait = citizens_contract.tokenIdToTrait(new_trait_id)
+    assert new_trait == (new_trait_id, '', True, True, 1, 0)
 
     # update the hair's uri
     trait_manager = TraitManager(citizens_contract, new_trait_id)

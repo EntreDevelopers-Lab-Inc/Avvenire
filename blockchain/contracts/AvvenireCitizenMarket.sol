@@ -267,12 +267,15 @@ contract AvvenireCitizenMarket is
                 tokenId = startTokenId + i;
 
                 // get the old trait information (some has been set already)
-                trait = avvenireCitizens.tokenIdToTrait(tokenId);
-
-                // set the trait information (stores less memory, as these are smaller than traits, and they have the important information already set)
-                trait.originCitizenId = citizenId;
-                trait.sex = newTraits[i].sex;
-                trait.traitType = newTraits[i].traitType;
+                trait = Trait({
+                        tokenId: tokenId,
+                        uri: '',
+                        free: true,
+                        exists: true,
+                        sex: newTraits[i].sex,
+                        traitType: newTraits[i].traitType,
+                        originCitizenId: citizenId
+                    });
 
                 // push the trait onto the data contract
                 // need to do this to differentiate the new traits created (for which properties)
