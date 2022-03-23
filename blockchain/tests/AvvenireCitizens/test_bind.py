@@ -1,3 +1,4 @@
+from re import L
 import pytest
 import brownie
 
@@ -168,33 +169,19 @@ def test_decompose_all_with_fee(set_mut_cost, set_dev_royalty):
     # use account 2 for the test user
     account = accounts[2]  
     
-    #     struct TraitChanges {
-    #     TraitChange backgroundChange;
-    #     TraitChange bodyChange;
-    #     TraitChange tattooChange;
-    #     TraitChange eyesChange;
-    #     TraitChange mouthChange;
-    #     TraitChange maskChange;
-    #     TraitChange necklaceChange;
-    #     TraitChange clothingChange;
-    #     TraitChange earringsChange;
-    #     TraitChange hairChange;
-    #     TraitChange effectChange;
-    # }
-
     # request from the market to remove all the traits of a citizen
     trait_changes = [
-        [0, False, 2, 1],
-        [0, True, 2, 2], 
-        [0, False, 2, 3],
-        [0, True, 2, 4],
-        [0, True, 2, 5],
-        [0, True, 2, 6],
-        [0, False, 2, 7],
-        [0, False, 2, 8],
-        [0, True, 2, 9],
-        [0, False, 2, 10],
-        [0, True, 2, 11],
+        [0, False, 1, 1],
+        [0, True, 1, 2], 
+        [0, False, 1, 3],
+        [0, True, 1, 4],
+        [0, True, 1, 5],
+        [0, True, 1, 6],
+        [0, False, 1, 7],
+        [0, False, 1, 8],
+        [0, True, 1, 9],
+        [0, False, 1, 10],
+        [0, True, 1, 11],
     ]
 
     change_cost = citizens_contract.getChangeCost()
@@ -217,3 +204,53 @@ def test_decompose_all_with_fee(set_mut_cost, set_dev_royalty):
     # for i in range(newly_minted_tokens):
     #     trait_manager = TraitManager(citizens_contract, balance_before_combine + i + 1)
     #     trait_manager.update_trait()
+
+
+
+
+    #     struct TraitChanges {
+    #     TraitChange backgroundChange;
+    #     TraitChange bodyChange;
+    #     TraitChange tattooChange;
+    #     TraitChange eyesChange;
+    #     TraitChange mouthChange;
+    #     TraitChange maskChange;
+    #     TraitChange necklaceChange;
+    #     TraitChange clothingChange;
+    #     TraitChange earringsChange;
+    #     TraitChange hairChange;
+    #     TraitChange effectChange;
+    # }
+    
+    #     struct TraitChange {
+    #     uint256 traitId; // setting this to 0 will bind the trait to its default (NULL)
+    #     bool toChange; // will be checked in the for loop to see if the trait needs to be changed
+    #     Sex sex;
+    #     TraitType traitType;
+    # }
+
+
+def test_adding_new_background():
+        # keep track of the contract
+    market_contract = AvvenireCitizenMarket[-1]
+    citizens_contract = AvvenireCitizens[-1]
+
+    # use account 2 for the test user
+    account = accounts[2]  
+    
+    # request from the market to remove all the traits of a citizen
+    trait_changes = [
+        [0, False, 2, 1],
+        [0, True, 2, 2], 
+        [0, False, 2, 3],
+        [0, True, 2, 4],
+        [0, True, 2, 5],
+        [0, True, 2, 6],
+        [0, False, 2, 7],
+        [0, False, 2, 8],
+        [0, True, 2, 9],
+        [0, False, 2, 10],
+        [0, True, 2, 11],
+    ]
+
+
