@@ -63,8 +63,6 @@ def test_base_URI():
 
 # request a change --> see if it returns the load uri
 # mint an NFT --> take the hair off, make sure that it returns a load URI
-@pytest.mark.flaky(reruns=5)
-# @pytest.mark.timeout(60)
 def test_load_uri():
     # get the contracts
     avvenire_market_contract = AvvenireCitizenMarket[-1]
@@ -109,8 +107,6 @@ def test_load_uri():
 
 # request a change --> have the admin update it
 # mint an NFT --> take the hair off, make sure that it returns a load URI
-@pytest.mark.flaky(reruns=5)
-#@pytest.mark.timeout(60)
 def test_character_uri_after_change():
     # get the contracts
     avvenire_citizens_contract = AvvenireCitizens[-1]

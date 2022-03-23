@@ -83,10 +83,12 @@ contract AvvenireCitizenMarket is
      */
     function initializeCitizen(uint256 citizenId) external payable nonReentrant {
         // make sure the sex is null, or the citizen has already been initialized
+        // this is currently disabled as the enumerables are giving us an odd error
         require(
             avvenireCitizens.tokenIdToCitizen(citizenId).sex == Sex.NULL,
             "This citizen has already been initialized."
         );
+
         uint256 cost = avvenireCitizens.getChangeCost();
         _refundIfOver(cost);
 
@@ -127,7 +129,7 @@ contract AvvenireCitizenMarket is
         // each trait's mergability will be checked on binding (to reduce gas costs, access the mapping on the frontend before using this function)
         // if changing and traitId == 0, add it to the list that need to be minted, else bind the trait directly
         if (traitChanges.backgroundChange.toChange) {
-            _bindTrait(
+            toMint = _bindTrait(
                 citizenId,
                 avvenireCitizens.tokenIdToCitizen(citizenId).traits.background,
                 newTraits,
@@ -137,7 +139,7 @@ contract AvvenireCitizenMarket is
         }
 
         if (traitChanges.bodyChange.toChange) {
-            _bindTrait(
+            toMint = _bindTrait(
                 citizenId,
                 avvenireCitizens.tokenIdToCitizen(citizenId).traits.body,
                 newTraits,
@@ -147,7 +149,7 @@ contract AvvenireCitizenMarket is
         }
 
         if (traitChanges.tattooChange.toChange) {
-            _bindTrait(
+            toMint = _bindTrait(
                 citizenId,
                 avvenireCitizens.tokenIdToCitizen(citizenId).traits.tattoo,
                 newTraits,
@@ -157,7 +159,7 @@ contract AvvenireCitizenMarket is
         }
 
         if (traitChanges.eyesChange.toChange) {
-            _bindTrait(
+            toMint = _bindTrait(
                 citizenId,
                 avvenireCitizens.tokenIdToCitizen(citizenId).traits.eyes,
                 newTraits,
@@ -167,7 +169,7 @@ contract AvvenireCitizenMarket is
         }
 
         if (traitChanges.mouthChange.toChange) {
-            _bindTrait(
+            toMint = _bindTrait(
                 citizenId,
                 avvenireCitizens.tokenIdToCitizen(citizenId).traits.mouth,
                 newTraits,
@@ -177,7 +179,7 @@ contract AvvenireCitizenMarket is
         }
 
         if (traitChanges.maskChange.toChange) {
-            _bindTrait(
+            toMint = _bindTrait(
                 citizenId,
                 avvenireCitizens.tokenIdToCitizen(citizenId).traits.mask,
                 newTraits,
@@ -187,7 +189,7 @@ contract AvvenireCitizenMarket is
         }
 
         if (traitChanges.necklaceChange.toChange) {
-            _bindTrait(
+            toMint = _bindTrait(
                 citizenId,
                 avvenireCitizens.tokenIdToCitizen(citizenId).traits.necklace,
                 newTraits,
@@ -197,7 +199,7 @@ contract AvvenireCitizenMarket is
         }
 
         if (traitChanges.clothingChange.toChange) {
-            _bindTrait(
+            toMint = _bindTrait(
                 citizenId,
                 avvenireCitizens.tokenIdToCitizen(citizenId).traits.clothing,
                 newTraits,
@@ -207,7 +209,7 @@ contract AvvenireCitizenMarket is
         }
 
         if (traitChanges.earringsChange.toChange) {
-            _bindTrait(
+            toMint = _bindTrait(
                 citizenId,
                 avvenireCitizens.tokenIdToCitizen(citizenId).traits.earrings,
                 newTraits,
@@ -217,7 +219,7 @@ contract AvvenireCitizenMarket is
         }
 
         if (traitChanges.hairChange.toChange) {
-            _bindTrait(
+            toMint = _bindTrait(
                 citizenId,
                 avvenireCitizens.tokenIdToCitizen(citizenId).traits.hair,
                 newTraits,
@@ -227,7 +229,7 @@ contract AvvenireCitizenMarket is
         }
 
         if (traitChanges.effectChange.toChange) {
-            _bindTrait(
+            toMint = _bindTrait(
                 citizenId,
                 avvenireCitizens.tokenIdToCitizen(citizenId).traits.effect,
                 newTraits,
@@ -238,8 +240,18 @@ contract AvvenireCitizenMarket is
 
         // if there are any to mint, do so
         if (toMint > 0) {
-            // add the amount to mint to the total cost
-            totalCost += toMint * changeCost;
+            // pay if the change cost is greater than 0
+            if (changeCost > 0)
+            {
+                // add the amount to mint to the total cost
+                totalCost += toMint * changeCost;
+
+                // for every new trait to mint, a change will be requested, so send the appropriate amount of eth (do so directly, as safe mint is not payable)
+                (bool success, ) = address(avvenireCitizens).call{value: totalCost}(
+                    ""
+                );
+                require(success, "Insufficient funds for new traits minted.");
+            }
 
             // mint the citzens --> this will only set ownership, will not indicate how to set traits and sexes
             uint256 startTokenId = avvenireCitizens.getTotalSupply();
@@ -257,12 +269,15 @@ contract AvvenireCitizenMarket is
                 tokenId = startTokenId + i;
 
                 // get the old trait information (some has been set already)
-                trait = avvenireCitizens.tokenIdToTrait(tokenId);
-
-                // set the trait information (stores less memory, as these are smaller than traits, and they have the important information already set)
-                trait.originCitizenId = citizenId;
-                trait.sex = newTraits[i].sex;
-                trait.traitType = newTraits[i].traitType;
+                trait = Trait({
+                        tokenId: tokenId,
+                        uri: '',
+                        free: true,
+                        exists: true,
+                        sex: avvenireCitizens.tokenIdToCitizen(citizenId).sex,  // make sure to set to the citizen sex, as it will not check on initial trait mint
+                        traitType: newTraits[i].traitType,   // these are checked
+                        originCitizenId: citizenId
+                    });
 
                 // push the trait onto the data contract
                 // need to do this to differentiate the new traits created (for which properties)
@@ -303,7 +318,10 @@ contract AvvenireCitizenMarket is
         TraitChange[11] memory newTraits,
         uint256 toMint,
         TraitChange memory traitChange
-    ) internal {
+    ) internal returns (uint256) {
+        // ensure that the traits are of the same type, as it is not checked anywhere else (will be resorted in bind)
+        require(oldTrait.traitType == traitChange.traitType, "Trait type mismatch");
+
         if ((oldTrait.tokenId == 0) && (oldTrait.exists)) {
             // add the trait to the newTraits array
             newTraits[toMint] = traitChange;
@@ -319,6 +337,9 @@ contract AvvenireCitizenMarket is
             traitChange.sex,
             traitChange.traitType
         );
+
+        // return the new mint amount
+        return toMint;
     }
 
     /**
