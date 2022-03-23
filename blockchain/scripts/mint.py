@@ -35,5 +35,3 @@ def mint_citizens_and_initialize(amount, account):
         broker.set_sex()
 
         drop_interval(1)
-
-    return broker

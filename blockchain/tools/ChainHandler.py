@@ -11,7 +11,7 @@ try:
 
 except ImportError:
     from scripts.helpful_scripts import get_server_account
-    from constants import BASE_URI, EXTENSION
+    from constants import BASE_URI, EXTENSION, WAIT_BLOCKS
     from GenerativeArt.core.art import Art
     from tools.ipfs import upload_to_ipfs
 
@@ -251,6 +251,8 @@ class CitizenMarketBroker:
 
             # set the sex
             citizen[3] = sex_id
+        else:
+            print(f"Already initialized: {citizen}")
 
         # set the citizen's data --> no need to update further, as the citizen's data is already stored
         self.contract.setCitizenData(
@@ -354,10 +356,10 @@ class TraitManager:
         }
 
         # get the trait sex (which will already be set automatically by the market contract)
-        sex = SEX_ORDER[trait[4] - 2]
+        sex = SEX_ORDER[trait[4] - 1]
 
         # get the trait data depending on the trait type
-        trait_type = TRAIT_ORDER[trait[5] - 2]
+        trait_type = TRAIT_ORDER[trait[5] - 1]
         file = file_dict[trait_type]
         attribute = attribute_dict[trait_type]
 
@@ -380,11 +382,14 @@ class TraitManager:
         # change the trait's uri (rest can stay the same)
         trait[1] = metadata_link
 
+        # set the sex to ENSURE that it is in-line with ipfs
+        trait[4] = SEX_ORDER.index(citizen_data['attributes'][0]['value']) + 1
+
         # set the trait's data using the admin account (set change update to false, as the trait has been updated)
         self.contract.setTraitData(
             trait, False, {"from": get_server_account()})
 
-        pass
+        return tuple(trait)
 
 
 # function for standardizing trait data

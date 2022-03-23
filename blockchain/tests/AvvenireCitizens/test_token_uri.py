@@ -114,22 +114,24 @@ def test_character_uri_after_change():
 
     # mint an nft
     account = accounts[2]
-    broker = mint_citizens_and_initialize(2, account)
+    mint_citizens_and_initialize(2, account)
+
+    # make the broker
+    broker = CitizenMarketBroker(avvenire_citizens_contract, 0)
 
     # request from the market to remove all the traits of a citizen --> should be stored on the backend --> will be able to set it later
-    # DID WE JUST SET IT ALL TO FEMALES?
     trait_changes = [
-        [0, False, 2, 1],  # default background
-        [0, True, 2, 2],
-        [0, False, 2, 3],  # default tattoos
-        [0, True, 2, 4],
-        [0, True, 2, 5],
-        [0, False, 2, 6],  # default masks
-        [0, False, 2, 7],  # default necklaces
-        [0, True, 2, 8],
-        [0, False, 2, 9],  # default earrings
-        [0, True, 2, 10],
-        [0, False, 2, 11],  # default effects
+        [0, False, 1, 1],  # default background
+        [0, True, 1, 2],
+        [0, False, 1, 3],  # default tattoos
+        [0, True, 1, 4],
+        [0, True, 1, 5],
+        [0, False, 1, 6],  # default masks
+        [0, False, 1, 7],  # default necklaces
+        [0, True, 1, 8],
+        [0, False, 1, 9],  # default earrings
+        [0, True, 1, 10],
+        [0, False, 1, 11],  # default effects
     ]
 
     # request the combination from the market
