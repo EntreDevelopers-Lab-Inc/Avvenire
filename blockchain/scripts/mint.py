@@ -25,16 +25,11 @@ def mint_citizens_and_end(amount, account):
 # mint and initialize
 def mint_citizens_and_initialize(amount, account):
     avvenire_citizens_contract = AvvenireCitizens[-1]
-    avvenire_market_contract = AvvenireCitizenMarket[-1]
 
     mint_citizens_and_end(amount, account)
 
     # initialize citizen 0
     for i in range(amount):
-        print(f"initializing citizen: {i}")
-        print(
-            f"Previous settings: {avvenire_citizens_contract.tokenIdToCitizen(i)}")
-        avvenire_market_contract.initializeCitizen(i, {'from': account})
         # set the citizen's sex
         broker = CitizenMarketBroker(avvenire_citizens_contract, i)
         broker.set_sex()

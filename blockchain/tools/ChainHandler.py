@@ -61,14 +61,14 @@ class CitizenCreator:
             for trait in self.ipfs_data["attributes"]
         }
 
+        # store the sex, so you can use the right file
+        self.sex = self.ipfs_data["attributes"][0]["value"]
+
         # save the overall on-chain data
         self.chain_data = chain_data
 
         # convert the on-chain data into files
         self.chain_traits = self.extract_data_for_traits(chain_data)
-
-        # store the sex, so you can use the right file
-        self.sex = self.ipfs_data["attributes"][0]["value"]
 
         # will need the metadata for later
         self.metadata = self.get_metadata()
@@ -246,13 +246,15 @@ class CitizenMarketBroker:
 
         # IF the citizen's sex is not set already, set it
         if citizen[3] == 0:
-            # set the sex
-            citizen[3] = int(SEX_ORDER.index(
+            sex_id = int(SEX_ORDER.index(
                 ipfs_data["attributes"][0]["value"])) + 1
 
-            # set the citizen's data --> no need to update further, as the citizen's data is already stored
-            self.contract.setCitizenData(
-                citizen, False, {"from": get_server_account()})
+            # set the sex
+            citizen[3] = sex_id
+
+        # set the citizen's data --> no need to update further, as the citizen's data is already stored
+        self.contract.setCitizenData(
+            citizen, False, {"from": get_server_account()})
 
     # function to update a citizen
     def update_citizen(self):

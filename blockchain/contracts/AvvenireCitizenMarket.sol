@@ -83,10 +83,12 @@ contract AvvenireCitizenMarket is
      */
     function initializeCitizen(uint256 citizenId) external payable {
         // make sure the sex is null, or the citizen has already been initialized
+        // this is currently disabled as the enumerables are giving us an odd error
         require(
             avvenireCitizens.tokenIdToCitizen(citizenId).sex == Sex.NULL,
             "This citizen has already been initialized."
         );
+
         uint256 cost = avvenireCitizens.getChangeCost();
         _refundIfOver(cost);
 
@@ -272,8 +274,8 @@ contract AvvenireCitizenMarket is
                         uri: '',
                         free: true,
                         exists: true,
-                        sex: newTraits[i].sex,
-                        traitType: newTraits[i].traitType,
+                        sex: avvenireCitizens.tokenIdToCitizen(citizenId).sex,  // make sure to set to the citizen sex, as it will not check on initial trait mint
+                        traitType: newTraits[i].traitType,   // these are checked
                         originCitizenId: citizenId
                     });
 
@@ -311,6 +313,9 @@ contract AvvenireCitizenMarket is
         uint256 toMint,
         TraitChange memory traitChange
     ) internal returns (uint256) {
+        // ensure that the traits are of the same type, as it is not checked anywhere else (will be resorted in bind)
+        require(oldTrait.traitType == traitChange.traitType, "Trait type mismatch");
+
         if ((oldTrait.tokenId == 0) && (oldTrait.exists)) {
             // add the trait to the newTraits array
             newTraits[toMint] = traitChange;
