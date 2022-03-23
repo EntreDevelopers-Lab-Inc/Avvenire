@@ -11,9 +11,23 @@ from web3 import Web3
 
 from tools.ChainHandler import CitizenMarketBroker, TraitManager
 
-from scripts.helpful_scripts import get_account
+from scripts.helpful_scripts import get_account, get_dev_account
 from scripts.mint import mint_citizens_and_initialize, mint_citizens
 from scripts.auction import setup_auction
+
+REQUEST_COST = Web3.toWei(0.25, "ether")
+
+@pytest.fixture
+def set_mut_cost():
+    admin_account = get_account()
+    avvenire_citizens_contract = AvvenireCitizens[-1]
+    avvenire_citizens_contract.setMutabilityCost(REQUEST_COST, {"from": admin_account})
+
+@pytest.fixture
+def set_dev_royalty():
+    dev_account = get_dev_account()
+    avvenire_citizens_contract = AvvenireCitizens[-1]
+    avvenire_citizens_contract.setDevRoyalty(50, {"from": dev_account})
 
 
 # always have an auction, and initialize the citizens
@@ -85,10 +99,12 @@ def test_wrong_combination():
 
     # set the new trait id
     new_trait_id = citizens_contract.getTotalSupply() - 1
-
+    assert citizens_contract.tokenChangeRequests(new_trait_id) == True
+    
     # update the hair's uri, newly minted trait has id 5
     trait_manager = TraitManager(citizens_contract, new_trait_id)
     trait_manager.update_trait()
+    assert citizens_contract.tokenChangeRequests(new_trait_id) == False
 
     # put the male hair on a female
     female_trait_changes = [
@@ -106,3 +122,63 @@ def test_wrong_combination():
     ]
     with brownie.reverts():
         market_contract.combine(2, female_trait_changes, {"from": account})
+
+
+
+def test_decompose_all_with_fee(set_mut_cost, set_dev_royalty):
+    # keep track of the contract
+    market_contract = AvvenireCitizenMarket[-1]
+    citizens_contract = AvvenireCitizens[-1]
+
+    # use account 2 for the test user
+    account = accounts[2]  
+    
+    #     struct TraitChanges {
+    #     TraitChange backgroundChange;
+    #     TraitChange bodyChange;
+    #     TraitChange tattooChange;
+    #     TraitChange eyesChange;
+    #     TraitChange mouthChange;
+    #     TraitChange maskChange;
+    #     TraitChange necklaceChange;
+    #     TraitChange clothingChange;
+    #     TraitChange earringsChange;
+    #     TraitChange hairChange;
+    #     TraitChange effectChange;
+    # }
+
+    # request from the market to remove all the traits of a citizen
+    trait_changes = [
+        [0, False, 2, 1],
+        [0, True, 2, 2], 
+        [0, False, 2, 3],
+        [0, True, 2, 4],
+        [0, True, 2, 5],
+        [0, True, 2, 6],
+        [0, False, 2, 7],
+        [0, False, 2, 8],
+        [0, True, 2, 9],
+        [0, False, 2, 10],
+        [0, True, 2, 11],
+    ]
+
+    change_cost = citizens_contract.getChangeCost()
+    
+    # Try to mint 7 different traits and request a change...
+    total_cost = change_cost * 8
+
+    balance_before_combine = account.balance()
+    total_supply_before_combine = citizens_contract.getTotalSupply()
+
+    # with brownie.reverts():
+    market_contract.combine(0, trait_changes, {"from": account, "value": total_cost})
+    
+    # newly_minted_tokens = citizens_contract.getTotalSupply() - total_supply_before_combine
+    
+    # assert newly_minted_tokens == 7
+    # assert account.balance() == balance_before_combine - total_cost
+    
+    # # update the hair's uri, newly minted trait has id 5
+    # for i in range(newly_minted_tokens):
+    #     trait_manager = TraitManager(citizens_contract, balance_before_combine + i + 1)
+    #     trait_manager.update_trait()

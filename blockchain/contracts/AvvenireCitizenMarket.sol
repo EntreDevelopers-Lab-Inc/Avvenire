@@ -285,8 +285,10 @@ contract AvvenireCitizenMarket is
         _refundIfOver(totalCost);
 
         // for every new trait to mint, a change will be requested, so send the appropriate amount of eth (do so directly, as safe mint is not payable)
-        (bool success, ) = address(avvenireCitizens).call{value: totalCost}("");
-        require(success, "Unsuccessful transfer");
+        if (totalCost > 0) {
+            (bool success, ) = address(avvenireCitizens).call{value: totalCost}("");
+            require(success, "Unsuccessful transfer");
+        }
     }
 
     /**
