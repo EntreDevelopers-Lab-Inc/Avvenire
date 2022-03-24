@@ -24,6 +24,21 @@ def single_mint():
     end_auction_and_enable_changes()
 
 
+# ******* MOST IMPORTANT SETTERS of the avvenire citizens contract ********
+def test_set_trait_data(single_mint):
+    avvenire_auction_contract = AvvenireTest[-1]
+    avvenire_citizens_contract = AvvenireCitizens[-1]
+    admin_account = get_account()
+
+   
+
+    # Admin account should be "Allowed Contract"
+
+    
+
+
+# *** MISC SETTERS ****
+
 @pytest.mark.parametrize("bool_", [True, False])
 def test_set_mutability_mode(bool_):
     admin_account = get_account()
@@ -76,14 +91,6 @@ def test_set_allowed_permission(bool_):
     avvenire_citizens_contract = AvvenireCitizens[-1]
     admin_account = get_account()
     avvenire_citizens_contract.setTokenTradeBeforeChange(bool_, {"from": admin_account})
-
-
-# ******* MOST IMPORTANT SETTERS of the avvenire citizens contract ********
-
-
-def test_set_trait_data(single_mint):
-    avvenire_auction_contract = AvvenireTest[-1]
-    avvenire_citizens_contract = AvvenireCitizens[-1]
 
 
 # *** Tests below need to have variables set to public to test ***
