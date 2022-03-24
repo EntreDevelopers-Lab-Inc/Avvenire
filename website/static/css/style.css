@@ -836,7 +836,7 @@ ol {
     text-align: center;
     text-transform: uppercase;
     background-size: 200% auto;
-    color: #fff;
+    color: #fff !important;
     box-shadow: 0 3px 20px rgba(0, 0, 0, 0.1);
     border-radius: 10px;
     background-image: linear-gradient(130deg, #eb3fa9 0%, #395ff6 50%, #eb3fa9 100%);
@@ -847,6 +847,7 @@ ol {
     background-position: right center;
     color: #fff;
 }
+
 /* ### Clients #####*/
 .client-logo-row {
     display: -ms-flexbox;
