@@ -1,5 +1,5 @@
 from web3 import Web3
-from brownie import AvvenireTest, AvvenireCitizens, AvvenireCitizenMarket
+from brownie import AvvenireTest, AvvenireCitizens, AvvenireCitizenMarket, interface
 
 from tools.ChainHandler import CitizenMarketBroker
 
@@ -28,10 +28,10 @@ def mint_citizens_and_initialize(amount, account):
 
     mint_citizens_and_end(amount, account)
 
-    # initialize citizen 0
+    # initialize citizens
     for i in range(amount):
+        # request initialization
+
         # set the citizen's sex
         broker = CitizenMarketBroker(avvenire_citizens_contract, i)
         broker.set_sex()
-
-        drop_interval(1)

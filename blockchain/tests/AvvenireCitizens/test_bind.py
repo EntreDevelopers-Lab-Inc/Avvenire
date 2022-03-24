@@ -13,6 +13,7 @@ from web3 import Web3
 from tools.ChainHandler import CitizenMarketBroker, TraitManager
 
 from scripts.helpful_scripts import get_account
+from scripts.script_definitions import drop_interval
 from scripts.mint import mint_citizens_and_initialize, mint_citizens
 from scripts.auction import setup_auction
 
