@@ -272,8 +272,8 @@ contract AvvenireTest is Ownable, ReentrancyGuard {
             block.timestamp >= publicSaleStartTime; // must be past the public start time
     }
 
-    uint256 public constant AUCTION_START_PRICE = 1 ether; // start price
-    uint256 public constant AUCTION_END_PRICE = 0.2 ether; // floor price
+    uint256 public constant AUCTION_START_PRICE = .01 ether; // start price
+    uint256 public constant AUCTION_END_PRICE = 0.002 ether; // floor price
     uint256 public constant AUCTION_PRICE_CURVE_LENGTH = 2 minutes; // total time of the auction
     uint256 public constant AUCTION_DROP_INTERVAL = 15 seconds;
     // Should be 0.1 ether with the current setup...

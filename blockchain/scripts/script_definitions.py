@@ -69,10 +69,9 @@ def deploy_contract(
     )
 
     avvenire_citizens_contract.setAllowedPermission(
-        AvvenireCitizenMarket[-1], True, {"from": account}
+        AvvenireCitizenMarket[-1].address, True, {"from": account}
     )
 
-    print(f"Contract deployed to {avvenire_contract.address}")
 
 # Logistic Functions*
 

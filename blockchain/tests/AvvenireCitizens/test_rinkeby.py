@@ -42,12 +42,20 @@ def auction_set():
 #     assert avvenire_contract.collectionSize() == 20
 #     assert avvenire_contract.amountForAuctionAndTeam() == 15
 #     assert avvenire_contract.amountForTeam() == 5
-    
+def wait_confirmation():
+    if network.show_active() in LOCAL_BLOCKCHAIN_ENVIRONMENTS:
+        chain.sleep(30)
+        chain.mine(1)
+    else:
+        time.sleep(45)
+        
+        
 # test changing body
 def test_new_body(auction_set):
     # keep track of the contracts
     market_contract = AvvenireCitizenMarket[-1]
     citizens_contract = AvvenireCitizens[-1]
+    gas_limit = 29000000
 
     # use account 2 for the test user
     account = get_dev_account()
@@ -69,8 +77,10 @@ def test_new_body(auction_set):
     ]
 
     # put on default body
-    market_contract.combine(0, male_trait_changes, {"from": account})
-
+    market_contract.combine(0, male_trait_changes, {"from": account, "gas_limit": gas_limit})
+    
+    wait_confirmation()
+    
     # make sure that the trait came off of the citizen
     assert citizens_contract.tokenIdToCitizen(0)[4][2][2] is False
     assert citizens_contract.tokenIdToCitizen(0)[4][2][3] is False
@@ -85,12 +95,15 @@ def test_new_body(auction_set):
     # update the hair's uri
     trait_manager = TraitManager(citizens_contract, new_trait_id)
     new_trait = trait_manager.update_trait()  # this is updating the effect
+    wait_confirmation()
 
     assert new_trait == citizens_contract.tokenIdToTrait(new_trait_id)
 
     # update the male
     broker = CitizenMarketBroker(citizens_contract, 0)
     citizen = broker.update_citizen()
+    
+    wait_confirmation()
 
     # ensure that the male on chain is what you set him to
     assert citizen == citizens_contract.tokenIdToCitizen(0)
@@ -119,8 +132,9 @@ def test_new_body(auction_set):
     assert other_citizen[3] == citizen[3]
 
     # put on the new body
-    market_contract.combine(1, male_trait_changes, {"from": account})
-
+    market_contract.combine(1, male_trait_changes, {"from": account, "gas_limit": gas_limit})
+    wait_confirmation()
+    
     # make sure that the trait is on the citizen
     assert citizens_contract.tokenIdToCitizen(1)[4][2][0] == new_trait_id
     assert citizens_contract.tokenIdToCitizen(1)[4][2][2] is False
@@ -129,6 +143,8 @@ def test_new_body(auction_set):
     # update the information with a new citizen broker
     broker = CitizenMarketBroker(citizens_contract, 1)
     new_citizen = broker.update_citizen()
+    
+    wait_confirmation()
 
     # check that the ipfs data made it
     assert new_citizen == citizens_contract.tokenIdToCitizen(1)
@@ -143,5 +159,7 @@ def test_new_body(auction_set):
     # check that the ipfs data uploaded
     trait_manager = TraitManager(citizens_contract, new_trait_id)
     new_trait = trait_manager.update_trait()
+    
+    wait_confirmation()
 
     assert new_trait == citizens_contract.tokenIdToTrait(new_trait_id)
