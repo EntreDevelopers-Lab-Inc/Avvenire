@@ -256,6 +256,8 @@ contract AvvenireCitizenMarket is
             // mint the citzens --> this will only set ownership, will not indicate how to set traits and sexes
             uint256 startTokenId = avvenireCitizens.getTotalSupply();
             avvenireCitizens.safeMint(tx.origin, toMint);
+            // avvenireCitizens.setOwnersExplicit(toMint);
+
 
             // this can be implied with toMint, as we minted exactly that many
             // uint256 pastLimit = avvenireCitizens.getTotalSupply();

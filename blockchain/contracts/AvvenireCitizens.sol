@@ -637,7 +637,7 @@ contract AvvenireCitizens is
      */
     function setOwnersExplicit(uint256 quantity)
         external
-        onlyOwner
+        callerIsAllowed
         nonReentrant
     {
         _setOwnersExplicit(quantity);
