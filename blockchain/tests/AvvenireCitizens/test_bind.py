@@ -162,49 +162,49 @@ def test_wrong_sex():
 
 
 
-def test_decompose_all_with_fee(set_mut_cost, set_dev_royalty):
-    # keep track of the contract
-    market_contract = AvvenireCitizenMarket[-1]
-    citizens_contract = AvvenireCitizens[-1]
+# def test_decompose_all_with_fee(set_mut_cost, set_dev_royalty):
+#     # keep track of the contract
+#     market_contract = AvvenireCitizenMarket[-1]
+#     citizens_contract = AvvenireCitizens[-1]
 
-    # use account 2 for the test user
-    account = accounts[2]  
+#     # use account 2 for the test user
+#     account = accounts[2]  
     
-    # request from the market to remove all the traits of a citizen
-    trait_changes = [
-        [0, False, 1, 1],
-        [0, True, 1, 2], 
-        [0, False, 1, 3],
-        [0, True, 1, 4],
-        [0, True, 1, 5],
-        [0, True, 1, 6],
-        [0, False, 1, 7],
-        [0, False, 1, 8],
-        [0, True, 1, 9],
-        [0, False, 1, 10],
-        [0, True, 1, 11],
-    ]
+#     # request from the market to remove all the traits of a citizen
+#     trait_changes = [
+#         [0, False, 1, 1],
+#         [0, True, 1, 2], 
+#         [0, False, 1, 3],
+#         [0, True, 1, 4],
+#         [0, True, 1, 5],
+#         [0, True, 1, 6],
+#         [0, False, 1, 7],
+#         [0, False, 1, 8],
+#         [0, True, 1, 9],
+#         [0, False, 1, 10],
+#         [0, True, 1, 11],
+#     ]
 
-    change_cost = citizens_contract.getChangeCost()
+#     change_cost = citizens_contract.getChangeCost()
     
-    # Try to mint 7 different traits and request a change...
-    total_cost = change_cost * 8
+#     # Try to mint 7 different traits and request a change...
+#     total_cost = change_cost * 8
 
-    balance_before_combine = account.balance()
-    total_supply_before_combine = citizens_contract.getTotalSupply()
+#     balance_before_combine = account.balance()
+#     total_supply_before_combine = citizens_contract.getTotalSupply()
 
-    # with brownie.reverts():
-    market_contract.combine(0, trait_changes, {"from": account, "value": total_cost})
+#     # with brownie.reverts():
+#     market_contract.combine(0, trait_changes, {"from": account, "value": total_cost})
     
-    # newly_minted_tokens = citizens_contract.getTotalSupply() - total_supply_before_combine
+#     # newly_minted_tokens = citizens_contract.getTotalSupply() - total_supply_before_combine
     
-    # assert newly_minted_tokens == 7
-    # assert account.balance() == balance_before_combine - total_cost
+#     # assert newly_minted_tokens == 7
+#     # assert account.balance() == balance_before_combine - total_cost
     
-    # # update the hair's uri, newly minted trait has id 5
-    # for i in range(newly_minted_tokens):
-    #     trait_manager = TraitManager(citizens_contract, balance_before_combine + i + 1)
-    #     trait_manager.update_trait()
+#     # # update the hair's uri, newly minted trait has id 5
+#     # for i in range(newly_minted_tokens):
+#     #     trait_manager = TraitManager(citizens_contract, balance_before_combine + i + 1)
+#     #     trait_manager.update_trait()
 
 
 # test changing body
@@ -277,6 +277,10 @@ def test_new_body():
     print(
         f"citizen before combination: {citizens_contract.tokenIdToCitizen(1)}")
 
+    other_citizen = citizens_contract.tokenIdToCitizen(1)
+    
+    # Assert the citizen is in fact a male... 
+    assert other_citizen[3] == True
     # put on the new body
     market_contract.combine(1, male_trait_changes, {"from": account})
 
