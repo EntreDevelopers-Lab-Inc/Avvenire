@@ -488,6 +488,7 @@ contract AvvenireCitizens is
         external
         callerIsAllowed
     {
+        require(tx.origin != msg.sender, "The caller is a user.");
         _safeMint(address_, quantity_);
     }
 
