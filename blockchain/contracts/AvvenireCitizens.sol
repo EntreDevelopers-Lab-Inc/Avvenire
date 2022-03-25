@@ -240,12 +240,7 @@ contract AvvenireCitizens is
                 mouth: baseTrait(tokenId, Sex.NULL, TraitType.MOUTH, true),
                 mask: baseTrait(0, Sex.NULL, TraitType.MASK, false), // mint with no masks
                 necklace: baseTrait(0, Sex.NULL, TraitType.NECKLACE, false), // mint with no necklaces
-                clothing: baseTrait(
-                    tokenId,
-                    Sex.NULL,
-                    TraitType.CLOTHING,
-                    true
-                ),
+                clothing: baseTrait(tokenId, Sex.NULL, TraitType.CLOTHING, true),
                 earrings: baseTrait(0, Sex.NULL, TraitType.EARRINGS, false), // mint with no earrings
                 hair: baseTrait(tokenId, Sex.NULL, TraitType.HAIR, true),
                 effect: baseTrait(0, Sex.NULL, TraitType.EFFECT, false) // mint with no effects
@@ -253,53 +248,53 @@ contract AvvenireCitizens is
         });
     }
 
-    /**
-     * @notice an internal function to get a trait for binding --> only for use within binding and unbinding (want to make it easy for the bind function to be overridden)
-     * trait is guaranteed to exist, as this is only called when binding
-     * @param traitId indicated the trait id that will be bound (can be set to 0 for a non-existend trait that adheres to the type)
-     * @param traitType indicates the type of trait to be bound
-     */
-    function lockAndReturnTraitForBinding(
-        uint256 traitId,
-        Sex sex,
-        TraitType traitType
-    ) internal returns (Trait memory) {
-        // store the trait that should be bound
-        if (traitId == 0) {
-            // this trait does not exist, just set it to the default struct
-            Trait memory trait = Trait({
-                tokenId: traitId,
-                originCitizenId: 0, // no need for an origin citizen, it's a default
-                uri: "",
-                free: false,
-                exists: false,
-                sex: sex,
-                traitType: traitType
-            });
+    // /**
+    //  * @notice an internal function to get a trait for binding --> only for use within binding and unbinding (want to make it easy for the bind function to be overridden)
+    //  * trait is guaranteed to exist, as this is only called when binding
+    //  * @param traitId indicated the trait id that will be bound (can be set to 0 for a non-existend trait that adheres to the type)
+    //  * @param traitType indicates the type of trait to be bound
+    //  */
+    // function lockAndReturnTraitForBinding(
+    //     uint256 traitId,
+    //     Sex sex,
+    //     TraitType traitType
+    // ) internal returns (Trait memory) {
+    //     // store the trait that should be bound
+    //     if (traitId == 0) {
+    //         // this trait does not exist, just set it to the default struct
+    //         Trait memory trait = Trait({
+    //             tokenId: traitId,
+    //             originCitizenId: 0, // no need for an origin citizen, it's a default
+    //             uri: "",
+    //             free: false,
+    //             exists: false,
+    //             sex: sex,
+    //             traitType: traitType
+    //         });
 
-            return trait;
-        } else {
-            // check the owner of the trait
-            require(
-                ownerOf(traitId) == tx.origin,
-                "The transaction origin does not own the trait"
-            );
+    //         return trait;
+    //     } else {
+    //         // check the owner of the trait
+    //         require(
+    //             ownerOf(traitId) == tx.origin,
+    //             "The transaction origin does not own the trait"
+    //         );
 
-            // the trait exists and can be found
-            Trait memory trait = tokenIdToTrait[traitId];
+    //         // the trait exists and can be found
+    //         Trait memory trait = tokenIdToTrait[traitId];
 
-            // require that the trait's type is the same type as the trait Id (if the user tries to put traits on the wrong parts of NFTs)
-            require(
-                trait.traitType == traitType,
-                "Trait type does not match trait id"
-            );
+    //         // require that the trait's type is the same type as the trait Id (if the user tries to put traits on the wrong parts of NFTs)
+    //         require(
+    //             trait.traitType == traitType,
+    //             "Trait type does not match trait id"
+    //         );
 
-            // disallow trading of the bound trait
-            makeTraitNonTransferrable(traitId);
+    //         // disallow trading of the bound trait
+    //         makeTraitNonTransferrable(traitId);
 
-            return trait;
-        }
-    }
+    //         return trait;
+    //     }
+    // }
 
     /**
      * @notice internal function to make traits transferrable (used when binding traits)
@@ -361,27 +356,50 @@ contract AvvenireCitizens is
         // check each of the types and bind them accordingly
         // this logic costs gas, as these are already checked in the market contract
         // this should be here though. 11 integer checks should be ok, as it needs to bind to the correct place
+
+        // Lock the trait and return it.  
+        // Save in temporary variable used for assignment 
+
+        // Trait memory _trait = lockAndReturnTraitForBinding(traitId, sex,traitType);
+        Trait memory _trait;
+
+        // Set _trait according to its respective id 
+        if (traitId == 0) {
+            // this trait does not exist, just set it to the default struct
+            _trait = Trait({
+                tokenId: traitId,
+                originCitizenId: 0, // no need for an origin citizen, it's a default
+                uri: "",
+                free: false,
+                exists: false,
+                sex: sex,
+                traitType: traitType
+            });
+        } else {
+            // check the owner of the trait
+            require(ownerOf(traitId) == tx.origin, "The transaction origin does not own the trait");
+            // the trait exists and can be found
+            _trait = tokenIdToTrait[traitId];
+
+            // require that the trait's type is the same type as the trait Id (if the user tries to put traits on the wrong parts of NFTs)
+            require(_trait.traitType == traitType, "Trait type does not match trait id");
+
+            // disallow trading of the bound trait
+            makeTraitNonTransferrable(traitId);
+        }
+
+
         if (traitType == TraitType.BACKGROUND) {
             // make the old trait transferrable
-            makeTraitTransferable(
-                tokenIdToCitizen[citizenId].traits.background.tokenId,
+            makeTraitTransferable(tokenIdToCitizen[citizenId].traits.background.tokenId,
                 tokenIdToCitizen[citizenId].traits.background.exists
             );
+            tokenIdToCitizen[citizenId].traits.background = _trait;
 
-            // set the new trait
-            tokenIdToCitizen[citizenId].traits.background = lockAndReturnTraitForBinding(
-                traitId,
-                sex,
-                traitType
-            );
         } else if (traitType == TraitType.BODY) {
             // make the old trait transferrable
             makeTraitTransferable(tokenIdToCitizen[citizenId].traits.body.tokenId, tokenIdToCitizen[citizenId].traits.body.exists);
-
-            // set the new trait
-            tokenIdToCitizen[citizenId].traits.body = tokenIdToTrait[traitId];
-            
-            lockAndReturnTraitForBinding(traitId, sex, traitType);
+            tokenIdToCitizen[citizenId].traits.body = _trait;
 
         } else if (traitType == TraitType.TATTOO) {
             // make the old trait transferrable
@@ -389,111 +407,72 @@ contract AvvenireCitizens is
                 tokenIdToCitizen[citizenId].traits.tattoo.tokenId,
                 tokenIdToCitizen[citizenId].traits.tattoo.exists
             );
+            tokenIdToCitizen[citizenId].traits.tattoo = _trait;
 
-            // set the new trait
-            tokenIdToCitizen[citizenId]
-                .traits
-                .tattoo = lockAndReturnTraitForBinding(traitId, sex, traitType);
         } else if (traitType == TraitType.EYES) {
             // make the old trait transferrable
             makeTraitTransferable(
                 tokenIdToCitizen[citizenId].traits.eyes.tokenId,
                 tokenIdToCitizen[citizenId].traits.eyes.exists
             );
+            tokenIdToCitizen[citizenId].traits.eyes = _trait;
 
-            // set the new trait
-            tokenIdToCitizen[citizenId]
-                .traits
-                .eyes = lockAndReturnTraitForBinding(traitId, sex, traitType);
         } else if (traitType == TraitType.MOUTH) {
             // make the old trait transferrable
             makeTraitTransferable(
                 tokenIdToCitizen[citizenId].traits.mouth.tokenId,
                 tokenIdToCitizen[citizenId].traits.mouth.exists
             );
+            tokenIdToCitizen[citizenId].traits.mouth = _trait;
 
-            // set the new trait
-            tokenIdToCitizen[citizenId]
-                .traits
-                .mouth = lockAndReturnTraitForBinding(traitId, sex, traitType);
         } else if (traitType == TraitType.MASK) {
             // make the old trait transferrable
             makeTraitTransferable(
                 tokenIdToCitizen[citizenId].traits.mask.tokenId,
                 tokenIdToCitizen[citizenId].traits.mask.exists
             );
+            tokenIdToCitizen[citizenId].traits.mask = _trait;
 
-            // set the new trait
-            tokenIdToCitizen[citizenId]
-                .traits
-                .mask = lockAndReturnTraitForBinding(traitId, sex, traitType);
         } else if (traitType == TraitType.NECKLACE) {
             // make the old trait transferrable
             makeTraitTransferable(
                 tokenIdToCitizen[citizenId].traits.necklace.tokenId,
                 tokenIdToCitizen[citizenId].traits.necklace.exists
             );
+            tokenIdToCitizen[citizenId].traits.necklace = _trait;
 
-            // set the new trait
-            tokenIdToCitizen[citizenId]
-                .traits
-                .necklace = lockAndReturnTraitForBinding(
-                traitId,
-                sex,
-                traitType
-            );
         } else if (traitType == TraitType.CLOTHING) {
             // make the old trait transferrable
             makeTraitTransferable(
                 tokenIdToCitizen[citizenId].traits.clothing.tokenId,
                 tokenIdToCitizen[citizenId].traits.clothing.exists
             );
+            tokenIdToCitizen[citizenId].traits.clothing = _trait;
 
-            // set the new trait
-            tokenIdToCitizen[citizenId]
-                .traits
-                .clothing = lockAndReturnTraitForBinding(
-                traitId,
-                sex,
-                traitType
-            );
         } else if (traitType == TraitType.EARRINGS) {
             // make the old trait transferrable
             makeTraitTransferable(
                 tokenIdToCitizen[citizenId].traits.earrings.tokenId,
                 tokenIdToCitizen[citizenId].traits.earrings.exists
             );
-
             // set the new trait
-            tokenIdToCitizen[citizenId]
-                .traits
-                .earrings = lockAndReturnTraitForBinding(
-                traitId,
-                sex,
-                traitType
-            );
+            tokenIdToCitizen[citizenId].traits.earrings = _trait;
+
         } else if (traitType == TraitType.HAIR) {
             // make the old trait transferrable
             makeTraitTransferable(
                 tokenIdToCitizen[citizenId].traits.hair.tokenId,
                 tokenIdToCitizen[citizenId].traits.hair.exists
             );
+            tokenIdToCitizen[citizenId].traits.hair = _trait;
 
-            // set the new trait
-            tokenIdToCitizen[citizenId]
-                .traits
-                .hair = lockAndReturnTraitForBinding(traitId, sex, traitType);
         } else if (traitType == TraitType.EFFECT) {
             // make the old trait transferrable
             makeTraitTransferable(
                 tokenIdToCitizen[citizenId].traits.effect.tokenId,
                 tokenIdToCitizen[citizenId].traits.effect.exists
             );
-
-            // set the new trait
-            tokenIdToCitizen[citizenId]
-                .traits
-                .effect = lockAndReturnTraitForBinding(traitId, sex, traitType);
+            tokenIdToCitizen[citizenId].traits.effect = _trait;
         } else {
             // return an error that the trait type does not exist
             revert TraitTypeDoesNotExist();
@@ -608,12 +587,12 @@ contract AvvenireCitizens is
                     // create a new trait and put it in the mapping --> just set the token id, that it exists and that it is free
                     tokenIdToTrait[tokenId] = Trait({
                         tokenId: tokenId,
-                        originCitizenId: 0, // must set the origin citizen to null, as we have no data
                         uri: "",
                         free: true,
                         exists: true,
                         sex: Sex.NULL,
-                        traitType: TraitType.NULL
+                        traitType: TraitType.NULL,
+                        originCitizenId: 0 // must set the origin citizen to null, as we have no data
                     });
 
                     // everytime a new trait is created, a change must be requested, as there is no data bound to it yet

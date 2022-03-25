@@ -116,6 +116,7 @@ def test_bind_existing_token():
     trait_type_from_mapping = trait_from_mapping[5]
     print(f"mapping trait type = {trait_from_mapping[5]} ")
     
+    # Asserts that trait types match
     assert trait_from_mapping[5] == new_trait[5]
     
           
@@ -123,9 +124,9 @@ def test_bind_existing_token():
     market_contract.combine(0, male_trait_changes, {"from": account})
 
     # make sure that the trait is on the citizen
+    assert citizens_contract.tokenIdToCitizen(0)[4][2][0] == new_trait_id
     assert citizens_contract.tokenIdToCitizen(0)[4][2][2] is False
     assert citizens_contract.tokenIdToCitizen(0)[4][2][3] is True
-    assert citizens_contract.tokenIdToCitizen(0)[4][2][0] == new_trait_id
 
     # update the information with a new citizen broker
     broker = CitizenMarketBroker(citizens_contract, 1)
@@ -133,6 +134,9 @@ def test_bind_existing_token():
 
     # check that the ipfs data made it
     assert new_citizen == citizens_contract.tokenIdToCitizen(0)
+
+def test_attaching_unowned_existing_trait():
+    pass 
 
 
 def test_single_trait_change_no_cost():
