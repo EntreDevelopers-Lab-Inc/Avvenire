@@ -379,13 +379,13 @@ contract AvvenireCitizens is
             // check the owner of the trait
             require(ownerOf(traitId) == tx.origin, "The transaction origin does not own the trait");
             // the trait exists and can be found
+
+            // disallow trading of the bound trait
+            makeTraitNonTransferrable(traitId);
             _trait = tokenIdToTrait[traitId];
 
             // require that the trait's type is the same type as the trait Id (if the user tries to put traits on the wrong parts of NFTs)
             require(_trait.traitType == traitType, "Trait type does not match trait id");
-
-            // disallow trading of the bound trait
-            makeTraitNonTransferrable(traitId);
         }
 
 
