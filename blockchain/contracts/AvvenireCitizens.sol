@@ -352,13 +352,10 @@ contract AvvenireCitizens is
         // if binding non-empty trait, must require the correct sex and ensure that the tokenId exists
         if (traitId != 0) {
             // check if the trait exists
-            require(tokenIdToTrait[traitId].exists, "Trait doesn't exist");
+            require(tokenIdToTrait[traitId].exists); //, "Trait doesn't exist"
 
             // ensure that the trait and citizen have the same sex
-            require(
-                tokenIdToCitizen[citizenId].sex == tokenIdToTrait[traitId].sex,
-                "Sex mismatch"
-            );
+            require(tokenIdToCitizen[citizenId].sex == tokenIdToTrait[traitId].sex);    //             "Sex mismatch"
         }
 
         // check each of the types and bind them accordingly
@@ -372,24 +369,20 @@ contract AvvenireCitizens is
             );
 
             // set the new trait
-            tokenIdToCitizen[citizenId]
-                .traits
-                .background = lockAndReturnTraitForBinding(
+            tokenIdToCitizen[citizenId].traits.background = lockAndReturnTraitForBinding(
                 traitId,
                 sex,
                 traitType
             );
         } else if (traitType == TraitType.BODY) {
             // make the old trait transferrable
-            makeTraitTransferable(
-                tokenIdToCitizen[citizenId].traits.body.tokenId,
-                tokenIdToCitizen[citizenId].traits.body.exists
-            );
+            makeTraitTransferable(tokenIdToCitizen[citizenId].traits.body.tokenId, tokenIdToCitizen[citizenId].traits.body.exists);
 
             // set the new trait
-            tokenIdToCitizen[citizenId]
-                .traits
-                .body = lockAndReturnTraitForBinding(traitId, sex, traitType);
+            tokenIdToCitizen[citizenId].traits.body = tokenIdToTrait[traitId];
+            
+            lockAndReturnTraitForBinding(traitId, sex, traitType);
+
         } else if (traitType == TraitType.TATTOO) {
             // make the old trait transferrable
             makeTraitTransferable(
@@ -536,7 +529,7 @@ contract AvvenireCitizens is
     function getOwnershipData(
         uint256 tokenId // storing all the old ownership
     ) external view returns (TokenOwnership memory) {
-        return ownershipOf(tokenId); // get historic ownership
+        return _ownershipOf(tokenId); // get historic ownership
     }
 
     /**
@@ -564,9 +557,8 @@ contract AvvenireCitizens is
             // the tokens SHOULD NOT be awaiting a change (you don't want the user to get surprised)
             if (!mutabilityConfig.tradeBeforeChange) {
                 require(
-                    !tokenChangeRequests[tokenId],
-                    "Change already requested"
-                );
+                    !tokenChangeRequests[tokenId]
+                ); // "Change already requested"
             }
 
             // if this is a trait, it must be free to be transferred
@@ -637,7 +629,7 @@ contract AvvenireCitizens is
      */
     function setOwnersExplicit(uint256 quantity)
         external
-        onlyOwner
+        callerIsAllowed
         nonReentrant
     {
         _setOwnersExplicit(quantity);

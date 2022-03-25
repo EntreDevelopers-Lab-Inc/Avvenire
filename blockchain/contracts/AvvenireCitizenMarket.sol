@@ -81,7 +81,7 @@ contract AvvenireCitizenMarket is
      * @notice a function to initialize the citizen (just requests a change to set the sex from ipfs)
      * @param citizenId gives the contract a citizen to look for
      */
-    function initializeCitizen(uint256 citizenId) external payable {
+    function initializeCitizen(uint256 citizenId) external payable nonReentrant {
         // make sure the sex is null, or the citizen has already been initialized
         // this is currently disabled as the enumerables are giving us an odd error
         require(
@@ -110,6 +110,7 @@ contract AvvenireCitizenMarket is
     function combine(uint256 citizenId, TraitChanges memory traitChanges)
         external
         payable
+        nonReentrant
         canChange(citizenId)
     {
         // keep track of the ones to mint
@@ -252,10 +253,11 @@ contract AvvenireCitizenMarket is
                 require(success, "Insufficient funds for new traits minted.");
             }
 
-
             // mint the citzens --> this will only set ownership, will not indicate how to set traits and sexes
             uint256 startTokenId = avvenireCitizens.getTotalSupply();
             avvenireCitizens.safeMint(tx.origin, toMint);
+            // avvenireCitizens.setOwnersExplicit(toMint);
+
 
             // this can be implied with toMint, as we minted exactly that many
             // uint256 pastLimit = avvenireCitizens.getTotalSupply();
@@ -298,6 +300,12 @@ contract AvvenireCitizenMarket is
         // refund the rest of the transaction value if the transaction is over
         // guarantees that msg.value is > totalCost
         _refundIfOver(totalCost);
+
+        // for every new trait to mint, a change will be requested, so send the appropriate amount of eth (do so directly, as safe mint is not payable)
+        if (totalCost > 0) {
+            (bool success, ) = address(avvenireCitizens).call{value: totalCost}("");
+            require(success, "Unsuccessful transfer");
+        }
     }
 
     /**
@@ -352,7 +360,7 @@ contract AvvenireCitizenMarket is
      * @notice refunds excess eth
      * @param cost the amount required for the change
      */
-    function _refundIfOver(uint256 cost) internal nonReentrant {
+    function _refundIfOver(uint256 cost) internal {
         // make sure the msg sent enough eth
         require(msg.value >= cost, "Insufficient funds.");
 

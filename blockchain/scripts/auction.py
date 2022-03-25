@@ -16,7 +16,7 @@ from scripts.helpful_scripts import (
 
 import time
 
-SALE_START_TIME = 100
+SALE_START_TIME = 10
 PUBLIC_SALE_START_TIME = 120
 PUBLIC_SALE_KEY = 12345
 DEV_PAYMENT = Web3.toWei(2, "ether")

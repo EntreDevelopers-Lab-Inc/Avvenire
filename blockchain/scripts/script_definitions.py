@@ -47,10 +47,8 @@ def deploy_contract(
     )
 
     avvenire_market_contract = AvvenireCitizenMarket.deploy(
-        avvenire_citizens_contract.address, {"from": account}
-    )
+        AvvenireCitizens[-1], {"from": account})
 
-    # deploy avvenire test contract
     avvenire_contract = AvvenireTest.deploy(
         max_per_address_during_auctioin,
         max_per_address_during_whitelist,
@@ -59,20 +57,20 @@ def deploy_contract(
         amount_for_team,
         dev_address,
         payment_to_devs_ETH,
-        avvenire_citizens_contract.address,
+        AvvenireCitizens[-1],
         {"from": account},
     )
 
+    print(avvenire_contract)
+
     # allow the test contract to interact with the citizens contract
     avvenire_citizens_contract.setAllowedPermission(
-        avvenire_contract.address, True, {"from": account}
+        AvvenireTest[-1].address, True, {"from": account}
     )
 
     avvenire_citizens_contract.setAllowedPermission(
-        avvenire_market_contract.address, True, {"from": account}
+        AvvenireCitizenMarket[-1].address, True, {"from": account}
     )
-
-    print(f"Contract deployed to {avvenire_contract.address}")
 
 
 # Logistic Functions*
@@ -90,7 +88,9 @@ def set_auction_start_time(time_from_epoch):
     if network.show_active() in LOCAL_BLOCKCHAIN_ENVIRONMENTS:
         start_time = chain.time() + time_from_epoch
     else:
-        most_recent_block = Web3.eth.get_block("latest")
+        w3 = Web3(Web3.HTTPProvider(
+            "https://mainnet.infura.io/v3/6f8af8dcbb974218a1f3aec661b9fc30"))
+        most_recent_block = w3.eth.get_block("latest")
         start_time = most_recent_block["timestamp"] + time_from_epoch
 
     avvenire_contract.setAuctionSaleStartTime(start_time, {"from": account})
@@ -124,7 +124,9 @@ def end_auction(ending_auction_price, time_from_epoch):
     if network.show_active() in LOCAL_BLOCKCHAIN_ENVIRONMENTS:
         public_sale_start_time = chain.time() + time_from_epoch
     else:
-        most_recent_block = Web3.eth.get_block("latest")
+        w3 = Web3(Web3.HTTPProvider(
+            "https://mainnet.infura.io/v3/6f8af8dcbb974218a1f3aec661b9fc30"))
+        most_recent_block = w3.eth.get_block("latest")
         public_sale_start_time = most_recent_block["timestamp"] + \
             time_from_epoch
 
@@ -136,7 +138,9 @@ def end_auction(ending_auction_price, time_from_epoch):
 
 
 def drop_interval(number_of_drops):
-    drop_time = int(60 * 7.5 * number_of_drops)
+    avvenire_contract = AvvenireTest[-1]
+    drop_interval = avvenire_contract.AUCTION_DROP_INTERVAL()
+    drop_time = int(drop_interval * number_of_drops)
     if network.show_active() in LOCAL_BLOCKCHAIN_ENVIRONMENTS:
         chain.sleep(drop_time)
         chain.mine(1)

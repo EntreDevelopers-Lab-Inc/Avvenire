@@ -1,0 +1,10 @@
+{
+  "ExpandedNodes": [
+    "",
+    "\\blockchain",
+    "\\blockchain\\contracts",
+    "\\blockchain\\tests"
+  ],
+  "SelectedNode": "\\blockchain\\hardhat.config.js",
+  "PreviewInSolutionExplorer": false
+}
