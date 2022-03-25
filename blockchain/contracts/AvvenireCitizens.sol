@@ -372,9 +372,7 @@ contract AvvenireCitizens is
             );
 
             // set the new trait
-            tokenIdToCitizen[citizenId]
-                .traits
-                .background = lockAndReturnTraitForBinding(
+            tokenIdToCitizen[citizenId].traits.background = lockAndReturnTraitForBinding(
                 traitId,
                 sex,
                 traitType

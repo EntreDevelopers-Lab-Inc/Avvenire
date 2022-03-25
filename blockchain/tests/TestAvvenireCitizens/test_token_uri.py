@@ -91,6 +91,7 @@ def test_load_uri():
     # request the combination from the market
     print(
         f"Cost to make changes: {avvenire_citizens_contract.getChangeCost()}")
+    
     avvenire_market_contract.combine(
         0, trait_changes, {"from": account, "value": Web3.toWei(0.05, "ether")}
     )
