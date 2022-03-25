@@ -18,8 +18,9 @@ async function getMintPrice()
     var max;
     var value;
 
+
     // get the whitelist information
-    await CONTRACT.allowlist(ethereum.selectedAddress).then(function (resp) {
+    await CONTRACT.allowlist(window.ethereum.selectedAddress).then(function (resp) {
         // set whether this address is whitelisted
         whitelisted = ethers.utils.formatUnits(resp) != 0;
     });
@@ -79,7 +80,7 @@ async function setTotalCost()
     var amount = parseInt($('#amount').val());
 
     // set the initial total cost
-    $('#total-cost').text(PRICE * amount);
+    $('#total-cost').text((PRICE * amount).toFixed(3));
 }
 
 
@@ -127,6 +128,10 @@ async function mintNFTs(gasLimit=GAS_LIMIT) {
 
 async function load_document()
 {
+    // wait until you are connected
+    const provider = new ethers.providers.Web3Provider(window.ethereum);
+    let currentBlock = await provider.getBlockNumber();
+
     // get the mint price --> sets global variable
     await getMintPrice();
 
