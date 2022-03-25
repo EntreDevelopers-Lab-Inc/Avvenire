@@ -54,8 +54,9 @@ def test_below_mint_cost():
         time.sleep(SALE_START_TIME + 5)
 
     account = get_dev_account()
-    value = Web3.toWei(0.5, "ether")
     avvenire_contract = AvvenireTest[-1]
+    value = avvenire_contract.AUCTION_START_PRICE() / 2
+    
     with brownie.reverts():
         avvenire_contract.auctionMint(1, {"from": account, "value": value})
 
@@ -68,16 +69,16 @@ def test_mint_too_many():
         time.sleep(SALE_START_TIME + 5)
 
     avvenire_contract = AvvenireTest[-1]
-    eth = Web3.toWei(1, "ether")
+    cost = avvenire_contract.AUCTION_START_PRICE()
     account = accounts[1]
 
     # Mint 1
-    avvenire_contract.auctionMint(1, {"from": account, "value": eth})
+    avvenire_contract.auctionMint(1, {"from": account, "value": cost})
 
-    three_eth = eth * 3
+    three_mint_cost = cost * 3
     # Mint 3 more
     with brownie.reverts():
-        avvenire_contract.auctionMint(3, {"from": account, "value": three_eth})
+        avvenire_contract.auctionMint(3, {"from": account, "value": three_mint_cost})
 
 
 def test_auction_mint():
@@ -130,7 +131,7 @@ def test_all_prices():
 
     # Before drops intervals
     avvenire_contract = AvvenireTest[-1]
-    assert avvenire_contract.getAuctionPrice() == Web3.toWei(1, "ether")
+    assert avvenire_contract.getAuctionPrice() == avvenire_contract.AUCTION_START_PRICE()
     drop_per_step_wei = avvenire_contract.AUCTION_DROP_PER_STEP()
     auction_start_price_wei = avvenire_contract.AUCTION_START_PRICE()
     auction_end_price_wei = avvenire_contract.AUCTION_END_PRICE()
@@ -155,7 +156,7 @@ def test_all_prices():
 def test_mint_after_auction_amount():
     avvenire_contract = AvvenireTest[-1]
     avvenire_citizens_contract = AvvenireCitizens[-1]
-    auction_sale_price_wei = Web3.toWei(1, "ether")
+    auction_sale_price_wei = avvenire_contract.AUCTION_START_PRICE()
     mint_quantity = 3
     mint_cost = auction_sale_price_wei * mint_quantity
     chain.sleep(SALE_START_TIME + 1)

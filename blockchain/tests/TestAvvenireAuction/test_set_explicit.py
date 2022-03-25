@@ -31,16 +31,6 @@ def auction_set(fn_isolation):
     # Unsure why
     set_auction_start_time(SALE_START_TIME)
 
-
-def drop_interval(number_of_drops):
-    drop_time = int(60 * 7.5 * number_of_drops)
-    if network.show_active() in LOCAL_BLOCKCHAIN_ENVIRONMENTS:
-        chain.sleep(drop_time)
-        chain.mine(1)
-    else:
-        time.sleep(drop_time)
-
-
 def test_explicit_no_supply():
     avvenire_contract = AvvenireTest[-1]
     avvenire_citizens_contract = AvvenireCitizens[-1]
@@ -67,14 +57,11 @@ def test_set_explicit():
     else:
         time.sleep(SALE_START_TIME + 5)
 
-    cost = Web3.toWei(1, "ether")
-
     for count in range(1, 9):
+        cost = avvenire_contract.getAuctionPrice()
         avvenire_contract.auctionMint(1, {"from": accounts[count], "value": cost})
         drop_interval(1)
         total_balance = total_balance + cost
-        cost = cost - Web3.toWei(0.1, "ether")
-        assert float(Web3.fromWei(cost, "ether")) == round((1 - count * 0.1), 1)
         assert total_balance == avvenire_contract.balance()
         assert avvenire_citizens_contract.numberMinted(accounts[count]) == 1
 
