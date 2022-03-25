@@ -61,9 +61,6 @@ def test_set_explicit():
         cost = avvenire_contract.getAuctionPrice()
         avvenire_contract.auctionMint(1, {"from": accounts[count], "value": cost})
         drop_interval(1)
-        total_balance = total_balance + cost
-        assert total_balance == avvenire_contract.balance()
-        assert avvenire_citizens_contract.numberMinted(accounts[count]) == 1
 
     # 9 auction mints and 5 team mint = 14 minted total for 5.4 ETH
     # 6 left in collection
