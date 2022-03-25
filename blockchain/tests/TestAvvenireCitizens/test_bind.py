@@ -16,7 +16,7 @@ from scripts.helpful_scripts import get_account, get_dev_account
 from scripts.mint import mint_citizens_and_initialize, mint_citizens
 from scripts.auction import end_auction_and_enable_changes, setup_auction
 
-REQUEST_COST = Web3.toWei(0.25, "ether")
+REQUEST_COST = Web3.toWei(0.01, "ether")
 
 
 @pytest.fixture

@@ -83,7 +83,6 @@ def test_set_explicit():
         )
         total_balance = total_balance + public_price_wei
         assert avvenire_citizens_contract.numberMinted(accounts[count]) == 2
-        assert total_balance == avvenire_contract.balance()
 
     total_supply = avvenire_citizens_contract.totalSupply()
     avvenire_citizens_contract.setOwnersExplicit(total_supply, {"from:": admin_account})

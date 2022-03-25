@@ -27,7 +27,6 @@ def perform_auction(fn_isolation):
     set_auction_start_time(SALE_START_TIME)
 
     avvenire_contract.teamMint({"from": admin_account})
-    cost = Web3.toWei(1, "ether")
 
     # Move to the auction start time...
     if network.show_active() in LOCAL_BLOCKCHAIN_ENVIRONMENTS:
@@ -38,15 +37,10 @@ def perform_auction(fn_isolation):
 
     # Mint an NFT at every interval...
     for count in range(1, 9):
+        cost = avvenire_contract.getAuctionPrice()
         avvenire_contract.auctionMint(1, {"from": accounts[count], "value": cost})
         drop_interval(1)
-        cost = cost - Web3.toWei(0.1, "ether")
     # 9 auction mints and 5 team mint = 14 minted total for 5.4 ETH
-
-
-# May need to refactor...
-# Unit test is way too bloated
-
 
 def test_withdraw():
     # Initializations
