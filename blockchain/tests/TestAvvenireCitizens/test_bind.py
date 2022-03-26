@@ -9,6 +9,7 @@ from brownie import (
     exceptions,
 )
 from web3 import Web3
+from scripts.script_definitions import drop_interval
 
 from tools.ChainHandler import CitizenMarketBroker, TraitManager
 
@@ -48,12 +49,6 @@ def auction_set(fn_isolation):
     
     end_auction_and_enable_changes()
 
-def test_is_citizen_initalized():
-    citizens_contract = AvvenireCitizens[-1]
-    print (citizens_contract.isCitizenInitialized(0))
-    citizens_contract.isCitizenInitialized(0)
-    assert citizens_contract.isCitizenInitialized(0) == True
-
 def test_bind_existing_token():
     market_contract = AvvenireCitizenMarket[-1]
     citizens_contract = AvvenireCitizens[-1]
@@ -78,32 +73,35 @@ def test_bind_existing_token():
     ]
 
     # put on default body
-    print(citizens_contract.tokenIdToCitizen(3))
+    print(citizens_contract.getCitizen(0))
+    drop_interval(1)
+    print(f"Total Supply = {citizens_contract.getTotalSupply()}")
+    
     market_contract.combine(0, male_trait_changes, {"from": account})
 
     # make sure that the trait came off of the citizen
-    assert citizens_contract.tokenIdToCitizen(0)[4][1][2] is False
-    assert citizens_contract.tokenIdToCitizen(0)[4][1][3] is False
+    assert citizens_contract.getCitizen(0)[4][1][2] is False
+    assert citizens_contract.getCitizen(0)[4][1][3] is False
 
     # set the new trait id
     new_trait_id = citizens_contract.getTotalSupply() - 1
 
     # check that the new trait has the proper information
-    assert citizens_contract.tokenIdToTrait(new_trait_id) == (
+    assert citizens_contract.getTrait(new_trait_id) == (
         new_trait_id, '', True, True, 1, 2, 0)
 
     # update the hair's uri
     trait_manager = TraitManager(citizens_contract, new_trait_id)
     new_trait = trait_manager.update_trait()  # this is updating the effect
 
-    assert new_trait == citizens_contract.tokenIdToTrait(new_trait_id)
+    assert new_trait == citizens_contract.getTrait(new_trait_id)
     
     # update the male
     broker = CitizenMarketBroker(citizens_contract, 0)
     citizen = broker.update_citizen()
 
     # ensure that the male on chain is what you set him to
-    assert citizen == citizens_contract.tokenIdToCitizen(0)
+    assert citizen == citizens_contract.getCitizen(0)
 
     # now, put the body on citizen 1
     male_trait_changes = [
@@ -120,23 +118,23 @@ def test_bind_existing_token():
         [0, False, 1, 11],
     ]         
     # put on the new body
-    assert citizens_contract.tokenIdToCitizen(0)[3] == 1
-    assert citizens_contract.tokenIdToCitizen(1)[3] == 1
-    print(citizens_contract.tokenIdToCitizen(1))
+    assert citizens_contract.getCitizen(0)[3] == 1
+    assert citizens_contract.getCitizen(1)[3] == 1
+    print(citizens_contract.getCitizen(1))
     
-    market_contract.combine(0, male_trait_changes, {"from": account})
+    market_contract.combine(1, male_trait_changes, {"from": account})
 
     # make sure that the trait is on the citizen
-    assert citizens_contract.tokenIdToCitizen(0)[4][1][0] == new_trait_id
-    assert citizens_contract.tokenIdToCitizen(0)[4][1][2] is False
-    assert citizens_contract.tokenIdToCitizen(0)[4][1][3] is True
+    assert citizens_contract.getCitizen(1)[4][1][0] == new_trait_id
+    assert citizens_contract.getCitizen(1)[4][1][2] is False
+    assert citizens_contract.getCitizen(1)[4][1][3] is True
     
     # update the information with a new citizen broker
     broker = CitizenMarketBroker(citizens_contract, 0)
     new_citizen = broker.update_citizen()
 
     # check that the ipfs data made it
-    assert new_citizen == citizens_contract.tokenIdToCitizen(0)
+    assert new_citizen == citizens_contract.getCitizen(0)
 
 def test_attaching_unowned_existing_trait():
     market_contract = AvvenireCitizenMarket[-1]
@@ -166,14 +164,14 @@ def test_attaching_unowned_existing_trait():
     market_contract.combine(0, male_trait_changes, {"from": trait_owner})
 
     # make sure that the trait came off of the citizen
-    assert citizens_contract.tokenIdToCitizen(0)[4][1][2] is False
-    assert citizens_contract.tokenIdToCitizen(0)[4][1][3] is False
+    assert citizens_contract.getCitizen(0)[4][1][2] is False
+    assert citizens_contract.getCitizen(0)[4][1][3] is False
 
     # set the new trait id
     new_trait_id = citizens_contract.getTotalSupply() - 1
 
     # check that the new trait has the proper information
-    assert citizens_contract.tokenIdToTrait(new_trait_id) == (
+    assert citizens_contract.getTrait(new_trait_id) == (
         new_trait_id, '', True, True, 1, 2, 0)
 
     # update the hair's uri
@@ -181,14 +179,14 @@ def test_attaching_unowned_existing_trait():
     new_trait = trait_manager.update_trait()  # this is updating the effect
 
     # The newly minted trait on IPFS should match the on-chain trait 
-    assert new_trait == citizens_contract.tokenIdToTrait(new_trait_id)
+    assert new_trait == citizens_contract.getTrait(new_trait_id)
     
     # update the male
     broker = CitizenMarketBroker(citizens_contract, 0)
     citizen = broker.update_citizen()
 
     # The citizen on IPFS should match the on-chain data 
-    assert citizen == citizens_contract.tokenIdToCitizen(0)
+    assert citizen == citizens_contract.getCitizen(0)
 
     # now, put the body on citizen 1
     male_trait_changes = [
@@ -210,9 +208,9 @@ def test_attaching_unowned_existing_trait():
         market_contract.combine(3, male_trait_changes, {"from": other_account})
     
     # Assert that no changes have been made 
-    assert citizens_contract.tokenIdToCitizen(3)[4][1][0] == 0
-    assert citizens_contract.tokenIdToCitizen(3)[4][1][2] is False
-    assert citizens_contract.tokenIdToCitizen(3)[4][1][3] is True
+    assert citizens_contract.getCitizen(3)[4][1][0] == 0
+    assert citizens_contract.getCitizen(3)[4][1][2] is False
+    assert citizens_contract.getCitizen(3)[4][1][3] is True
 
 def test_binding_wrong_trait_type():
     market_contract = AvvenireCitizenMarket[-1]
@@ -248,14 +246,14 @@ def test_binding_wrong_trait_type():
     new_trait_id = citizens_contract.getTotalSupply() - 1
 
     # check that the new trait has the proper information
-    assert citizens_contract.tokenIdToTrait(new_trait_id) == (
+    assert citizens_contract.getTrait(new_trait_id) == (
         new_trait_id, '', True, True, 1, 2, 0)
 
     # update the hair's uri
     trait_manager = TraitManager(citizens_contract, new_trait_id)
     new_trait = trait_manager.update_trait()  # this is updating the effect
 
-    assert new_trait == citizens_contract.tokenIdToTrait(new_trait_id)
+    assert new_trait == citizens_contract.getTrait(new_trait_id)
     
     # update the male
     broker = CitizenMarketBroker(citizens_contract, 0)
@@ -334,7 +332,7 @@ def test_trait_changes_no_cost():
     # check that the new trait has the proper information
 
     for x in range(5):
-        assert citizens_contract.tokenIdToTrait(end_trait_id - x) == (
+        assert citizens_contract.getTrait(end_trait_id - x) == (
             end_trait_id - x, 
             "", 
             True, 
@@ -348,7 +346,7 @@ def test_trait_changes_no_cost():
         trait_manager = TraitManager(citizens_contract, end_trait_id - x)
         new_trait = trait_manager.update_trait()  # this is updating the effect
 
-        assert new_trait == citizens_contract.tokenIdToTrait(end_trait_id - x)
+        assert new_trait == citizens_contract.getTrait(end_trait_id - x)
 
     # update the male
     broker = CitizenMarketBroker(citizens_contract, 0)

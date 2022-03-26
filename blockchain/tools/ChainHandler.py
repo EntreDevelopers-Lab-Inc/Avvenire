@@ -221,7 +221,8 @@ class CitizenMarketBroker:
     # get the citizen
     def get_citizen(self):
         # need to connect to other contract to get the citizen
-        citizen = list(self.contract.tokenIdToCitizen(self.citizen_id))
+        citizen = list(self.contract.getCitizen(self.citizen_id))
+        
         return citizen
 
     # get the traits of the citizen
@@ -332,7 +333,7 @@ class TraitManager:
     # on the API, citizen creations will be stored with the exact traits created and dropped --> will have this data
     def update_trait(self):
         # get the trait
-        trait = list(self.contract.tokenIdToTrait(self.trait_id))
+        trait = list(self.contract.getTrait(self.trait_id))
 
         # get the trait data from ipfs by linking it to the origin citizen
         resp = requests.get(f"{BASE_URI}{trait[6]}")

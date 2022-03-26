@@ -33,10 +33,6 @@ interface AvvenireCitizensInterface is AvvenireCitizenDataInterface, IERC721 {
 
     function getCitizenMintActive() external view returns (bool);
 
-    function isCitizenInitialized(uint256) external view returns(bool);
-
-
-
     function bind(
         uint256,
         uint256,
@@ -51,11 +47,31 @@ interface AvvenireCitizensInterface is AvvenireCitizenDataInterface, IERC721 {
     function setOwnersExplicit(uint256) external;
 }
 
-interface AvvenireCitizensWithMappingInterface is AvvenireCitizensInterface {
-    // public mappings that should return information
-    function tokenIdToCitizen(uint256) external view returns (Citizen memory);
+// interface AvvenireCitizensWithMappingInterface is AvvenireCitizensInterface {
+//     // public mappings that should return information
+//     function tokenIdToCitizen(uint256) external view returns (Citizen memory);
 
-    function tokenIdToTrait(uint256) external view returns (Trait memory);
+//     function tokenIdToTrait(uint256) external view returns (Trait memory);
 
-    function mutabilityConfig() external view returns (MutabilityConfig memory);
+//     function mutabilityConfig() external view returns (MutabilityConfig memory);
+// }
+
+interface AvvenireCitizensMappingsInterface is AvvenireCitizenDataInterface {
+
+    function getCitizen(uint256) external view returns (Citizen memory);
+
+    function getCitizenBody (uint256) external view returns (Trait memory);
+
+    function getTrait(uint256) external view returns (Trait memory);
+
+    function setCitizen(Citizen memory) external; 
+
+    function setTrait(Trait memory) external;
+
+    function setAllowedPermission(address, bool) external;
+
+    function setTraitFreedom(uint256, bool) external;
+
+    function isCitizenInitialized(uint256) external view returns (bool);
 }
+
