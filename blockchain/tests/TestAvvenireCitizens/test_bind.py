@@ -82,7 +82,7 @@ def test_bind_existing_token():
     market_contract.combine(0, male_trait_changes, {"from": account})
 
     # make sure that the trait came off of the citizen
-    assert citizens_contract.tokenIdToCitizen(0)[4s][1][2] is False
+    assert citizens_contract.tokenIdToCitizen(0)[4][1][2] is False
     assert citizens_contract.tokenIdToCitizen(0)[4][1][3] is False
 
     # set the new trait id
