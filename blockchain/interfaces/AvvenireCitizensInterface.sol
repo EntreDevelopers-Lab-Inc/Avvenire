@@ -33,6 +33,10 @@ interface AvvenireCitizensInterface is AvvenireCitizenDataInterface, IERC721 {
 
     function getCitizenMintActive() external view returns (bool);
 
+    function isCitizenInitialized(uint256) external view returns(bool);
+
+
+
     function bind(
         uint256,
         uint256,

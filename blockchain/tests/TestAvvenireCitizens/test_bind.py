@@ -48,6 +48,11 @@ def auction_set(fn_isolation):
     
     end_auction_and_enable_changes()
 
+def test_is_citizen_initalized():
+    citizens_contract = AvvenireCitizens[-1]
+    print (citizens_contract.isCitizenInitialized(0))
+    citizens_contract.isCitizenInitialized(0)
+    assert citizens_contract.isCitizenInitialized(0) == True
 
 def test_bind_existing_token():
     market_contract = AvvenireCitizenMarket[-1]
@@ -73,7 +78,8 @@ def test_bind_existing_token():
     ]
 
     # put on default body
-    market_contract.combine(0, male_trait_changes, {"from": account})
+    print(citizens_contract.tokenIdToCitizen(3))
+    market_contract.combine(3, male_trait_changes, {"from": accounts[3]})
 
     # make sure that the trait came off of the citizen
     assert citizens_contract.tokenIdToCitizen(0)[4][1][2] is False
@@ -91,8 +97,6 @@ def test_bind_existing_token():
     new_trait = trait_manager.update_trait()  # this is updating the effect
 
     assert new_trait == citizens_contract.tokenIdToTrait(new_trait_id)
-    print (new_trait)
-    print (citizens_contract.tokenIdToTrait(new_trait_id))
     
     # update the male
     broker = CitizenMarketBroker(citizens_contract, 0)
@@ -116,11 +120,11 @@ def test_bind_existing_token():
         [0, False, 1, 11],
     ]         
     # put on the new body
-    market_contract.combine(0, male_trait_changes, {"from": account})
+    assert citizens_contract.tokenIdToCitizen(0)[3] == 1
+    assert citizens_contract.tokenIdToCitizen(1)[3] == 1
+    print(citizens_contract.tokenIdToCitizen(1))
     
-    updated_citizen = citizens_contract.tokenIdToCitizen(0)
-    print(f"New body from updated citizen: {updated_citizen[4][1]}")
-    print(f"Eyes from updated citizen: {updated_citizen[4][3]}")
+    market_contract.combine(0, male_trait_changes, {"from": account})
 
     # make sure that the trait is on the citizen
     assert citizens_contract.tokenIdToCitizen(0)[4][1][0] == new_trait_id
@@ -296,22 +300,21 @@ def test_trait_changes_no_cost():
         [0, False, 1, 3],
         [0, True, 1, 4], # put on default eyes
         [0, True, 1, 5], # put on default mouth
-        [0, False, 1, 6],
-        [0, False, 1, 7],
-        [0, False, 1, 8],
-        [0, False, 1, 9],
-        [0, False, 1, 10],
+        [0, False, 1, 6], 
+        [0, False, 1, 7], 
+        [0, True, 1, 8], # default clothing
+        [0, False, 1, 9], 
+        [0, True, 1, 10], # default hair 
         [0, False, 1, 11],
     ]
-
-    # Make sure all traits exist before combine
+    # *** 
+    # Trait indexes
+    # ***
+    trait_indexes = [1, 3, 4, 7, 9]
     
-    # Body
-    assert citizens_contract.tokenIdToCitizen(0)[4][1][3] is True
-    # Eyes...
-    assert citizens_contract.tokenIdToCitizen(0)[4][3][3] is True
-    # Mouth... 
-    assert citizens_contract.tokenIdToCitizen(0)[4][4][3] is True
+    # Make sure all traits exist before combine
+    for index in trait_indexes:
+        assert citizens_contract.tokenIdToCitizen(0)[4][index][3] is True
     
     # ***
     # Combining...
@@ -319,38 +322,28 @@ def test_trait_changes_no_cost():
     market_contract.combine(0, male_trait_changes, {"from": account})
 
     # Make sure that the traits came off of the citizen and the default is on
+    for index in trait_indexes:
+        assert citizens_contract.tokenIdToCitizen(0)[4][index][0] == 0
+        assert citizens_contract.tokenIdToCitizen(0)[4][index][2] is False
+        assert citizens_contract.tokenIdToCitizen(0)[4][index][3] is False
     
-    # Body...
-    assert citizens_contract.tokenIdToCitizen(0)[4][1][0] == 0
-    assert citizens_contract.tokenIdToCitizen(0)[4][1][2] is False
-    assert citizens_contract.tokenIdToCitizen(0)[4][1][3] is False
-    
-    # Eyes...
-    assert citizens_contract.tokenIdToCitizen(0)[4][3][0] == 0
-    assert citizens_contract.tokenIdToCitizen(0)[4][3][2] is False
-    assert citizens_contract.tokenIdToCitizen(0)[4][3][3] is False
-    
-    # Mouth... 
-    assert citizens_contract.tokenIdToCitizen(0)[4][4][0] == 0
-    assert citizens_contract.tokenIdToCitizen(0)[4][4][2] is False
-    assert citizens_contract.tokenIdToCitizen(0)[4][4][3] is False
-    
-    # Make sure that 3 tokens were minted
-    assert citizens_contract.getTotalSupply() - supply_before_combine == 3
+    # Make sure that 5 tokens were minted
+    assert citizens_contract.getTotalSupply() - supply_before_combine == 5
     end_trait_id = citizens_contract.getTotalSupply() - 1
 
     # check that the new trait has the proper information
-    
-    for x in range(3):
+
+    for x in range(5):
         assert citizens_contract.tokenIdToTrait(end_trait_id - x) == (
-            end_trait_id - x,
-            "",
-            True,
-            True,
-            1,
-            2,
-            0,
-        )
+            end_trait_id - x, 
+            "", 
+            True, 
+            True, 
+            1, 
+            # Need to start @ 4...
+            trait_indexes[4-x] + 1,  # Adjusted for the fact that TraitTypes start at 1 in contract
+            0, 
+            )
         # update the hair's uri
         trait_manager = TraitManager(citizens_contract, end_trait_id - x)
         new_trait = trait_manager.update_trait()  # this is updating the effect
@@ -363,16 +356,46 @@ def test_trait_changes_no_cost():
 
     # ensure that the male on chain is what you set him to
     assert citizen == citizens_contract.tokenIdToCitizen(0)
+    
+    # Rebind to new citizen 
+    other_male_trait_changes = [
+        [0, False, 1, 1],
+        [(end_trait_id - 1), True, 1, 2],  # put on default body
+        [0, False, 1, 3],
+        [(end_trait_id - 2), True, 1, 4], # put on default eyes
+        [(end_trait_id - 3), True, 1, 5], # put on default mouth
+        [0, False, 1, 6], 
+        [0, False, 1, 7], 
+        [(end_trait_id - 4), True, 1, 8], # default clothing
+        [0, False, 1, 9], 
+        [(end_trait_id - 5), True, 1, 10], # default hair 
+        [0, False, 1, 11],
+    ]
+    supply_before_combine = citizens_contract.getTotalSupply()
+    print(f"Citizen # 1: {citizens_contract.tokenIdToCitizen(1)}")
+    print(f"Citizen # 1 sex: {citizens_contract.tokenIdToCitizen(1)[3]}")
+    market_contract.combine(1, other_male_trait_changes, {"from": account})
+    
+    # Assert that 5 traits were minted
+    assert citizens_contract.getTotalSupply() - supply_before_combine == 5
+    
+    for count, trait_index in enumerate(trait_indexes, 1):
+        assert citizens_contract.tokenIdToCitizen(1)[4][trait_index][0] == end_trait_id - count
+        assert citizens_contract.tokenIdToCitizen(1)[4][trait_index][2] is False
+        assert citizens_contract.tokenIdToCitizen(1)[4][trait_index][3] is True
+
 
 def test_changes_with_cost_and_multiple_mints():
     # keep track of the contracts
     market_contract = AvvenireCitizenMarket[-1]
     citizens_contract = AvvenireCitizens[-1]
     number_of_mints = 3
+    dev_account = get_dev_account()
+    admin_account = get_account()
     
     mutability_cost = Web3.toWei(0.01, "ether")
-    citizens_contract.setMutabilityCost(mutability_cost)
-    citizens_contract.setDevRoyalty(50)
+    citizens_contract.setMutabilityCost(mutability_cost, {"from": admin_account})
+    citizens_contract.setDevRoyalty(50, {"from": dev_account})
     supply_before_combine = citizens_contract.getTotalSupply()
 
     # use account 2 for the test user

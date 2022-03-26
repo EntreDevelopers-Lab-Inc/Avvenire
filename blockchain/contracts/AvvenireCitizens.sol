@@ -742,4 +742,9 @@ contract AvvenireCitizens is
 
         require(success && royaltyPaid, "Failed to change");
     }
+
+    function isCitizenInitialized(uint256 citizenId) external view returns (bool) {
+        return tokenIdToCitizen[citizenId].sex != Sex.NULL;
+    }
+
 } // End of contract

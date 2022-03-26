@@ -31,7 +31,9 @@ def mint_citizens_and_initialize(amount, account):
     
     admin_account = get_account()
     # avvenire_citizens_contract.setOwnersExplicit(amount, {"from": admin_account})
-
+    
+    avvenire_citizens_contract = AvvenireCitizens[-1]; 
+    start_index = avvenire_citizens_contract.getTotalSupply()
     # initialize citizen 0
     for i in range(amount):
         # set the citizen's sex

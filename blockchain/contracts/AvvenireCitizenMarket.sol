@@ -70,7 +70,7 @@ contract AvvenireCitizenMarket is
 
         // make sure the citizen has a sex
         require(
-            avvenireCitizens.tokenIdToCitizen(citizenId).sex != Sex.NULL,
+            avvenireCitizens.isCitizenInitialized(citizenId),
             "Must initialize the citizen before changing it."
         );
 
@@ -125,6 +125,8 @@ contract AvvenireCitizenMarket is
         // track the total cost
         uint256 totalCost;
 
+        Trait memory _trait;
+
         // check each traitId individually --> bind it if a change has been requested
         // each trait's mergability will be checked on binding (to reduce gas costs, access the mapping on the frontend before using this function)
         // if changing and traitId == 0, add it to the list that need to be minted, else bind the trait directly
@@ -139,9 +141,12 @@ contract AvvenireCitizenMarket is
         }
 
         if (traitChanges.bodyChange.toChange) {
+    
+            _trait = avvenireCitizens.tokenIdToCitizen(citizenId).traits.body;
+            
             toMint = _bindTrait(
                 citizenId,
-                avvenireCitizens.tokenIdToCitizen(citizenId).traits.body,
+                _trait,
                 newTraits,
                 toMint,
                 traitChanges.bodyChange

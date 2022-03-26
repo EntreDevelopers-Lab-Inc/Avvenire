@@ -81,7 +81,6 @@ def test_set_explicit():
         avvenire_contract.publicSaleMint(
             1, PUBLIC_SALE_KEY, {"from": accounts[count], "value": public_price_wei}
         )
-        total_balance = total_balance + public_price_wei
         assert avvenire_citizens_contract.numberMinted(accounts[count]) == 2
 
     total_supply = avvenire_citizens_contract.totalSupply()
