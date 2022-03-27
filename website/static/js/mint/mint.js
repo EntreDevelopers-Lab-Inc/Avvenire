@@ -34,10 +34,23 @@ async function getMintPrice()
     // check if the auction is on with saleConfig.auctionSaleStartTime <= block.time_stamp
     if (parseFloat(ethers.utils.formatEther(config[0])) > 0)  // this will be set to 0 when the auction is over
     {
-        CONTRACT.AUCTION_START_PRICE().then(
-            function (resp) {
-                price = resp;
-            });
+        // if in the future, get the start price
+        if (parseFloat(ethers.utils.formatEther(config[0])) > Date.now())
+        {
+            CONTRACT.AUCTION_START_PRICE().then(
+                function (resp) {
+                    price = resp;
+                });
+        }
+        // else, get the auction price
+        else
+        {
+            CONTRACT.getAuctionPrice().then(
+                function (resp) {
+                    price = resp;
+                });
+
+        }
 
         // set the max and value
         max = 3;
@@ -135,9 +148,9 @@ async function load_document()
     // get the mint price --> sets global variable
     await getMintPrice();
 
-    // if the mint start time is past the current time, enable the button
+    // if the mint start time is past the current time and the public sale has not started yet, enable the button
     CONTRACT.saleConfig().then(function (resp) {
-        if (resp[0] < Date.now())
+        if ((Date.now() > resp[0]) && (Date.now() > resp[1]))
         {
             // enable the button
             $('#mint-btn').attr('class', 'btn more-btn');
