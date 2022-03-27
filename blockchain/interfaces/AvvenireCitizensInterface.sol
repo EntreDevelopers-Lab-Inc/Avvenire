@@ -60,8 +60,6 @@ interface AvvenireCitizensMappingsInterface is AvvenireCitizenDataInterface {
 
     function getCitizen(uint256) external view returns (Citizen memory);
 
-    function getCitizenBody (uint256) external view returns (Trait memory);
-
     function getTrait(uint256) external view returns (Trait memory);
 
     function setCitizen(Citizen memory) external; 

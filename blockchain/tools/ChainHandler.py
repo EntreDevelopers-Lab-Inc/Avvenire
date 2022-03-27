@@ -256,8 +256,9 @@ class CitizenMarketBroker:
             print(f"Already initialized: {citizen}")
 
         # set the citizen's data --> no need to update further, as the citizen's data is already stored
-        self.contract.setCitizenData(
+        tx = self.contract.setCitizenData(
             citizen, False, {"from": get_server_account()})
+        tx.wait(1)
 
     # function to update a citizen
     def update_citizen(self):
@@ -291,8 +292,9 @@ class CitizenMarketBroker:
         citizen[1] = uri
 
         # set the citizen data with the contract using the admin account --> no need for more changes, set those to false
-        self.contract.setCitizenData(
+        tx = self.contract.setCitizenData(
             citizen, False, {"from": get_server_account()})
+        tx.wait(1)
 
         # return reconverted version of citizen for better understanding
         return tuple(citizen)
@@ -387,8 +389,9 @@ class TraitManager:
         trait[4] = SEX_ORDER.index(citizen_data['attributes'][0]['value']) + 1
 
         # set the trait's data using the admin account (set change update to false, as the trait has been updated)
-        self.contract.setTraitData(
+        tx = self.contract.setTraitData(
             trait, False, {"from": get_server_account()})
+        tx.wait(1)
 
         return tuple(trait)
 

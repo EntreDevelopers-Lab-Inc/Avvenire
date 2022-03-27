@@ -65,10 +65,6 @@ contract AvvenireCitizensData is
         return tokenIdToCitizen[tokenId];
     }
 
-    function getCitizenBody (uint256 tokenId) external view returns (Trait memory) {
-        return tokenIdToCitizen[tokenId].traits.body;
-    }
-
     function setAllowedPermission(address address_, bool setting) external onlyOwner
     {
         allowedContracts[address_] = setting;
