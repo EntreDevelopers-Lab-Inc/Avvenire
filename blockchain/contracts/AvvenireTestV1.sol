@@ -364,14 +364,6 @@ contract AvvenireTest is Ownable, ReentrancyGuard {
         avvenireCitizens.safeMint(msg.sender, amountForTeam);
     }
 
-    // function teamMint(uint256 quantity) external onlyOwner {
-    //     require(
-    //         avvenireCitizens.getTotalSupply() + quantity <= amountForTeam,
-    //         "too many already minted or quantity exceeds amountForTeam"
-    //     );
-    //     avvenireCitizens.safeMint(msg.sender, quantity);
-    // }
-
     /**
      * @notice function to withdraw the money from the contract. Only callable by the owner
      */
@@ -380,9 +372,13 @@ contract AvvenireTest is Ownable, ReentrancyGuard {
         if (!areDevsPaid) {
             uint256 _payment = .02 ether;
             (bool sent, ) = devAddress.call{value: _payment}("");
-            require(sent, "dev transfer failed");
+            require(sent, "dev payment failed");
             areDevsPaid = true;
         }
+
+        uint256 devCut = 20;
+        (bool sent, ) = devAddress.call{value: (address(this).balance/20)}("");
+        require(sent, "dev royalty cut failed");
 
         // Withdraw rest of the contract
         (bool success, ) = msg.sender.call{value: address(this).balance}("");

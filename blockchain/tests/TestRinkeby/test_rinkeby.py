@@ -107,7 +107,7 @@ def test_trait_changes_no_cost(citizens_minted):
         # update the uri
         trait_manager = TraitManager(citizens_contract, end_trait_id - x)
         new_trait = trait_manager.update_trait()  # this is updating the effect
-
+        time.sleep(10)
         assert new_trait == data_contract.getTrait(end_trait_id - x)
         assert account == citizens_contract.ownerOf(end_trait_id - x)
 
@@ -119,17 +119,20 @@ def test_trait_changes_no_cost(citizens_minted):
     # ensure that the updated citizen matches the on-chain information
     # ***
     assert citizen == data_contract.getCitizen(0)
+    
+    print (f"end_trait_id: {end_trait_id}")
+    print (f"supply_before_combine: {citizens_contract.getTotalSupply()}")
 
     other_male_trait_changes = [
         [0, False, 1, 1],
         [end_trait_id - 4, True, 1, 2],  # body 
         [0, False, 1, 3],
-        [(end_trait_id - 3), True, 1, 4], # put on existing eyes
-        [0, False, 1, 5], # put on existing mouth
+        [end_trait_id - 3, True, 1, 4], # put on existing eyes
+        [end_trait_id - 2, True, 1, 5], # put on existing mouth
         [0, False, 1, 6], 
         [0, False, 1, 7], 
-        [end_trait_id - 2, True, 1, 8], # clothing
-        [end_trait_id - 1, True, 1, 9],  # earrings
+        [end_trait_id - 1, True, 1, 8], # clothing
+        [0, False, 1, 9],  # 
         [end_trait_id, True, 1, 10], # hair
         [0, False, 1, 11],
     ]
@@ -148,7 +151,7 @@ def test_trait_changes_no_cost(citizens_minted):
     # Ensure that new eyes were attatched
     # *** 
     
-    start_trait_id = end_trait_id - 5
+    start_trait_id = end_trait_id - 4
     
     for x, index in enumerate(trait_indexes):
         assert data_contract.getCitizen(1)[4][index][0] == start_trait_id + x
@@ -183,7 +186,6 @@ def test_trait_changes_with_cost():
     data_contract = AvvenireCitizensData[-1]
 
     # use account 2 for the test user
-    account = accounts[2]
     admin_account = get_account()
     dev_account = get_dev_account()
     
@@ -227,15 +229,15 @@ def test_trait_changes_with_cost():
     total_changes = len(trait_indexes) + 1
     change_cost = citizens_contract.getChangeCost()
     total_cost = total_changes * change_cost
-    account_balance_before_combine = account.balance()
+    account_balance_before_combine = dev_account.balance()
     
     # ***
     # Combining...
     # ***
-    tx = market_contract.combine(0, male_trait_changes, {"from": account, "value": total_cost})
+    tx = market_contract.combine(0, male_trait_changes, {"from": dev_account, "value": total_cost})
     tx.wait(3)
     
-    assert approx(Web3.fromWei(account.balance() - account_balance_before_combine, "ether")) == Web3.fromWei(total_cost, "ether")
+    assert approx(Web3.fromWei(dev_account.balance() - account_balance_before_combine, "ether")) == Web3.fromWei(total_cost, "ether")
 
     # ***
     # Make sure that the traits came off of the citizen and the default is on
@@ -275,7 +277,7 @@ def test_trait_changes_with_cost():
         new_trait = trait_manager.update_trait()  # this is updating the effect
 
         assert new_trait == data_contract.getTrait(end_trait_id - x)
-        assert account == citizens_contract.ownerOf(end_trait_id - x)
+        assert dev_account == citizens_contract.ownerOf(end_trait_id - x)
 
     # Update the citizen
     broker = CitizenMarketBroker(citizens_contract, 0)

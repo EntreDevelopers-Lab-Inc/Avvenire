@@ -1,6 +1,6 @@
-import pytest
-import time
+import pytest, time, brownie
 
+from pytest import approx 
 from brownie import AvvenireTest, AvvenireCitizens, chain, network
 from web3 import Web3
 
@@ -56,12 +56,23 @@ def test_withdraw():
 
     # Withdrawing...
     avvenire_auction_contract.withdrawMoney({"from": admin_account})
+    contract_balance_eth = Web3.fromWei(contract_balance, "ether")
+    
+    print (f"contract_balance: {contract_balance_eth}")
+    print (f"contract_balance/20: {contract_balance_eth/20}")
 
     # Assertions
-    assert dev_account.balance() == dev_before_withdraw_balance + DEV_PAYMENT
+    assert Web3.fromWei(dev_account.balance(), "ether") == approx(
+        Web3.fromWei(dev_before_withdraw_balance + 
+                     DEV_PAYMENT + 
+                     (contract_balance/20),
+                     "ether"))
     assert (
-        admin_account.balance()
-        == admin_before_withdraw_balance + contract_balance - DEV_PAYMENT
+        Web3.fromWei(admin_account.balance(), "ether")
+        == approx(Web3.fromWei(
+            admin_before_withdraw_balance + 
+            (contract_balance * 19/20) - DEV_PAYMENT), 
+                  "ether")
     )
     assert avvenire_auction_contract.balance() == 0
 
@@ -103,10 +114,15 @@ def test_multiple_dev_withdraws():
     avvenire_auction_contract.withdrawMoney({"from": admin_account})
 
     # Admin account should increase by the full contract_balance...
-    assert admin_account.balance() == admin_account_balance + contract_balance
+    assert Web3.fromWei(admin_account.balance(), "ether") == approx(
+        Web3.fromWei(admin_account_balance + contract_balance * 0.95)
+        , "ether")
 
     # Dev account balance should be the same
-    assert dev_account.balance() == dev_account_balance
+    assert Web3.fromWei(dev_account.balance(), "ether") == approx(
+        Web3.fromWei(
+        dev_account_balance + (contract_balance/20), 
+        "ether"))
 
     # Contract balance should be 0
     assert avvenire_auction_contract.balance() == 0

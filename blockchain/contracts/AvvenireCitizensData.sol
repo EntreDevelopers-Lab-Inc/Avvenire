@@ -40,10 +40,19 @@ contract AvvenireCitizensData is
         _;
     }
 
+    /**
+     * @notice trait setter function 
+     * @param _trait the trait to store
+     */ 
     function setTrait (Trait memory _trait) external callerIsAllowed {
         tokenIdToTrait[_trait.tokenId] = _trait; 
     }
 
+    /**
+     * @notice trait.free setter function
+     * @param tokenId the trait's token id
+     * @param _free bool to what trait.free should be set to
+     */
     function setTraitFreedom(uint256 tokenId, bool _free) external callerIsAllowed {
         tokenIdToTrait[tokenId].free = _free;
     }
@@ -52,15 +61,18 @@ contract AvvenireCitizensData is
         tokenIdToCitizen[_citizen.tokenId] = _citizen;
     }
 
-    // *******
-    // TEST FIRST...
-    // IF WORKS, SET INDIVIDUAL SETTERS IN BIND of ERC721A contract
-    //**** 
-
+    /**
+     * @notice getter function for traits
+     * @param tokenId the trait's tokenId 
+     */
     function getTrait (uint256 tokenId) external view returns (Trait memory) {
         return tokenIdToTrait[tokenId];
     }
 
+    /**
+     * @notice getter function for citizens
+     * @param tokenId the citizen's tokenId 
+     */
     function getCitizen (uint256 tokenId) external view returns (Citizen memory) {
         return tokenIdToCitizen[tokenId];
     }
@@ -70,6 +82,10 @@ contract AvvenireCitizensData is
         allowedContracts[address_] = setting;
     }
 
+    /**
+     * @notice returns bool that is true if citizen is initialized; false otherwise
+     * @param citizenId the citizen's tokenId 
+     */
     function isCitizenInitialized(uint256 citizenId) external view returns (bool) {
         return tokenIdToCitizen[citizenId].sex != Sex.NULL;
     }

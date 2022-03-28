@@ -43,7 +43,7 @@ contract AvvenireCitizens is
         uint256 devRoyaltyPercent;
     }
 
-    DevConfig devConfig; // need to set it this way to avoid stack being too deep
+    DevConfig private devConfig; // need to set it this way to avoid stack being too deep
 
     // Contract containing data
     AvvenireCitizensMappingsInterface public avvenireCitizensData;
