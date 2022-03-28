@@ -674,17 +674,36 @@ contract AvvenireCitizens is
         require(success && royaltyPaid, "Failed to change");
     }
 
+    /**
+     * @notice getter function for citizen data
+     * @param tokenId the citizen's id
+     */
     function getCitizen(uint256 tokenId) external view returns (Citizen memory) {
         return avvenireCitizensData.getCitizen(tokenId);
     }
 
+    /**
+     * @notice getter function for trait data
+     * @param tokenId the trait's id
+     */
     function getTrait(uint256 tokenId) external view returns (Trait memory) {
         return avvenireCitizensData.getTrait(tokenId);
     }
 
+    /**
+     * @notice a burn function to burn an nft.  The tx.origin must be the owner
+     * @param tokenId the desired token to be burned
+     */
     function burn(uint256 tokenId) external callerIsAllowed {
         require (tx.origin == ownerOf(tokenId), "Not owner");
         _burn(tokenId, true);
+    }
+
+    /**
+     * @notice a getter function that returns the mutabilityConfig
+     */
+    function getMutabilityConfig() external view returns (MutabilityConfig memory) {
+        return mutabilityConfig;
     }
 
 } // End of contract
