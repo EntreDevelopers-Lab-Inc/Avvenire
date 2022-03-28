@@ -16,6 +16,13 @@
       <link href="{{url_for('static', filename='css/style.css')}}" rel="stylesheet" />
       <!-- Responsive Stylesheet -->
       <link href="{{url_for('static', filename='css/responsive.css')}}" rel="stylesheet" />
+
+      <!-- Slider CDN -->
+
+      <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/slick-carousel/1.5.8/slick-theme.min.css">
+      <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/slick-carousel/1.5.8/slick.css">
+
+
       <!-- jQuery js -->
       <script src="{{url_for('static', filename='js/jquery.min.js')}}">
       </script>
@@ -23,6 +30,42 @@
       <script src="https://cdn.ethers.io/lib/ethers-5.4.umd.min.js" type="application/javascript"></script>
       <!--constants.js-->
       <script src="{{url_for('static', filename='js/constants.js')}}"></script>
+
+      <style>
+            .slick-carousel {
+               margin: 0 auto;
+               width: 1000px;
+               }
+   
+               .slick-slide {
+               width: 350px;
+               }
+               .slick-next::before, .slick-prev::before {
+               color: #fff;
+               }
+               .card{
+                   background-color: #212529;
+                   box-shadow: 0 4px 8px 0 rgba(0, 0, 0, 0.2), 0 6px 20px 0 rgba(0, 0, 0, 0.19);
+               }
+               /* .card-body h4{
+                   color: black;
+               } */
+               .card-body{
+                   padding-left: 18px !important;
+                   padding-top: 5px !important;
+               }
+               .slick-next{
+                   right: 23px !important;
+               }
+               .slick-dots{
+                   display: none !important;
+               }
+               .slick-carousel{
+                   width: 1010px !important;
+               }
+        </style> 
+
+
 </head>
 
 <body class="darker">
