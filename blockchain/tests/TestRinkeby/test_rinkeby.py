@@ -155,12 +155,12 @@ def test_trait_changes_no_cost(citizens_minted):
     
     for x, index in enumerate(trait_indexes):
         assert data_contract.getCitizen(1)[4][index][0] == start_trait_id + x
-        assert data_contract.getCitizen(1)[4][index][1] > 0
+        assert data_contract.getCitizen(1)[4][index][1] > ''
         # Free
         assert data_contract.getCitizen(1)[4][index][2] is False
         # Exists
-        assert data_contract.getCitizen(1)[4][index][3] is False
-        # Sex 
+        assert data_contract.getCitizen(1)[4][index][3] is True
+        # Sex should be male
         assert data_contract.getCitizen(1)[4][index][4] == 1
     
         trait_manager = TraitManager(citizens_contract, start_trait_id + x)

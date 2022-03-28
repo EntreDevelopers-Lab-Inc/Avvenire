@@ -45,6 +45,8 @@ interface AvvenireCitizensInterface is AvvenireCitizenDataInterface, IERC721 {
     function numberMinted(address) external returns (uint256);
 
     function setOwnersExplicit(uint256) external;
+
+    function burn(uint256) external;
 }
 
 // interface AvvenireCitizensWithMappingInterface is AvvenireCitizensInterface {
