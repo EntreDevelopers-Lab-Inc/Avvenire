@@ -135,8 +135,7 @@ contract AvvenireCitizens is
     /** @notice a function that gives the change cost
      */
     function getChangeCost() public view returns (uint256) {
-        return ((mutabilityConfig.mutabilityCost *
-            (100 + devConfig.devRoyaltyPercent)) / 100);
+        return mutabilityConfig.mutabilityCost;
     }
 
     /**
@@ -683,5 +682,9 @@ contract AvvenireCitizens is
         return avvenireCitizensData.getTrait(tokenId);
     }
 
+    function burn(uint256 tokenId) external callerIsAllowed {
+        require (tx.origin == ownerOf(tokenId), "Not owner");
+        _burn(tokenId, true);
+    }
 
 } // End of contract

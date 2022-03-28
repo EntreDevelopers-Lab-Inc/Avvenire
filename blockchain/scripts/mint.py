@@ -12,8 +12,9 @@ from scripts.auction import end_auction_and_enable_changes
 def mint_citizens(amount, account):
     avvenire_auction_contract = AvvenireTest[-1]
     cost = avvenire_auction_contract.getAuctionPrice() * amount
-    avvenire_auction_contract.auctionMint(
+    tx = avvenire_auction_contract.auctionMint(
         amount, {"from": account, "value": cost})
+    tx.wait(1)
 
 
 # mint some citizens to an account and end it
