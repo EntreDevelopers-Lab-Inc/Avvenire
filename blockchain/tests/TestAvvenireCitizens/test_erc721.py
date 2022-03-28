@@ -31,6 +31,13 @@ def auction_set(fn_isolation):
     
     end_auction_and_enable_changes()
 
+@pytest.fixture()
+def burn_setup():
+    admin_account = get_account()
+    burn_test_contract = testAvvenireBurn.deploy(AvvenireCitizens[-1].address, {"from": admin_account})
+    citizens_contract = AvvenireCitizens[-1]
+    citizens_contract.setAllowedPermission(testAvvenireBurn[-1].address, True, {"from": admin_account})
+
 def test_transfer_trade_before_change_false():
     market_contract = AvvenireCitizenMarket[-1]
     citizens_contract = AvvenireCitizens[-1]
@@ -98,17 +105,26 @@ def test_transfer_trade_before_change_false():
     citizens_contract.transferFrom(account, other_account, new_trait_id, {"from": account})
     assert citizens_contract.ownerOf(new_trait_id) == other_account 
 
-def test_burn():
-    admin_account = get_account()
-    burn_test_contract = testAvvenireBurn.deploy(AvvenireCitizens[-1].address, {"from": admin_account})
+def test_burn(burn_setup):
+    burn_test_contract = testAvvenireBurn[-1]
     citizens_contract = AvvenireCitizens[-1]
-    citizens_contract.setAllowedPermission(testAvvenireBurn[-1].address, True, {"from": admin_account})
-    
     account = accounts[2]
     
     burn_test_contract.burn(0, {"from": account})
     
     assert citizens_contract.ownerOf(0) != account 
+    assert citizens_contract.numberBurned(account) == 1
+
+def test_burn_wrong_account(burn_setup):
+    burn_test_contract = testAvvenireBurn[-1]
+    citizens_contract = AvvenireCitizens[-1]
+    other_account = accounts[3]
+    
+    # ***
+    # Try to burn from account that does not own token 0
+    # ***
+    burn_test_contract.burn(0, {"from": other_account})
+    
     
     
     

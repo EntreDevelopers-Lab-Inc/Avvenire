@@ -153,6 +153,10 @@ def test_trait_changes_no_cost(citizens_minted):
     
     start_trait_id = end_trait_id - 4
     
+    # update the male
+    broker = CitizenMarketBroker(citizens_contract, 1)
+    citizen = broker.update_citizen()
+    
     for x, index in enumerate(trait_indexes):
         assert data_contract.getCitizen(1)[4][index][0] == start_trait_id + x
         assert data_contract.getCitizen(1)[4][index][1] > ''
@@ -167,10 +171,6 @@ def test_trait_changes_no_cost(citizens_minted):
         new_trait = trait_manager.update_trait()  # this is updating the effect
         assert new_trait == data_contract.getTrait(start_trait_id + x)
 
-    # update the male
-    broker = CitizenMarketBroker(citizens_contract, 1)
-    citizen = broker.update_citizen()
-    
     assert citizens_contract.getTotalSupply() - supply_before_combine == 5
     
     # ***

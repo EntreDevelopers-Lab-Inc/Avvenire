@@ -700,6 +700,14 @@ contract AvvenireCitizens is
     }
 
     /**
+     * @notice getter function for number of tokens that a user has burned
+     * @param _owner the user's address
+     */
+    function numberBurned(address _owner) external view returns (uint256) {
+        return _numberBurned(_owner); 
+    }
+
+    /**
      * @notice a getter function that returns the mutabilityConfig
      */
     function getMutabilityConfig() external view returns (MutabilityConfig memory) {
