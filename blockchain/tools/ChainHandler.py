@@ -221,7 +221,8 @@ class CitizenMarketBroker:
     # get the citizen
     def get_citizen(self):
         # need to connect to other contract to get the citizen
-        citizen = list(self.contract.tokenIdToCitizen(self.citizen_id))
+        citizen = list(self.contract.getCitizen(self.citizen_id))
+        
         return citizen
 
     # get the traits of the citizen
@@ -255,8 +256,9 @@ class CitizenMarketBroker:
             print(f"Already initialized: {citizen}")
 
         # set the citizen's data --> no need to update further, as the citizen's data is already stored
-        self.contract.setCitizenData(
+        tx = self.contract.setCitizenData(
             citizen, False, {"from": get_server_account()})
+        tx.wait(1)
 
     # function to update a citizen
     def update_citizen(self):
@@ -290,8 +292,9 @@ class CitizenMarketBroker:
         citizen[1] = uri
 
         # set the citizen data with the contract using the admin account --> no need for more changes, set those to false
-        self.contract.setCitizenData(
+        tx = self.contract.setCitizenData(
             citizen, False, {"from": get_server_account()})
+        tx.wait(1)
 
         # return reconverted version of citizen for better understanding
         return tuple(citizen)
@@ -332,7 +335,7 @@ class TraitManager:
     # on the API, citizen creations will be stored with the exact traits created and dropped --> will have this data
     def update_trait(self):
         # get the trait
-        trait = list(self.contract.tokenIdToTrait(self.trait_id))
+        trait = list(self.contract.getTrait(self.trait_id))
 
         # get the trait data from ipfs by linking it to the origin citizen
         resp = requests.get(f"{BASE_URI}{trait[6]}")
@@ -386,8 +389,9 @@ class TraitManager:
         trait[4] = SEX_ORDER.index(citizen_data['attributes'][0]['value']) + 1
 
         # set the trait's data using the admin account (set change update to false, as the trait has been updated)
-        self.contract.setTraitData(
+        tx = self.contract.setTraitData(
             trait, False, {"from": get_server_account()})
+        tx.wait(1)
 
         return tuple(trait)
 

@@ -38,5 +38,6 @@ def mint_citizens_and_initialize(amount, account):
         # request initialization
 
         # set the citizen's sex
-        broker = CitizenMarketBroker(avvenire_citizens_contract, i)
+        broker = CitizenMarketBroker(
+            avvenire_citizens_contract, i + start_index)
         broker.set_sex()

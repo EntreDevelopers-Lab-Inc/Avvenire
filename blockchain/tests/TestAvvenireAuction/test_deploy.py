@@ -8,7 +8,7 @@ from scripts.helpful_scripts import *
 
 # devAddress and paymentToDevs are internal.  Can't test
 
-DEV_PAYMENT = Web3.toWei(2, "ether")
+DEV_PAYMENT = Web3.toWei(.02, "ether")
 
 
 def test_deployment():

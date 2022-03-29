@@ -2,6 +2,7 @@ from brownie import (
     AvvenireTest,
     AvvenireCitizens,
     AvvenireCitizenMarket,
+    AvvenireCitizensData,
     network,
     chain,
 )
@@ -35,6 +36,8 @@ def deploy_contract(
     payment_to_devs_ETH = Web3.toWei(payment_to_devs, "ether")
 
     # if not Web3.isAddress(devAddress):
+    
+    avvenire_data_contract = AvvenireCitizensData.deploy({"from": account})
 
     # deploy avvenire citizens contract
     avvenire_citizens_contract = AvvenireCitizens.deploy(
@@ -43,11 +46,14 @@ def deploy_contract(
         "",
         "",
         dev_address,
+        AvvenireCitizensData[-1].address,
         {"from": account},
     )
+    
+    avvenire_data_contract.setAllowedPermission(AvvenireCitizens[-1].address, True, {"from": account})
 
     avvenire_market_contract = AvvenireCitizenMarket.deploy(
-        AvvenireCitizens[-1], {"from": account})
+        AvvenireCitizens[-1].address, AvvenireCitizensData[-1].address, {"from": account})
 
     avvenire_contract = AvvenireTest.deploy(
         max_per_address_during_auctioin,
@@ -57,7 +63,7 @@ def deploy_contract(
         amount_for_team,
         dev_address,
         payment_to_devs_ETH,
-        AvvenireCitizens[-1],
+        AvvenireCitizens[-1].address,
         {"from": account},
     )
 
