@@ -258,7 +258,7 @@ class CitizenMarketBroker:
         # set the citizen's data --> no need to update further, as the citizen's data is already stored
         tx = self.contract.setCitizenData(
             citizen, False, {"from": get_server_account()})
-        tx.wait(5)
+        tx.wait(1)
 
     # function to update a citizen
     def update_citizen(self):
@@ -295,7 +295,7 @@ class CitizenMarketBroker:
         tx = self.contract.setCitizenData(
             citizen, False, {"from": get_server_account()})
         
-        tx.wait(5)
+        tx.wait(1)
             
 
         # return reconverted version of citizen for better understanding
@@ -393,7 +393,7 @@ class TraitManager:
         # set the trait's data using the admin account (set change update to false, as the trait has been updated)
         tx = self.contract.setTraitData(
             trait, False, {"from": get_server_account()})
-        tx.wait(5)
+        tx.wait(1)
 
         return tuple(trait)
 

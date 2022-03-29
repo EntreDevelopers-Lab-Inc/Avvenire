@@ -36,6 +36,10 @@ def test_trait_changes_no_cost(citizens_minted):
 
     # use account 2 for the test user
     account = get_dev_account()
+    admin_account = get_account()
+    
+    total_supply = citizens_contract.getTotalSupply()
+    citizens_contract.setOwnersExplicit(total_supply, {"from": admin_account} )
     
     # take off the male body
     # request from the market to remove the hair of a citizen
@@ -107,7 +111,6 @@ def test_trait_changes_no_cost(citizens_minted):
         # update the uri
         trait_manager = TraitManager(citizens_contract, end_trait_id - x)
         new_trait = trait_manager.update_trait()  # this is updating the effect
-        time.sleep(10)
         assert new_trait == data_contract.getTrait(end_trait_id - x)
         assert account == citizens_contract.ownerOf(end_trait_id - x)
 
@@ -144,13 +147,6 @@ def test_trait_changes_no_cost(citizens_minted):
     # ***
     # Make sure that the new traits attatched to Citizen 1 are correct 
     # *** 
-        
-    # Assert that a trait was minted
-    
-    # ***
-    # Ensure that new eyes were attatched
-    # *** 
-    
     start_trait_id = end_trait_id - 4
     
     # update the male
@@ -170,6 +166,28 @@ def test_trait_changes_no_cost(citizens_minted):
         trait_manager = TraitManager(citizens_contract, start_trait_id + x)
         new_trait = trait_manager.update_trait()  # this is updating the effect
         assert new_trait == data_contract.getTrait(start_trait_id + x)
+    
+    #*** 
+    # Update minted traits
+    # ***
+    
+    end_trait_id = citizens_contract.getTotalSupply() - 1
+    for x in range(len(trait_indexes)):
+        assert citizens_contract.getTrait(end_trait_id - x) == (
+            end_trait_id - x, 
+            "", 
+            True, 
+            True, 
+            1, 
+            # Need to start @ 4...
+            trait_indexes[4-x] + 1,  # Adjusted for the fact that TraitTypes start at 1 in contract
+            0, 
+            )
+        # update the uri
+        trait_manager = TraitManager(citizens_contract, end_trait_id - x)
+        new_trait = trait_manager.update_trait()  # this is updating the effect
+        assert new_trait == data_contract.getTrait(end_trait_id - x)
+        assert account == citizens_contract.ownerOf(end_trait_id - x)
 
     assert citizens_contract.getTotalSupply() - supply_before_combine == 5
     
@@ -270,7 +288,7 @@ def test_trait_changes_with_cost():
             1, 
             # Need to start @ 4...
             trait_indexes[4-x] + 1,  # Adjusted for the fact that TraitTypes start at 1 in contract
-            0, 
+            1, 
             )
         # update the uri
         trait_manager = TraitManager(citizens_contract, end_trait_id - x)

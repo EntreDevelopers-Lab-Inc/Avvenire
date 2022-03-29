@@ -15,6 +15,10 @@ def mint_citizens(amount, account):
     tx = avvenire_auction_contract.auctionMint(
         amount, {"from": account, "value": cost})
     tx.wait(1)
+    
+    admin_account = get_account()
+    citizens_contract = AvvenireCitizens[-1]
+
 
 
 # mint some citizens to an account and end it

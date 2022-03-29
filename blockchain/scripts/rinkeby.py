@@ -103,7 +103,7 @@ def combine_second_citizen():
     tx.wait(3)
 
 def update_citizen_one():
-    end_trait_id = citizens_contract.getTotalSupply() - 1
+    citizens_contract = AvvenireCitizens[-1]
     # update the male
     broker = CitizenMarketBroker(citizens_contract, 1)
     citizen = broker.update_citizen()
@@ -114,10 +114,17 @@ def update_second_citizen_traits():
     data_contract = AvvenireCitizensData[-1]
     
     trait_indexes = [1, 3, 4, 7, 9]
-    
+    end_trait_id = citizens_contract.getTotalSupply() - 1
     start_trait_id = end_trait_id - 4
     
     
     for x, index in enumerate(trait_indexes):
        trait_manager = TraitManager(citizens_contract, start_trait_id + x)
-        new_trait = trait_manager.update_trait()  # this is updating the effect
+       new_trait = trait_manager.update_trait()  # this is updating the effect
+
+def main():
+    citizens_contract = AvvenireCitizens[-1]
+    print(citizens_contract.getCitizen(1))
+    trait = citizens_contract.getTrait(11)
+    
+    print(f"ownership of 7: {citizens_contract.ownerOf(7)}")

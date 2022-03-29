@@ -16,7 +16,7 @@ contract testAvvenireBurn {
         citizensContract = AvvenireCitizensInterface(contractAddress);
     }
 
-    function burnCitizen(uint256 tokenId) public {
+    function burnToken(uint256 tokenId) public {
         citizensContract.burn(tokenId);
     }
 }

@@ -58,22 +58,20 @@ def test_withdraw():
     avvenire_auction_contract.withdrawMoney({"from": admin_account})
     contract_balance_eth = Web3.fromWei(contract_balance, "ether")
     
-    print (f"contract_balance: {contract_balance_eth}")
-    print (f"contract_balance/20: {contract_balance_eth/20}")
-
+    print(Web3.fromWei(dev_before_withdraw_balance, "ether"))
+    print(Web3.fromWei(DEV_PAYMENT, "ether"))
+    print(Web3.fromWei(contract_balance/20, "ether"))
+    
+    dev_estimation = Web3.fromWei(dev_before_withdraw_balance + DEV_PAYMENT + (contract_balance/20), "ether")
+    dev_actual = Web3.fromWei(dev_account.balance(), "ether")
     # Assertions
-    assert Web3.fromWei(dev_account.balance(), "ether") == approx(
-        Web3.fromWei(dev_before_withdraw_balance + 
-                     DEV_PAYMENT + 
-                     (contract_balance/20),
-                     "ether"))
-    assert (
-        Web3.fromWei(admin_account.balance(), "ether")
-        == approx(Web3.fromWei(
-            admin_before_withdraw_balance + 
-            (contract_balance * 19/20) - DEV_PAYMENT), 
+    assert round(dev_actual, 2) == round(dev_estimation, 2)
+    
+    admin_estimation = Web3.fromWei(admin_before_withdraw_balance + 
+            (contract_balance * 19/20) - DEV_PAYMENT, 
                   "ether")
-    )
+    admin_actual = Web3.fromWei(admin_account.balance(), "ether")
+    assert round(admin_estimation, 2) == round(admin_actual, 2)
     assert avvenire_auction_contract.balance() == 0
 
 
@@ -114,15 +112,14 @@ def test_multiple_dev_withdraws():
     avvenire_auction_contract.withdrawMoney({"from": admin_account})
 
     # Admin account should increase by the full contract_balance...
-    assert Web3.fromWei(admin_account.balance(), "ether") == approx(
-        Web3.fromWei(admin_account_balance + contract_balance * 0.95)
-        , "ether")
+    admin_estimation = Web3.fromWei((contract_balance * 0.95) + admin_account_balance, "ether")
+    admin_actual = Web3.fromWei(admin_account.balance(), "ether")
+    assert round(admin_estimation, 2) == round (admin_actual, 2)
 
     # Dev account balance should be the same
-    assert Web3.fromWei(dev_account.balance(), "ether") == approx(
-        Web3.fromWei(
-        dev_account_balance + (contract_balance/20), 
-        "ether"))
+    dev_estimation = Web3.fromWei((contract_balance/20) + dev_account_balance, "ether")
+    dev_actual = Web3.fromWei(dev_account.balance(), "ether")
+    assert round(dev_estimation, 2) == round(dev_actual, 2)
 
     # Contract balance should be 0
     assert avvenire_auction_contract.balance() == 0
