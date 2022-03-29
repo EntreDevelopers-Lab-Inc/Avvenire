@@ -21,6 +21,9 @@ error NotSender();
 // token mutator changes the way that an ERC721A contract interacts with tokens
 contract AvvenireCitizensData is
     Ownable, AvvenireCitizensMappingsInterface {
+    // events
+    event SetTrait(uint256 tokenId);
+    event SetCitizen(uint256 tokenId);
 
     // mapping for tokenId to citizen
     mapping(uint256 => Citizen) private tokenIdToCitizen;
@@ -42,6 +45,7 @@ contract AvvenireCitizensData is
 
     function setTrait (Trait memory _trait) external callerIsAllowed {
         tokenIdToTrait[_trait.tokenId] = _trait; 
+        emit SetTrait(_trait.tokenId);
     }
 
     function setTraitFreedom(uint256 tokenId, bool _free) external callerIsAllowed {
@@ -50,6 +54,7 @@ contract AvvenireCitizensData is
 
     function setCitizen (Citizen memory _citizen) external callerIsAllowed {
         tokenIdToCitizen[_citizen.tokenId] = _citizen;
+        emit SetCitizen(_citizen.tokenId);
     }
 
     // *******

@@ -27,6 +27,15 @@ contract AvvenireCitizens is
     ReentrancyGuard,
     AvvenireCitizensInterface
 {
+    // events
+    event ChangeRequested(uint256 tokenId, address contractAddress, address sender);
+    event TraitTransferrable(uint256 tokenId);
+    event TraitNonTransferrable(uint256 tokenId);
+    event TraitBound(uint256 citizenId, uint256 traitId, TraitType traitType);
+    event MutabilityModeConfigured(bool configuration);
+    event CitizenMintActivityConfigured(bool configuration);
+    event MutabilityCostConfigured(uint256 configuration);
+
     // mint information (whether or not the platform is minting citizens)
     bool public citizenMintActive; // this defaults to true, as the platform needs to mint citizens before allowing tradable traits
 
@@ -163,6 +172,8 @@ contract AvvenireCitizens is
         // set the token as requested to change (don't change the URI, it's a waste of gas --> will be done once in when the admin sets the token uri)
         if (msg.value < getChangeCost()) revert InsufficcientFunds();
         tokenChangeRequests[tokenId] = true;
+
+        emit ChangeRequested(tokenId, msg.sender, tx.origin);
     }
 
     /**
@@ -268,7 +279,10 @@ contract AvvenireCitizens is
 
             // set the trait to free (should be tradable and combinable)
             avvenireCitizensData.setTraitFreedom(traitId, true);
+
+            emit TraitTransferrable(traitId);
         }
+
     }
 
     /**
@@ -284,6 +298,8 @@ contract AvvenireCitizens is
 
         // set the trait to not free (should not be tradable or combinable any longer)
         avvenireCitizensData.setTraitFreedom(traitId, false);
+
+        emit TraitNonTransferrable(traitId);
     }
 
     /**
@@ -412,6 +428,9 @@ contract AvvenireCitizens is
 
         // Finally set avvenireCitizensData.tokenIdToCitizen to _citizen
         avvenireCitizensData.setCitizen(_citizen);
+
+        // emit that the trait was set
+        emit TraitBound(_citizen.tokenId, _trait.tokenId, traitType);
     }
 
     /**
@@ -561,6 +580,8 @@ contract AvvenireCitizens is
     function setMutabilityMode(bool mutabilityMode_) external onlyOwner {
         // set te new mutability mode to this boolean
         mutabilityConfig.mutabilityMode = mutabilityMode_;
+
+        emit MutabilityModeConfigured(mutabilityMode_);
     }
 
     /**
@@ -594,6 +615,8 @@ contract AvvenireCitizens is
      */
     function setCitizenMintActive(bool citizenMintActive_) external onlyOwner {
         citizenMintActive = citizenMintActive_;
+
+        emit CitizenMintActivityConfigured(citizenMintActive_);
     }
 
     /**
@@ -609,6 +632,8 @@ contract AvvenireCitizens is
      */
     function setMutabilityCost(uint256 mutabilityCost_) external onlyOwner {
         mutabilityConfig.mutabilityCost = mutabilityCost_;
+
+        emit MutabilityCostConfigured(mutabilityCost_);
     }
 
     /**
