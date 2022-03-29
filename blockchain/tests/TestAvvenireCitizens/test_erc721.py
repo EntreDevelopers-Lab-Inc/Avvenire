@@ -110,11 +110,13 @@ def test_burn(burn_setup):
     citizens_contract = AvvenireCitizens[-1]
     account = accounts[2]
     
-    assert citizens_contract.ownerOf(0) == account
+    balance_before_burn = citizens_contract.balanceOf(account)
     
+    assert citizens_contract.ownerOf(0) == account
+
     burn_test_contract.burnToken(0, {"from": account})
     
-    assert citizens_contract.ownerOf(0) != account 
+    assert citizens_contract.balanceOf(account) == balance_before_burn - 1
     assert citizens_contract.numberBurned(account) == 1
 
 def test_burn_wrong_account(burn_setup):
@@ -125,8 +127,8 @@ def test_burn_wrong_account(burn_setup):
     # ***
     # Try to burn from account that does not own token 0
     # ***
-    
-    burn_test_contract.burnToken(0, {"from": other_account})
+    with brownie.reverts():
+        burn_test_contract.burnToken(0, {"from": other_account})
     
     
     

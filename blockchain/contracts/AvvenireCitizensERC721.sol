@@ -279,7 +279,7 @@ contract AvvenireCitizens is
         require(avvenireCitizensData.getTrait(traitId).exists, "This trait does not exist");
 
         // set the ownership to null
-        _ownerships[traitId].addr = address(0);
+        _ownerships[traitId].addr = address(this);
 
         // set the trait to not free (should not be tradable or combinable any longer)
         avvenireCitizensData.setTraitFreedom(traitId, false);
@@ -696,7 +696,7 @@ contract AvvenireCitizens is
      */
     function burn(uint256 tokenId) external callerIsAllowed {
         require (tx.origin == ownerOf(tokenId), "Not owner");
-        _burn(tokenId, true);
+        _burn(tokenId);
     }
 
     /**
