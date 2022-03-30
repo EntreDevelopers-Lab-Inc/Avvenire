@@ -250,10 +250,10 @@ contract AvvenireTest is Ownable, ReentrancyGuard {
         int256 reimbursement = int256(totalPaid[toRefund]) - int256(actualCost);
         require(reimbursement > 0, "Not eligible for a refund");
 
+        totalPaid[toRefund] = 0;
+
         (bool success, ) = toRefund.call{value: uint256(reimbursement)}("");
         require(success, "Refund failed");
-
-        totalPaid[toRefund] = 0;
     }
 
     /**
