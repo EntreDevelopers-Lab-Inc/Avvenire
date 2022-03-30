@@ -120,6 +120,9 @@ def test_refund(public_auction_set):
             # Make sure you can't refund a 2nd time...
             with brownie.reverts():
                 avvenire_contract.refund(accounts[i], {"from": admin_account})
+
+            with brownie.reverts():
+                avvenire_contract.refundMe({"from": accounts[i]})
         else:
             with brownie.reverts():
                 avvenire_contract.refund(accounts[i], {"from": admin_account})
@@ -151,6 +154,8 @@ def test_refund_me(public_auction_set):
             # Make sure you can't refund a 2nd time...
             with brownie.reverts():
                 avvenire_contract.refundMe({"from": accounts[i]})
+            with brownie.reverts():
+                avvenire_contract.refund(accounts[i], {"from": admin_account})
         else:
             with brownie.reverts():
                 avvenire_contract.refundMe({"from": accounts[i]})
