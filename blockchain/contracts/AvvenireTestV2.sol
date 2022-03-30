@@ -485,7 +485,7 @@ contract AvvenireTestV2 is
         view
         returns (TokenOwnership memory)
     {
-        return ownershipOf(tokenId);
+        return _ownershipOf(tokenId);
     }
 }
 

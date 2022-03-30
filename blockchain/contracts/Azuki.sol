@@ -353,6 +353,6 @@ contract Azuki is Ownable, ERC721A, ERC721AOwnersExplicit, ReentrancyGuard {
     function getOwnershipData(
         uint256 tokenId // storing all the old ownership
     ) external view returns (TokenOwnership memory) {
-        return ownershipOf(tokenId); // get historic ownership
+        return _ownershipOf(tokenId); // get historic ownership
     }
 }

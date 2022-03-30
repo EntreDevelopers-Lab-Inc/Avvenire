@@ -1,6 +1,6 @@
 import brownie
 
-from brownie import AvvenireTest
+from brownie import AvvenireTest, AvvenireCitizenMarket
 from web3 import Web3
 
 from scripts.script_definitions import *
@@ -8,7 +8,7 @@ from scripts.helpful_scripts import *
 
 # devAddress and paymentToDevs are internal.  Can't test
 
-DEV_PAYMENT = Web3.toWei(2, "ether")
+DEV_PAYMENT = Web3.toWei(.02, "ether")
 
 
 def test_deployment():
@@ -40,3 +40,5 @@ def test_deployment():
 
     with brownie.reverts():
         assert avvenire_contract.auctionMint(1, {"from": dev_account, "value": eth})
+    
+    avvenire_market_contract = AvvenireCitizenMarket[-1]

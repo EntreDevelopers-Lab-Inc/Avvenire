@@ -11,16 +11,27 @@ try:
 
 except ImportError:
     from scripts.helpful_scripts import get_server_account
-    from constants import BASE_URI, EXTENSION
+    from constants import BASE_URI, EXTENSION, WAIT_BLOCKS
     from GenerativeArt.core.art import Art
     from tools.ipfs import upload_to_ipfs
 
 # create a trait order
-TRAIT_ORDER = ['Background', 'Body', 'Tattoo', 'Eyes', 'Mouth',
-               'Mask', 'Necklace', 'Clothing', 'Earrings', 'Hair', 'Effect']
+TRAIT_ORDER = [
+    "Background",
+    "Body",
+    "Tattoo",
+    "Eyes",
+    "Mouth",
+    "Mask",
+    "Necklace",
+    "Clothing",
+    "Earrings",
+    "Hair",
+    "Effect",
+]
 
 # create the sex order
-SEX_ORDER = ['Male', 'Female']
+SEX_ORDER = ["Male", "Female"]
 
 # set the default
 DEFAULT_FILE = f"DEFAULT.{EXTENSION}"
@@ -29,11 +40,11 @@ DEFAULT_FILE = f"DEFAULT.{EXTENSION}"
 WORKING_DIR = os.getcwd()
 
 # if tests is in the working directory, remove blockchain and tests from it
-if 'tests' in WORKING_DIR:
-    WORKING_DIR = WORKING_DIR.split('tests')[0]
+if "tests" in WORKING_DIR:
+    WORKING_DIR = WORKING_DIR.split("tests")[0]
 
 # set the folder with the art (remove tests from path if it is there)
-ART_FOLDER = os.path.join(WORKING_DIR, 'GenerativeArt')
+ART_FOLDER = os.path.join(WORKING_DIR, "GenerativeArt")
 
 
 # make a class that can create citizens by comparing ipfs to on-chain data
@@ -41,19 +52,23 @@ class CitizenCreator:
     def __init__(self, ipfs_data, chain_data):
         # save each group of traits
         self.ipfs_data = ipfs_data
-        self.ipfs_files = {trait['trait_type']: trait['file']
-                           for trait in self.ipfs_data['trait_files']}
-        self.ipfs_traits = {trait['trait_type']: trait['value']
-                            for trait in self.ipfs_data['attributes']}
+        self.ipfs_files = {
+            trait["trait_type"]: trait["file"]
+            for trait in self.ipfs_data["trait_files"]
+        }
+        self.ipfs_traits = {
+            trait["trait_type"]: trait["value"]
+            for trait in self.ipfs_data["attributes"]
+        }
+
+        # store the sex, so you can use the right file
+        self.sex = self.ipfs_data["attributes"][0]["value"]
 
         # save the overall on-chain data
         self.chain_data = chain_data
 
         # convert the on-chain data into files
         self.chain_traits = self.extract_data_for_traits(chain_data)
-
-        # store the sex, so you can use the right file
-        self.sex = self.ipfs_data['attributes'][0]['value']
 
         # will need the metadata for later
         self.metadata = self.get_metadata()
@@ -96,12 +111,16 @@ class CitizenCreator:
             return data
         # if there is not a uri, but it exists, get the data from ipfs
         elif trait[3]:
-            return create_trait(self.ipfs_traits[trait_type], self.ipfs_files[trait_type], trait_type)
+            return create_trait(
+                self.ipfs_traits[trait_type], self.ipfs_files[trait_type], trait_type, self.sex
+            )
         # if no uri, and it doesn't exist, set it to the default
         else:
             # imply the file default information based on the trait type and sex
             # first argument (name) will never be used, as no name will be set
-            return create_trait(f"Default {trait_type}", f"{trait_type}/{DEFAULT_FILE}", trait_type)
+            return create_trait(
+                f"Default {trait_type}", f"{trait_type}/{DEFAULT_FILE}", trait_type, self.sex
+            )
 
     # create a way to get the metadata
     def get_metadata(self):
@@ -113,55 +132,27 @@ class CitizenCreator:
         files = []
 
         # create an attribute list (start with the sex data)
-        attributes = [{'trait_type': 'Sex', 'value': self.sex}]
+        attributes = [{"trait_type": "Sex", "value": self.sex}]
 
         # iterate over all of the files in both trait lists
         for i in range(len(TRAIT_ORDER)):
-            # get the ipfs file
-            ipfs_file = self.ipfs_data['trait_files'][i]['file']
-            ipfs_attribute = self.ipfs_data['attributes'][i]
-
             # get the chain file
-            chain_file = self.chain_traits[i]['file']
-            chain_attribute = self.chain_traits[i]['name']
-
-            # figure out if the new trait exists
-            new_trait_exists = self.chain_data[i][3]
-
-            # if the ipfs trait and the chain trait are the same, just use that file
-            if ipfs_file == chain_file:
-                # set the file and attribute
-                new_file = ipfs_file
-                new_attribute = ipfs_attribute
-            # if the ipfs file is a default and the new one exists, use the chain trait
-            elif (ipfs_file == DEFAULT_FILE) and (new_trait_exists):
-                # set the file and attribute
-                new_file = chain_file
-                new_attribute = chain_attribute
-            # if the ipfs file is NOT a default, and the new one does not exist, the trait has been removed, add the chain trait
-            elif (ipfs_file != DEFAULT_FILE) and (not new_trait_exists):
-                # set the new trait to the default, which is the the current chain trait
-                # set the file and attribute
-                new_file = chain_file
-                new_attribute = chain_attribute
-            # if the ipfs trait is not the same as the chain trait, the traits have been swapped
-            else:
-                # set the file and attribute
-                new_file = chain_file
-                new_attribute = chain_attribute
+            chain_file = self.chain_traits[i]["file"]
+            chain_attribute = self.chain_traits[i]["name"]
 
             # add the new file to files
-            files.append({'trait_type': TRAIT_ORDER[i], 'file': new_file})
+            files.append({"trait_type": TRAIT_ORDER[i], "file": chain_file})
 
             # add the new attribute to the attributes
-            attributes.append(new_attribute)
+            attributes.append(
+                {'trait_type': TRAIT_ORDER[i], 'value': chain_attribute})
 
             # make a metadata dict for the new citizen
             metadata_dict = {
-                'name': self.ipfs_data['name'],
-                'image': '',  # this will be set AFTER the image is uploaded
-                'attributes': attributes,
-                'trait_files': files
+                "name": self.ipfs_data["name"],
+                "image": "",  # this will be set AFTER the image is uploaded
+                "attributes": attributes,
+                "trait_files": files,
             }
 
         return metadata_dict
@@ -169,22 +160,23 @@ class CitizenCreator:
     # function to upload to ipfs (both citizen and metadata --> return metadata uri)
     def upload_to_ipfs(self):
         # create the composition files from the metadata that will be pushed on chain
-        composition_files = [os.path.join(
-            *entry['file'].split('/')) for entry in self.metadata['trait_files']]
+        composition_files = [
+            os.path.join(*entry["file"].split("/"))
+            for entry in self.metadata["trait_files"]
+        ]
 
         # get the files
-        files = [os.path.join(self.sex, file)
-                 for file in composition_files]
+        files = [os.path.join(self.sex, file) for file in composition_files]
 
         print(composition_files)
 
         # create a piece of art, initializing with the first file
-        art = Art({'full_path': os.path.join(ART_FOLDER, files[0])})
+        art = Art({"full_path": os.path.join(ART_FOLDER, files[0])})
 
         # iterate over the files
         for file in files[1:]:
             # paste each file onto the original piece of art
-            art.paste({'full_path': os.path.join(ART_FOLDER, file)})
+            art.paste({"full_path": os.path.join(ART_FOLDER, file)})
 
         # upload the image to ipfs
         image_link = upload_to_ipfs(art.image)
@@ -194,11 +186,12 @@ class CitizenCreator:
             return None
 
         # now that you have the pinata link, finish the metadata
-        self.metadata['image'] = image_link
+        self.metadata["image"] = image_link
 
         # upload the metadata to ipfs
         metadata_link = upload_to_ipfs(
-            bytes(json.dumps(self.metadata, indent=4), encoding='utf-8'), extension=None)
+            bytes(json.dumps(self.metadata, indent=4), encoding="utf-8"), extension=None
+        )
 
         # need metadata link to continue
         if not metadata_link:
@@ -211,7 +204,7 @@ class CitizenCreator:
     @property
     def composition_files(self):
         # iterate over all the files and add them to a list
-        files = [file['file'] for file in self.metadata['trait_files']]
+        files = [file["file"] for file in self.metadata["trait_files"]]
 
         return files
 
@@ -228,8 +221,8 @@ class CitizenMarketBroker:
     # get the citizen
     def get_citizen(self):
         # need to connect to other contract to get the citizen
-        citizen = list(self.contract.tokenIdToCitizen(
-            self.citizen_id))
+        citizen = list(self.contract.getCitizen(self.citizen_id))
+        
         return citizen
 
     # get the traits of the citizen
@@ -254,13 +247,18 @@ class CitizenMarketBroker:
 
         # IF the citizen's sex is not set already, set it
         if citizen[3] == 0:
-            # set the sex
-            citizen[3] = int(SEX_ORDER.index(
-                ipfs_data['attributes'][0]['value'])) + 1
+            sex_id = int(SEX_ORDER.index(
+                ipfs_data["attributes"][0]["value"])) + 1
 
-            # set the citizen's data --> no need to update further, as the citizen's data is already stored
-            self.contract.setCitizenData(
-                citizen, False, {'from': get_server_account()})
+            # set the sex
+            citizen[3] = sex_id
+        else:
+            print(f"Already initialized: {citizen}")
+
+        # set the citizen's data --> no need to update further, as the citizen's data is already stored
+        tx = self.contract.setCitizenData(
+            citizen, False, {"from": get_server_account()})
+        tx.wait(1)
 
     # function to update a citizen
     def update_citizen(self):
@@ -276,7 +274,8 @@ class CitizenMarketBroker:
         # if there are not ipfs traits, say that we failed to update the citizen
         if not ipfs_data:
             print(
-                f"Failed to update citizen due to lack of ipfs data: {self.citizen_id}")
+                f"Failed to update citizen due to lack of ipfs data: {self.citizen_id}"
+            )
             return
 
         # create a citizen creator with the two bunches of traits
@@ -293,8 +292,9 @@ class CitizenMarketBroker:
         citizen[1] = uri
 
         # set the citizen data with the contract using the admin account --> no need for more changes, set those to false
-        self.contract.setCitizenData(
-            citizen, False, {'from': get_server_account()})
+        tx = self.contract.setCitizenData(
+            citizen, False, {"from": get_server_account()})
+        tx.wait(1)
 
         # return reconverted version of citizen for better understanding
         return tuple(citizen)
@@ -328,11 +328,14 @@ class TraitManager:
         # save the contract
         self.contract = contract
 
+        # saev the trait id
+        self.trait_id = trait_id
+
     # function to update a trait (needs to be relocated to a trait manager --> will become a part of creating a citizen)
     # on the API, citizen creations will be stored with the exact traits created and dropped --> will have this data
     def update_trait(self):
         # get the trait
-        trait = self.contract.tokenIdToTrait(self.trait_id)
+        trait = list(self.contract.getTrait(self.trait_id))
 
         # get the trait data from ipfs by linking it to the origin citizen
         resp = requests.get(f"{BASE_URI}{trait[6]}")
@@ -346,12 +349,16 @@ class TraitManager:
         citizen_data = resp.json()
 
         # get dictionaries for the attributes and files
-        attribute_dict = {attribute['trait_type']: attribute['value']
-                          for attribute in citizen_data['attributes']}
-        file_dict = {trait_files['trait_type']: trait_files['file']
-                     for trait_files in citizen_data['trait_files']}
+        attribute_dict = {
+            attribute["trait_type"]: attribute["value"]
+            for attribute in citizen_data["attributes"]
+        }
+        file_dict = {
+            trait_files["trait_type"]: trait_files["file"]
+            for trait_files in citizen_data["trait_files"]
+        }
 
-        # get the trait sex
+        # get the trait sex (which will already be set automatically by the market contract)
         sex = SEX_ORDER[trait[4] - 1]
 
         # get the trait data depending on the trait type
@@ -360,38 +367,47 @@ class TraitManager:
         attribute = attribute_dict[trait_type]
 
         # create the metadata
-        metadata = create_trait(
-            attribute, file, trait_type)
+        metadata = create_trait(attribute, file, trait_type, sex)
 
         # get the image (just create some art with only one file)
-        art = Art({'full_path': os.path.join(ART_FOLDER, sex, file)})
+        art = Art({"full_path": os.path.join(ART_FOLDER, sex, file)})
 
         # upload the image to ifpfs
         art_link = upload_to_ipfs(art.image)
 
         # set the image associated with the trait
-        metadata['image'] = art_link
+        metadata["image"] = art_link
 
         # upload the metadata to ipfs
-        metadata_link = upload_to_ipfs
+        metadata_bytes = json.dumps(metadata, indent=4).encode('utf-8')
+        metadata_link = upload_to_ipfs(metadata_bytes, extension=None)
 
         # change the trait's uri (rest can stay the same)
         trait[1] = metadata_link
 
-        # set the trait's data using the admin account
-        self.contract.setTraitsData(trait, {'from': get_server_account()})
+        # set the sex to ENSURE that it is in-line with ipfs
+        trait[4] = SEX_ORDER.index(citizen_data['attributes'][0]['value']) + 1
 
-        pass
+        # set the trait's data using the admin account (set change update to false, as the trait has been updated)
+        tx = self.contract.setTraitData(
+            trait, False, {"from": get_server_account()})
+        tx.wait(1)
+
+        return tuple(trait)
 
 
 # function for standardizing trait data
-def create_trait(name, file, trait_type):
-    return {'name': name, 'file': file, 'attributes': {'trait_type': trait_type, 'value': name}}
+def create_trait(name, file, trait_type, sex):
+    return {
+        "name": name,
+        "file": file,
+        "attributes": [{'Sex': sex}, {"trait_type": trait_type, "value": name}],
+    }
 
 
-'''
+"""
 NOTES
 - this is mainly to make changes on the backend, so it may need to interact using web3
     - for even more security, it may be smart to hire a server security expert
         - we could also just run these from a computer and person --> get logged changes and make them
-'''
+"""

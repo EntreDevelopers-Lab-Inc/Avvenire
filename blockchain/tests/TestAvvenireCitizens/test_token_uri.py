@@ -40,6 +40,7 @@ def test_direct_false_token_change():
     # user tries to change token directly (hitting modifier)
     with brownie.reverts():
         avvenire_citizens_contract.requestChange(0, {"from": account})
+    drop_interval(1)
 
     # try and get the token uri, is it still the base uri?
     assert avvenire_citizens_contract.tokenURI(0) == f"{BASE_URI}0"
@@ -72,7 +73,7 @@ def test_load_uri():
 
     mint_citizens_and_initialize(2, account)
 
-# request from the market to remove all the traits of a citizen
+    # request from the market to remove all the traits of a citizen
     trait_changes = [
         [0, False, 2, 1],  # default background
         [0, True, 2, 2],
@@ -90,9 +91,11 @@ def test_load_uri():
     # request the combination from the market
     print(
         f"Cost to make changes: {avvenire_citizens_contract.getChangeCost()}")
+    
     avvenire_market_contract.combine(
         0, trait_changes, {"from": account, "value": Web3.toWei(0.05, "ether")}
     )
+    drop_interval(1)
 
     # check to make sure that the token uri is the loading uri
     assert avvenire_citizens_contract.tokenURI(0) == LOAD_URI
@@ -112,21 +115,24 @@ def test_character_uri_after_change():
 
     # mint an nft
     account = accounts[2]
-    broker = mint_citizens_and_initialize(2, account)
+    mint_citizens_and_initialize(2, account)
+
+    # make the broker
+    broker = CitizenMarketBroker(avvenire_citizens_contract, 0)
 
     # request from the market to remove all the traits of a citizen --> should be stored on the backend --> will be able to set it later
     trait_changes = [
-        [0, False, 2, 1],  # default background
-        [0, True, 2, 2],
-        [0, False, 2, 3],  # default tattoos
-        [0, True, 2, 4],
-        [0, True, 2, 5],
-        [0, False, 2, 6],  # default masks
-        [0, False, 2, 7],  # default necklaces
-        [0, True, 2, 8],
-        [0, False, 2, 9],  # default earrings
-        [0, True, 2, 10],
-        [0, False, 2, 11],  # default effects
+        [0, False, 1, 1],  # default background
+        [0, True, 1, 2],
+        [0, False, 1, 3],  # default tattoos
+        [0, True, 1, 4],
+        [0, True, 1, 5],
+        [0, False, 1, 6],  # default masks
+        [0, False, 1, 7],  # default necklaces
+        [0, True, 1, 8],
+        [0, False, 1, 9],  # default earrings
+        [0, True, 1, 10],
+        [0, False, 1, 11],  # default effects
     ]
 
     # request the combination from the market
@@ -142,6 +148,7 @@ def test_character_uri_after_change():
 
     # make the changes as an admin
     broker_citizen = broker.update_citizen()
+    drop_interval(1)
 
     # get the new citizen from the chain and see if it matches
     chain_citizen = avvenire_citizens_contract.tokenIdToCitizen(0)
@@ -149,3 +156,6 @@ def test_character_uri_after_change():
 
     # make sure the citizens are the same
     assert broker_citizen == chain_citizen
+
+    # make sure traits have been minted
+    avvenire_citizens_contract.getTotalSupply() == 7
