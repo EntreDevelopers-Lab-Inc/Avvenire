@@ -225,14 +225,16 @@ contract AvvenireTest is Ownable, ReentrancyGuard {
 
         uint256 actualCost = endingPrice *
             avvenireCitizens.numberMinted(msg.sender);
+
         int256 reimbursement = int256(totalPaid[msg.sender]) -
             int256(actualCost);
+
         require(reimbursement > 0, "You are not eligible for a refund");
+
+        totalPaid[msg.sender] = 0;
 
         (bool success, ) = msg.sender.call{value: uint256(reimbursement)}("");
         require(success, "Refund failed");
-
-        totalPaid[msg.sender] = 0;
     }
 
     /**
@@ -376,8 +378,8 @@ contract AvvenireTest is Ownable, ReentrancyGuard {
             areDevsPaid = true;
         }
 
-        uint256 devCut = address(this).balance/20;
-        (bool sent, ) = devAddress.call{value: devCut }("");
+        uint256 devCut = address(this).balance / 20;
+        (bool sent, ) = devAddress.call{value: devCut}("");
         require(sent, "dev cut failed");
 
         // Withdraw rest of the contract
