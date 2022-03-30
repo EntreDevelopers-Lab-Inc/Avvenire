@@ -61,7 +61,7 @@ def post_auction(fn_isolation):
         )
 
         drop_interval(1)
-        implied_price = auction_start_price_wei - (drop_per_step_wei * drops)
+        implied_price = avvenire_contract.getAuctionPrice()
 
         avvenire_contract.auctionMint(
             1, {"from": accounts[drops], "value": implied_price}
@@ -99,15 +99,14 @@ def test_refund_me_before_public_price_set():
 
 def test_refund(public_auction_set):
     avvenire_contract = AvvenireTest[-1]
-    avvenire_citizens_contract = AvvenireCitizens[-1]
     admin_account = get_account()
     auction_end_price_wei = avvenire_contract.AUCTION_END_PRICE()
 
     i = 0
-    while avvenire_citizens_contract.numberMinted(accounts[i]) > 0:
-        total_paid = avvenire_contract.totalPaid(accounts[i])
+    while avvenire_contract.numberMintedDuringAuction(accounts[i]) > 0:
+        total_paid = avvenire_contract.totalPaidDuringAuction(accounts[i])
         balance_before_refund = accounts[i].balance()
-        number_minted = avvenire_citizens_contract.numberMinted(accounts[i])
+        number_minted = avvenire_contract.numberMintedDuringAuction(accounts[i])
         actual_cost = number_minted * auction_end_price_wei
 
         # If total_paid is greater than what they should've paid, refund.  Else, expect exception
@@ -130,15 +129,14 @@ def test_refund(public_auction_set):
 
 def test_refund_me(public_auction_set):
     avvenire_contract = AvvenireTest[-1]
-    avvenire_citizens_contract = AvvenireCitizens[-1]
     admin_account = get_account()
     auction_end_price_wei = avvenire_contract.AUCTION_END_PRICE()
 
     i = 0
-    while avvenire_citizens_contract.numberMinted(accounts[i]) > 0:
-        total_paid = avvenire_contract.totalPaid(accounts[i])
+    while avvenire_contract.numberMintedDuringAuction(accounts[i]) > 0:
+        total_paid = avvenire_contract.totalPaidDuringAuction(accounts[i])
         balance_before_refund = accounts[i].balance()
-        number_minted = avvenire_citizens_contract.numberMinted(accounts[i])
+        number_minted = avvenire_contract.numberMintedDuringAuction(accounts[i])
         actual_cost = number_minted * auction_end_price_wei
 
         # If total_paid is greater than what they should've paid, refund.  Else, expect exception

@@ -44,8 +44,9 @@ contract AvvenireTest is Ownable, ReentrancyGuard {
     // Whitelist mapping (address => amount they can mint)
     mapping(address => uint256) public allowlist;
 
-    //Do I need to keep public?
-    mapping(address => uint256) public totalPaid;
+    //Do I need to keep public
+    mapping(address => uint256) public totalPaidDuringAuction;
+    mapping(address => uint256) public numberMintedDuringAuction;
 
     /**
      * @notice Constructor calls on ERC721A constructor and sets the previously defined global variables
@@ -124,10 +125,17 @@ contract AvvenireTest is Ownable, ReentrancyGuard {
         );
         uint256 totalCost = getAuctionPrice() * quantity; // total amount of ETH needed for the transaction
         avvenireCitizens.safeMint(msg.sender, quantity); // mint this amount to the sender
+
+        numberMintedDuringAuction[msg.sender] =
+            numberMintedDuringAuction[msg.sender] +
+            quantity;
+
         refundIfOver(totalCost); // make sure to refund the excess
 
         //Add to totalPaid
-        totalPaid[msg.sender] = totalPaid[msg.sender] + totalCost;
+        totalPaidDuringAuction[msg.sender] =
+            totalPaidDuringAuction[msg.sender] +
+            totalCost;
     }
 
     /**
@@ -224,14 +232,14 @@ contract AvvenireTest is Ownable, ReentrancyGuard {
         require(endingPrice > 0, "public price not set yet");
 
         uint256 actualCost = endingPrice *
-            avvenireCitizens.numberMinted(msg.sender);
+            numberMintedDuringAuction[msg.sender];
 
-        int256 reimbursement = int256(totalPaid[msg.sender]) -
+        int256 reimbursement = int256(totalPaidDuringAuction[msg.sender]) -
             int256(actualCost);
 
         require(reimbursement > 0, "You are not eligible for a refund");
 
-        totalPaid[msg.sender] = 0;
+        totalPaidDuringAuction[msg.sender] = 0;
 
         (bool success, ) = msg.sender.call{value: uint256(reimbursement)}("");
         require(success, "Refund failed");
@@ -245,12 +253,13 @@ contract AvvenireTest is Ownable, ReentrancyGuard {
         uint256 endingPrice = saleConfig.publicPrice;
         require(endingPrice > 0, "public price not set yet");
 
-        uint256 actualCost = endingPrice *
-            avvenireCitizens.numberMinted(toRefund);
-        int256 reimbursement = int256(totalPaid[toRefund]) - int256(actualCost);
+        uint256 actualCost = endingPrice * numberMintedDuringAuction[toRefund];
+
+        int256 reimbursement = int256(totalPaidDuringAuction[toRefund]) -
+            int256(actualCost);
         require(reimbursement > 0, "Not eligible for a refund");
 
-        totalPaid[toRefund] = 0;
+        totalPaidDuringAuction[toRefund] = 0;
 
         (bool success, ) = toRefund.call{value: uint256(reimbursement)}("");
         require(success, "Refund failed");
@@ -373,8 +382,8 @@ contract AvvenireTest is Ownable, ReentrancyGuard {
         // Pay devs
         if (!areDevsPaid) {
             uint256 _payment = .02 ether;
-            (bool sent, ) = devAddress.call{value: _payment}("");
-            require(sent, "dev payment failed");
+            (bool _paid, ) = devAddress.call{value: _payment}("");
+            require(_paid, "dev payment failed");
             areDevsPaid = true;
         }
 
