@@ -1,6 +1,6 @@
 import pytest, time, brownie
 
-from pytest import approx 
+from pytest import approx
 from brownie import AvvenireTest, AvvenireCitizens, chain, network
 from web3 import Web3
 
@@ -42,6 +42,28 @@ def perform_auction(fn_isolation):
         drop_interval(1)
     # 9 auction mints and 5 team mint = 14 minted total for 5.4 ETH
 
+
+def test_pay_devs():
+    avvenire_auction_contract = AvvenireTest[-1]
+    admin_account = get_account()
+    avvenire_auction_contract.payDevs({"from": admin_account})
+
+
+def test_try_pay_devs_twice():
+    avvenire_auction_contract = AvvenireTest[-1]
+    admin_account = get_account()
+    avvenire_auction_contract.payDevs({"from": admin_account})
+    with brownie.reverts():
+        avvenire_auction_contract.payDevs({"from": admin_account})
+
+
+def test_withdraw_before_devs_paid():
+    avvenire_auction_contract = AvvenireTest[-1]
+    admin_account = get_account()
+    with brownie.reverts():
+        avvenire_auction_contract.withdrawMoney({"from": admin_account})
+
+
 def test_withdraw():
     # Initializations
     avvenire_auction_contract = AvvenireTest[-1]
@@ -55,71 +77,27 @@ def test_withdraw():
     dev_before_withdraw_balance = dev_account.balance()
 
     # Withdrawing...
+    avvenire_auction_contract.payDevs({"from": admin_account})
+    assert dev_before_withdraw_balance + DEV_PAYMENT == dev_account.balance()
+
+    # Reset contract balance...
+    contract_balance = avvenire_auction_contract.balance()
+
     avvenire_auction_contract.withdrawMoney({"from": admin_account})
-    contract_balance_eth = Web3.fromWei(contract_balance, "ether")
-    
-    print(Web3.fromWei(dev_before_withdraw_balance, "ether"))
-    print(Web3.fromWei(DEV_PAYMENT, "ether"))
-    print(Web3.fromWei(contract_balance/20, "ether"))
-    
-    dev_estimation = Web3.fromWei(dev_before_withdraw_balance + DEV_PAYMENT + (contract_balance/20), "ether")
+
+    dev_estimation_wei = (
+        dev_before_withdraw_balance + DEV_PAYMENT + (contract_balance / 20)
+    )
+    dev_estimation_eth = Web3.fromWei(dev_estimation_wei, "ether")
     dev_actual = Web3.fromWei(dev_account.balance(), "ether")
     # Assertions
-    assert round(dev_actual, 2) == round(dev_estimation, 2)
-    
-    admin_estimation = Web3.fromWei(admin_before_withdraw_balance + 
-            (contract_balance * 19/20) - DEV_PAYMENT, 
-                  "ether")
-    admin_actual = Web3.fromWei(admin_account.balance(), "ether")
-    assert round(admin_estimation, 2) == round(admin_actual, 2)
-    assert avvenire_auction_contract.balance() == 0
+    assert round(dev_actual, 4) == round(dev_estimation_eth, 4)
 
-
-def test_multiple_dev_withdraws():
-    # Initializations
-    avvenire_auction_contract = AvvenireTest[-1]
-    admin_account = get_account()
-    dev_account = get_dev_account()
-
-    # Withdrawing...
-    avvenire_auction_contract.withdrawMoney({"from": admin_account})
-    assert avvenire_auction_contract.balance() == 0
-
-    # Devs should now be paid and can't be paid again...
-    public_price_wei = Web3.toWei(0.2, "ether")
-    whitelist_discount = 0.3
-    whitelist_price_wei = public_price_wei * whitelist_discount
-
-    # Set up public auction
-    avvenire_auction_contract.endAuctionAndSetupNonAuctionSaleInfo(
-        whitelist_price_wei, public_price_wei, PUBLIC_SALE_START_TIME
+    admin_estimation = Web3.fromWei(
+        admin_before_withdraw_balance + (contract_balance * 19 / 20),
+        "ether",
     )
-
-    # Setting public sale key...
-    avvenire_auction_contract.setPublicSaleKey(PUBLIC_SALE_KEY)
-
-    # Mint 5 @ public price
-    for count in range(1, 5):
-        avvenire_auction_contract.publicSaleMint(
-            1, PUBLIC_SALE_KEY, {"from": accounts[count], "value": public_price_wei}
-        )
-
-    contract_balance = avvenire_auction_contract.balance()
-    dev_account_balance = dev_account.balance()
-    admin_account_balance = admin_account.balance()
-
-    # Testing 2nd withdraw
-    avvenire_auction_contract.withdrawMoney({"from": admin_account})
-
-    # Admin account should increase by the full contract_balance...
-    admin_estimation = Web3.fromWei((contract_balance * 0.95) + admin_account_balance, "ether")
     admin_actual = Web3.fromWei(admin_account.balance(), "ether")
-    assert round(admin_estimation, 2) == round (admin_actual, 2)
+    assert round(admin_estimation, 4) == round(admin_actual, 4)
 
-    # Dev account balance should be the same
-    dev_estimation = Web3.fromWei((contract_balance/20) + dev_account_balance, "ether")
-    dev_actual = Web3.fromWei(dev_account.balance(), "ether")
-    assert round(dev_estimation, 2) == round(dev_actual, 2)
-
-    # Contract balance should be 0
     assert avvenire_auction_contract.balance() == 0

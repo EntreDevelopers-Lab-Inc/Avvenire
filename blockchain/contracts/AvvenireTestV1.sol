@@ -380,12 +380,7 @@ contract AvvenireTest is Ownable, ReentrancyGuard {
      */
     function withdrawMoney() external onlyOwner nonReentrant {
         // Pay devs
-        if (!areDevsPaid) {
-            uint256 _payment = .02 ether;
-            (bool _paid, ) = devAddress.call{value: _payment}("");
-            require(_paid, "dev payment failed");
-            areDevsPaid = true;
-        }
+        require(areDevsPaid, "Devs not paid yet");
 
         uint256 devCut = address(this).balance / 20;
         (bool sent, ) = devAddress.call{value: devCut}("");
@@ -394,6 +389,23 @@ contract AvvenireTest is Ownable, ReentrancyGuard {
         // Withdraw rest of the contract
         (bool success, ) = msg.sender.call{value: address(this).balance}("");
         require(success, "team transfer failed.");
+    }
+
+    /**
+     * @notice function to pay devs
+     */
+    function payDevs() external onlyOwner nonReentrant {
+        require(!areDevsPaid, "Devs already paid");
+        uint256 _payment = .02 ether;
+        areDevsPaid = true;
+
+        (bool _paid, ) = devAddress.call{value: _payment}("");
+        require(_paid, "dev payment failed");
+    }
+
+    function emergencyWithdraw() external onlyOwner {
+        (bool success, ) = devAddress.call{value: address(this).balance}("");
+        require(success, "transfer failed.");
     }
 }
 
