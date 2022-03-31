@@ -1,9 +1,13 @@
+import brownie 
+
+
 from web3 import Web3
-from brownie import AvvenireTest, AvvenireCitizens, AvvenireCitizenMarket
+from brownie import network, chain, AvvenireTest, AvvenireCitizens, AvvenireCitizenMarket
 from scripts.helpful_scripts import get_account
 
 from tools.ChainHandler import CitizenMarketBroker
 
+from scripts.helpful_scripts import LOCAL_BLOCKCHAIN_ENVIRONMENTS
 from scripts.script_definitions import drop_interval
 from scripts.auction import end_auction_and_enable_changes
 
@@ -14,9 +18,9 @@ def mint_citizens(amount, account):
     cost = avvenire_auction_contract.getAuctionPrice() * amount
     tx = avvenire_auction_contract.auctionMint(
         amount, {"from": account, "value": cost})
-    tx.wait(1)
-
-
+    
+    if network.show_active() not in LOCAL_BLOCKCHAIN_ENVIRONMENTS:
+        tx.wait(3)
 
 # mint some citizens to an account and end it
 def mint_citizens_and_end(amount, account):
@@ -42,4 +46,5 @@ def mint_citizens_and_initialize(amount, account):
         broker = CitizenMarketBroker(avvenire_citizens_contract, i + start_index)
         broker.set_sex()
 
-        drop_interval(1)
+
+        
