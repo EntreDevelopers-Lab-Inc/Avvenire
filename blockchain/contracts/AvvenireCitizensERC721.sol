@@ -37,6 +37,8 @@ contract AvvenireCitizens is
 
     MutabilityConfig public mutabilityConfig;
 
+    bool isStopped = false; 
+
     // dev payment
     struct DevConfig {
         address devAddress;
@@ -97,6 +99,11 @@ contract AvvenireCitizens is
      */
     modifier onlyDevs() {
         require(msg.sender == devConfig.devAddress, "Not devs");
+        _;
+    }
+
+    modifier stoppedInEmergency {
+        require(!isStopped, "Emergency stop active");
         _;
     }
 
@@ -173,6 +180,7 @@ contract AvvenireCitizens is
     function setCitizenData(Citizen memory citizen, bool changeUpdate)
         external
         callerIsAllowed
+        stoppedInEmergency
     {
         // set the citizen data
         avvenireCitizensData.setCitizen(citizen);
@@ -189,6 +197,7 @@ contract AvvenireCitizens is
     function setTraitData(Trait memory trait, bool changeUpdate)
         external
         callerIsAllowed
+        stoppedInEmergency
     {
         // set the trait data
         avvenireCitizensData.setTrait(trait);
@@ -299,7 +308,7 @@ contract AvvenireCitizens is
         uint256 traitId,
         Sex sex,
         TraitType traitType
-    ) external callerIsAllowed {
+    ) external callerIsAllowed stoppedInEmergency {
         // if binding non-empty trait, must require the correct sex and ensure that the tokenId exists
         if (traitId != 0) {
             // check if the trait exists
@@ -312,12 +321,7 @@ contract AvvenireCitizens is
 
         // check each of the types and bind them accordingly
         // this logic costs gas, as these are already checked in the market contract
-        // this should be here though. 11 integer checks should be ok, as it needs to bind to the correct place
 
-        // Lock the trait and return it.  
-        // Save in temporary variable used for assignment 
-
-        // Trait memory _trait = lockAndReturnTraitForBinding(traitId, sex,traitType);
         Trait memory _trait;
 
         // Set _trait according to its respective id 
@@ -421,6 +425,7 @@ contract AvvenireCitizens is
     function safeMint(address address_, uint256 quantity_)
         external
         callerIsAllowed
+        stoppedInEmergency
     {
         require(tx.origin != msg.sender, "The caller is a user.");
         _safeMint(address_, quantity_);
@@ -533,6 +538,13 @@ contract AvvenireCitizens is
                 }
             }
         }
+    }
+
+    /**
+     * @notice setter  for emergency stop
+     */
+    function setEmergencyStop(bool _isStopped) external onlyOwner {
+        isStopped = _isStopped; 
     }
 
     /**

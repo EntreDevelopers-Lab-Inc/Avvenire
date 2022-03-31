@@ -21,6 +21,8 @@ contract AvvenireCitizenMarket is
     // store the avvenireCitizensData contract 
     AvvenireCitizensMappingsInterface public avvenireCitizensData;
 
+    bool isStopped = false; 
+
     // struct for storing a trait change
     struct TraitChange {
         uint256 traitId; // setting this to 0 will bind the trait to its default (NULL)
@@ -79,11 +81,16 @@ contract AvvenireCitizenMarket is
         _;
     }
 
+    modifier stoppedInEmergency{
+        require (!isStopped, "Emergency stop activated");
+        _;
+    }
+
     /**
      * @notice a function to initialize the citizen (just requests a change to set the sex from ipfs)
      * @param citizenId gives the contract a citizen to look for
      */
-    function initializeCitizen(uint256 citizenId) external payable nonReentrant {
+    function initializeCitizen(uint256 citizenId) external payable nonReentrant stoppedInEmergency {
         // make sure the sex is null, or the citizen has already been initialized
         // this is currently disabled as the enumerables are giving us an odd error
         require(
@@ -114,6 +121,7 @@ contract AvvenireCitizenMarket is
         external
         payable
         nonReentrant
+        stoppedInEmergency
         canChange(citizenId)
     {
         // keep track of the ones to mint
