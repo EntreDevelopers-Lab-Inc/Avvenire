@@ -222,10 +222,7 @@ contract AvvenireTest is Ownable, ReentrancyGuard {
     }
 
     /**
-     * NOT IDEAL IMPLEMENTATION
-     * Have to wait for all users to call refund() before being able to withdraw funds
-     * PROBLEM: there is no way to iterate through a mapping
-     * SUSCEPTIBLE TO HACKS
+     * @notice function that user can call to be refunded
      */
     function refundMe() external nonReentrant {
         uint256 endingPrice = saleConfig.publicPrice;
