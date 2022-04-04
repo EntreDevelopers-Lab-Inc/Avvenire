@@ -1040,7 +1040,7 @@ nav{-webkit-transition: padding-top .3s,padding-bottom .3s;
     padding-left: 0
 }
 .hero-section.fullwidth-header .special-head.dark:before{
-    display: none;
+    display: none;1066
 }
 @media (max-width: 991px){
     .hero-section.fullwidth-header{

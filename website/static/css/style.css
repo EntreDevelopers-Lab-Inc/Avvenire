@@ -1066,6 +1066,7 @@ nav{-webkit-transition: padding-top .3s,padding-bottom .3s;
 .hero-section.moving{
     overflow: hidden;
     background-size: cover;
+    aspect-ratio:  960 / 300;
 }
 .moving-bg {
     position: absolute;
