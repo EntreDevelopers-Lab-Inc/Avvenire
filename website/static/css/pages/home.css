@@ -1,6 +1,11 @@
 .welcome-img
 {
   max-height: 180px;
-  float:  right;
-  vertical-align: middle;
+}
+
+.welcome-row
+{
+  display: flex;
+  justify-content: center;
+  align-items: center;
 }
