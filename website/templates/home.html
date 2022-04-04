@@ -2,7 +2,7 @@
 
 {% block content %}
 
-
+<link href="{{url_for('static', filename='css/pages/home.css')}}" rel="stylesheet" />
 <!-- ##### Welcome Area Start ##### -->
 <section class="hero-section moving section-padding" id="home">
     <div class="moving-bg">
@@ -20,10 +20,10 @@
                             </span>
                 </h1>
             </div>
-            <div class="col-12 col-lg-6 col-md-6">
-
+            <div class="col-12 col-lg-3 col-md-6" width="180" height="180">
+              <img class="welcome-img" src="{{url_for('static', filename='img/home/VR.png')}}">
             </div>
-            <div class="col-12 col-lg-6 col-md-6">
+            <div class="col-12 col-lg-9 col-md-6">
                 <div>
                     <p class="w-text fadeInUp" data-wow-delay="0.3s">
                         Based in the near future, the Avvenire City is a utopia whereby the love for art and
