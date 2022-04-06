@@ -1097,6 +1097,7 @@ nav{-webkit-transition: padding-top .3s,padding-bottom .3s;
 @media (max-width: 991px){
     .hero-section.moving{
         background-position: left top;
+        margin-top: 4rem;
         }
 }
 @-webkit-keyframes cloudwash {
