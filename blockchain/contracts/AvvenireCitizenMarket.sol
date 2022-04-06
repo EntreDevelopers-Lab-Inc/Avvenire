@@ -18,10 +18,10 @@ contract AvvenireCitizenMarket is
     // store the avvenireCitizens contract
     AvvenireCitizensInterface public avvenireCitizens;
 
-    // store the avvenireCitizensData contract 
+    // store the avvenireCitizensData contract
     AvvenireCitizensMappingsInterface public avvenireCitizensData;
 
-    bool isStopped = false; 
+    bool isStopped = false;
 
     // struct for storing a trait change
     struct TraitChange {
@@ -50,9 +50,16 @@ contract AvvenireCitizenMarket is
     @notice the constructor of the contract
     @param avvenireCitizensContractAddress the address for the existing avvvenireCitizens contract  
      */
-    constructor(address avvenireCitizensContractAddress, address avvenireCitizensDataAddress) Ownable() {
-        avvenireCitizens = AvvenireCitizensInterface(avvenireCitizensContractAddress);
-        avvenireCitizensData = AvvenireCitizensMappingsInterface(avvenireCitizensDataAddress);
+    constructor(
+        address avvenireCitizensContractAddress,
+        address avvenireCitizensDataAddress
+    ) Ownable() {
+        avvenireCitizens = AvvenireCitizensInterface(
+            avvenireCitizensContractAddress
+        );
+        avvenireCitizensData = AvvenireCitizensMappingsInterface(
+            avvenireCitizensDataAddress
+        );
     }
 
     /**
@@ -81,8 +88,8 @@ contract AvvenireCitizenMarket is
         _;
     }
 
-    modifier stoppedInEmergency{
-        require (!isStopped, "Emergency stop activated");
+    modifier stoppedInEmergency() {
+        require(!isStopped, "Emergency stop activated");
         _;
     }
 
@@ -90,7 +97,12 @@ contract AvvenireCitizenMarket is
      * @notice a function to initialize the citizen (just requests a change to set the sex from ipfs)
      * @param citizenId gives the contract a citizen to look for
      */
-    function initializeCitizen(uint256 citizenId) external payable nonReentrant stoppedInEmergency {
+    function initializeCitizen(uint256 citizenId)
+        external
+        payable
+        nonReentrant
+        stoppedInEmergency
+    {
         // make sure the sex is null, or the citizen has already been initialized
         // this is currently disabled as the enumerables are giving us an odd error
         require(
@@ -152,7 +164,6 @@ contract AvvenireCitizenMarket is
         }
 
         if (traitChanges.bodyChange.toChange) {
-    
             toMint = _bindTrait(
                 citizenId,
                 avvenireCitizensData.getCitizen(citizenId).traits.body,
@@ -255,8 +266,7 @@ contract AvvenireCitizenMarket is
         // if there are any to mint, do so
         if (toMint > 0) {
             // pay if the change cost is greater than 0
-            if (changeCost > 0)
-            {
+            if (changeCost > 0) {
                 // add the amount to mint to the total cost
                 totalCost += toMint * changeCost;
             }
@@ -265,7 +275,6 @@ contract AvvenireCitizenMarket is
             uint256 startTokenId = avvenireCitizens.getTotalSupply();
             avvenireCitizens.safeMint(tx.origin, toMint);
             avvenireCitizens.setOwnersExplicit(toMint);
-
 
             // this can be implied with toMint, as we minted exactly that many
             // uint256 pastLimit = avvenireCitizens.getTotalSupply();
@@ -283,16 +292,24 @@ contract AvvenireCitizenMarket is
 
         // refund the rest of the transaction value if the transaction is over
         // guarantees that msg.value is > totalCost
-        _refundIfOver(totalCost);
 
         // for every new trait to mint, a change will be requested, so send the appropriate amount of eth (do so directly, as safe mint is not payable)
         if (totalCost > 0) {
-            (bool success, ) = address(avvenireCitizens).call{value: totalCost}("");
+            (bool success, ) = address(avvenireCitizens).call{value: totalCost}(
+                ""
+            );
             require(success, "Unsuccessful transfer");
         }
+
+        _refundIfOver(totalCost);
     }
 
-    function _setTraitData(uint256 _startTokenId, uint256 _citizenId, TraitChange[11] memory newTraits, uint256 _toMint ) internal {
+    function _setTraitData(
+        uint256 _startTokenId,
+        uint256 _citizenId,
+        TraitChange[11] memory newTraits,
+        uint256 _toMint
+    ) internal {
         uint256 tokenId;
         Trait memory _trait;
 
@@ -301,14 +318,14 @@ contract AvvenireCitizenMarket is
             tokenId = _startTokenId + i;
 
             _trait = Trait({
-                    tokenId: tokenId,
-                    uri: '',
-                    free: true,
-                    exists: true,
-                    sex: avvenireCitizensData.getCitizen(_citizenId).sex,  // make sure to set to the citizen sex, as it will not check on initial trait mint
-                    traitType: newTraits[i].traitType,   // these are checked
-                    originCitizenId: _citizenId
-                });
+                tokenId: tokenId,
+                uri: "",
+                free: true,
+                exists: true,
+                sex: avvenireCitizensData.getCitizen(_citizenId).sex, // make sure to set to the citizen sex, as it will not check on initial trait mint
+                traitType: newTraits[i].traitType, // these are checked
+                originCitizenId: _citizenId
+            });
 
             // push the trait onto the data contract
             // need to do this to differentiate the new traits created (for which properties)
@@ -333,7 +350,10 @@ contract AvvenireCitizenMarket is
         TraitChange memory traitChange
     ) internal returns (uint256) {
         // ensure that the traits are of the same type, as it is not checked anywhere else (will be resorted in bind)
-        require(oldTrait.traitType == traitChange.traitType, "Trait type mismatch");
+        require(
+            oldTrait.traitType == traitChange.traitType,
+            "Trait type mismatch"
+        );
 
         if ((oldTrait.tokenId == 0) && (oldTrait.exists)) {
             // add the trait to the newTraits array
@@ -362,9 +382,7 @@ contract AvvenireCitizenMarket is
         external
         onlyOwner
     {
-        avvenireCitizens = AvvenireCitizensInterface(
-            contractAddress
-        );
+        avvenireCitizens = AvvenireCitizensInterface(contractAddress);
     }
 
     function setAvvenireCitizensDataAddress(address contractAddress)

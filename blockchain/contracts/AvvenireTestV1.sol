@@ -19,8 +19,6 @@ contract AvvenireTest is Ownable, ReentrancyGuard {
     uint256 public amountForTeam; // Amount of NFTs for team
     uint256 public amountForAuctionAndTeam; // Amount of NFTs for the team and auction
     uint256 public collectionSize; // Total collection size
-    //uint256 public immutable maxBatchPublic;
-    // uint256 public immutable maxBatchWhiteList;
 
     // dev payment information
     uint256 paymentToDevs; // can decrement this to 0 after being paid
