@@ -6499,3 +6499,37 @@ ul li input[type=checkbox]:checked ~ i:after {
         transform: rotateX(0deg);
     }
 }
+
+/* Respo0nsive Slider */
+
+@media only screen and (max-width: 1450) {
+    .slick-next{
+    right: 55px !important;
+}
+}
+
+
+@media only screen and (max-width: 562px) {
+    .slick-slider {
+        margin-left: 125px;
+  }
+  .slick-next{
+    right: 26px;
+  }
+  .slick-dots {
+    position: revert;
+  }
+}
+
+@media only screen and (max-width: 400px) {
+    .slick-slider {
+        margin-left: 125px;
+  }
+  .slick-next{
+    right: 26px;
+  }
+}
+
+
+
+
