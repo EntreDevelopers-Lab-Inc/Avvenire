@@ -156,7 +156,7 @@
                 Avvenire Citizens
             </h2>
             <p class="fadeInUp" data-wow-delay="0.4s">
-                Join us as one of the 5,000 Citizens of Avvenire City!
+                Join us as one of the 5,000 Citizens of Avvenire City! test
             </p>
         </div>
 
@@ -634,15 +634,15 @@
     <!-- slick Carousel CDN -->
     <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/slick-carousel/1.8.1/slick.min.js"></script>
 
-    <script>
-        $('.slick-carousel').slick({
-          infinite: true,
-          autoplay: true,
-          slidesToShow: 3,
-          slidesToScroll: 1, 
-          arrows: true, 
-          dots: true,
-          responsive: [
+    <!-- <script>
+$('.slick-carousel').slick({
+  infinite: true,
+//   autoplay: true,
+  slidesToShow: 3,
+  slidesToScroll: 1, 
+  arrows: true, 
+  dots: true,
+  responsive: [
     {
       breakpoint: 1024,
       settings: {
@@ -669,10 +669,49 @@
     // You can unslick at a given breakpoint now by adding:
     // settings: "unslick"
     // instead of a settings object
-  ]   
-        });
-    </script>
+  ] 
+});
+    </script> -->
 
+
+    <script>
+        $('.slick-carousel').slick({
+          infinite: true,
+        //   autoplay: true,
+          slidesToShow: 3,
+          slidesToScroll: 1, 
+          arrows: true, 
+          dots: true,
+          responsive: [
+            {
+              breakpoint: 1024,
+              settings: {
+                slidesToShow: 3,
+                slidesToScroll: 3,
+                infinite: true,
+                dots: true
+              }
+            },
+            {
+              breakpoint: 835,
+              settings: {
+                slidesToShow: 2,
+                slidesToScroll: 2
+              }
+            },
+            {
+              breakpoint: 565,
+              settings: {
+                slidesToShow: 1,
+                slidesToScroll: 1
+              }
+            }
+            // You can unslick at a given breakpoint now by adding:
+            // settings: "unslick"
+            // instead of a settings object
+          ] 
+        });
+            </script>
 
 <script src="{{url_for('static', filename='js/toggle.js')}}">
 </script>
