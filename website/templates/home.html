@@ -2,6 +2,39 @@
 
 {% block content %}
 
+<style>
+    /* .slick-prev{
+  display: none;
+}
+
+.slick-next::before, .slick-prev::before {
+    display: none;
+} */
+
+@media only screen and (max-width: 765px) {
+    .slick-dots{
+        bottom: -85px;
+        width: 100%;
+    }
+    .slickSlider{
+        max-width: 320px;
+    }
+}
+
+@media only screen and (max-width: 766px) {
+    /* .card-img-top{
+        width: 74%;
+    } */
+    .slick-slider {
+        margin: 0;
+    }
+}
+/* .slick-slider{
+    margin: 0;
+} */
+
+</style>
+
 <link href="{{url_for('static', filename='css/pages/home.css')}}" rel="stylesheet" />
 <!-- ##### Welcome Area Start ##### -->
 <section class="hero-section moving section-padding" id="home">
@@ -148,7 +181,7 @@
 <!-- ##### Top Collections Start ##### -->
 
 <section class="section-padding-0-70 clearfix" id="art">
-    <div class="container">
+    <div class="container slickSlider">
         <div class="section-heading text-center">
             <div class="dream-dots justify-content-center fadeInUp" data-wow-delay="0.2s">
             </div>
@@ -156,7 +189,7 @@
                 Avvenire Citizens
             </h2>
             <p class="fadeInUp" data-wow-delay="0.4s">
-                Join us as one of the 5,000 Citizens of Avvenire City! test
+                Join us as one of the 5,000 Citizens of Avvenire City! 
             </p>
         </div>
 
@@ -693,22 +726,19 @@ $('.slick-carousel').slick({
               }
             },
             {
-              breakpoint: 835,
+              breakpoint: 990,
               settings: {
                 slidesToShow: 2,
                 slidesToScroll: 2
               }
             },
             {
-              breakpoint: 565,
+              breakpoint: 765,
               settings: {
                 slidesToShow: 1,
                 slidesToScroll: 1
               }
             }
-            // You can unslick at a given breakpoint now by adding:
-            // settings: "unslick"
-            // instead of a settings object
           ] 
         });
             </script>

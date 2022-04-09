@@ -12,3 +12,22 @@
   justify-content: center;
   align-items: center;
 }
+
+/* .slick-prev{
+  display: none;
+}
+
+@media only screen and (max-width: 480px) {
+  .container {
+    padding-left: 60px;
+  }
+  .slick-prev:before {
+    display: none;
+  }
+}
+
+@media only screen and (max-width: 800px) {
+  .slick-current{
+    width: 420px;
+  }
+} */

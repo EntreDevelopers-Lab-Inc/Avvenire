@@ -6511,20 +6511,34 @@ ul li input[type=checkbox]:checked ~ i:after {
 
 @media only screen and (max-width: 562px) {
     .slick-slider {
-        margin-left: 125px;
+        margin-left: 79px;
   }
   .slick-next{
     right: 26px;
+    /* display: none; */
   }
   .slick-dots {
     position: revert;
   }
+  .slick-prev:before, .slick-next:before{
+      /* display: none; */
+  }
 }
 
+@media only screen and (max-width: 355px) {
+    .slick-next{   
+      display: none;
+      }
+      .slick-prev:before, .slick-next:before{
+        display: none;
+    }
+}
+
+
 @media only screen and (max-width: 400px) {
-    .slick-slider {
+    /* .slick-slider {
         margin-left: 125px;
-  }
+  } */
   .slick-next{
     right: 26px;
   }
@@ -6532,4 +6546,9 @@ ul li input[type=checkbox]:checked ~ i:after {
 
 
 
+
+
+/* .slick-next {
+    right: 77px !important;
+} */
 
