@@ -1,40 +1,6 @@
 {% extends "layout.html" %}
 
 {% block content %}
-
-<style>
-    /* .slick-prev{
-  display: none;
-}
-
-.slick-next::before, .slick-prev::before {
-    display: none;
-} */
-
-@media only screen and (max-width: 765px) {
-    .slick-dots{
-        bottom: -85px;
-        width: 100%;
-    }
-    .slickSlider{
-        max-width: 320px;
-    }
-}
-
-@media only screen and (max-width: 766px) {
-    /* .card-img-top{
-        width: 74%;
-    } */
-    .slick-slider {
-        margin: 0;
-    }
-}
-/* .slick-slider{
-    margin: 0;
-} */
-
-</style>
-
 <link href="{{url_for('static', filename='css/pages/home.css')}}" rel="stylesheet" />
 <!-- ##### Welcome Area Start ##### -->
 <section class="hero-section moving section-padding" id="home">
@@ -197,104 +163,104 @@
         <div class="slick-carousel">
             <div>
               <div class="card" style="width: 18rem;">
-                <img class="card-img-top" src="{{url_for('static', filename='img/slider-img/0.PNG')}}" alt="Card image cap">
+                <img class="card-img-top" src="{{url_for('static', filename='img/slider-img/0.PNG')}}">
               </div>
             </div>
             <div>
                 <div class="card" style="width: 18rem;">
-                    <img class="card-img-top" src="{{url_for('static', filename='img/slider-img/1.PNG')}}" alt="Card image cap">
+                    <img class="card-img-top" src="{{url_for('static', filename='img/slider-img/1.PNG')}}">
                   </div>
             </div>
             <div>
                 <div class="card" style="width: 18rem;">
-                    <img class="card-img-top" src="{{url_for('static', filename='img/slider-img/2.PNG')}}" alt="Card image cap">
+                    <img class="card-img-top" src="{{url_for('static', filename='img/slider-img/2.PNG')}}">
                   </div>
             </div>
             <div>
                 <div class="card" style="width: 18rem;">
-                    <img class="card-img-top" src="{{url_for('static', filename='img/slider-img/3.PNG')}}" alt="Card image cap">
+                    <img class="card-img-top" src="{{url_for('static', filename='img/slider-img/3.PNG')}}">
                   </div>
             </div>
             <div>
                 <div class="card" style="width: 18rem;">
-                    <img class="card-img-top" src="{{url_for('static', filename='img/slider-img/4.PNG')}}" alt="Card image cap">
+                    <img class="card-img-top" src="{{url_for('static', filename='img/slider-img/4.PNG')}}">
                   </div>
             </div>
             <div>
                 <div class="card" style="width: 18rem;">
-                    <img class="card-img-top" src="{{url_for('static', filename='img/slider-img/5.PNG')}}" alt="Card image cap">
+                    <img class="card-img-top" src="{{url_for('static', filename='img/slider-img/5.PNG')}}">
                   </div>
             </div>
-              <div>
-                <div class="card" style="width: 18rem;">
-                    <img class="card-img-top" src="{{url_for('static', filename='img/slider-img/6.PNG')}}" alt="Card image cap">
-                  </div>
-              </div>
-              <div>
-                <div class="card" style="width: 18rem;">
-                    <img class="card-img-top" src="{{url_for('static', filename='img/slider-img/7.PNG')}}" alt="Card image cap">
-                  </div>
-              </div>
-              <div>
-                <div class="card" style="width: 18rem;">
-                    <img class="card-img-top" src="{{url_for('static', filename='img/slider-img/8.PNG')}}" alt="Card image cap">
-                  </div>
-              </div>
-              <div>
-                <div class="card" style="width: 18rem;">
-                    <img class="card-img-top" src="{{url_for('static', filename='img/slider-img/9.PNG')}}" alt="Card image cap">
-                  </div>
-              </div>
-              <div>
-                <div class="card" style="width: 18rem;">
-                    <img class="card-img-top" src="{{url_for('static', filename='img/slider-img/10.PNG')}}" alt="Card image cap">
-                  </div>
-              </div>
-              <div>
-                <div class="card" style="width: 18rem;">
-                    <img class="card-img-top" src="{{url_for('static', filename='img/slider-img/11.PNG')}}" alt="Card image cap">
-                  </div>
-              </div>
-              <div>
-                <div class="card" style="width: 18rem;">
-                    <img class="card-img-top" src="{{url_for('static', filename='img/slider-img/12.PNG')}}" alt="Card image cap">
-                  </div>
-              </div>
-              <div>
-                <div class="card" style="width: 18rem;">
-                    <img class="card-img-top" src="{{url_for('static', filename='img/slider-img/13.PNG')}}" alt="Card image cap">
-                  </div>
-              </div>
-              <div>
-                <div class="card" style="width: 18rem;">
-                    <img class="card-img-top" src="{{url_for('static', filename='img/slider-img/14.PNG')}}" alt="Card image cap">
-                  </div>
-              </div>
-              <div>
-                <div class="card" style="width: 18rem;">
-                    <img class="card-img-top" src="{{url_for('static', filename='img/slider-img/15.PNG')}}" alt="Card image cap">
-                  </div>
-              </div>
-              <div>
-                <div class="card" style="width: 18rem;">
-                    <img class="card-img-top" src="{{url_for('static', filename='img/slider-img/16.PNG')}}" alt="Card image cap">
-                  </div>
-              </div>
-              <div>
-                <div class="card" style="width: 18rem;">
-                    <img class="card-img-top" src="{{url_for('static', filename='img/slider-img/17.PNG')}}" alt="Card image cap">
-                  </div>
-              </div>
-              <div>
-                <div class="card" style="width: 18rem;">
-                    <img class="card-img-top" src="{{url_for('static', filename='img/slider-img/18.PNG')}}" alt="Card image cap">
-                  </div>
-              </div>
-              <div>
-                <div class="card" style="width: 18rem;">
-                    <img class="card-img-top" src="{{url_for('static', filename='img/slider-img/19.PNG')}}" alt="Card image cap">
-                  </div>
-              </div>
+            <div>
+              <div class="card" style="width: 18rem;">
+                  <img class="card-img-top" src="{{url_for('static', filename='img/slider-img/6.PNG')}}">
+                </div>
+            </div>
+            <div>
+              <div class="card" style="width: 18rem;">
+                  <img class="card-img-top" src="{{url_for('static', filename='img/slider-img/7.PNG')}}">
+                </div>
+            </div>
+            <div>
+              <div class="card" style="width: 18rem;">
+                  <img class="card-img-top" src="{{url_for('static', filename='img/slider-img/8.PNG')}}">
+                </div>
+            </div>
+            <div>
+              <div class="card" style="width: 18rem;">
+                  <img class="card-img-top" src="{{url_for('static', filename='img/slider-img/9.PNG')}}">
+                </div>
+            </div>
+            <div>
+              <div class="card" style="width: 18rem;">
+                  <img class="card-img-top" src="{{url_for('static', filename='img/slider-img/10.PNG')}}">
+                </div>
+            </div>
+            <div>
+              <div class="card" style="width: 18rem;">
+                  <img class="card-img-top" src="{{url_for('static', filename='img/slider-img/11.PNG')}}">
+                </div>
+            </div>
+            <div>
+              <div class="card" style="width: 18rem;">
+                  <img class="card-img-top" src="{{url_for('static', filename='img/slider-img/12.PNG')}}">
+                </div>
+            </div>
+            <div>
+              <div class="card" style="width: 18rem;">
+                  <img class="card-img-top" src="{{url_for('static', filename='img/slider-img/13.PNG')}}">
+                </div>
+            </div>
+            <div>
+              <div class="card" style="width: 18rem;">
+                  <img class="card-img-top" src="{{url_for('static', filename='img/slider-img/14.PNG')}}">
+                </div>
+            </div>
+            <div>
+              <div class="card" style="width: 18rem;">
+                  <img class="card-img-top" src="{{url_for('static', filename='img/slider-img/15.PNG')}}">
+                </div>
+            </div>
+            <div>
+              <div class="card" style="width: 18rem;">
+                  <img class="card-img-top" src="{{url_for('static', filename='img/slider-img/16.PNG')}}">
+                </div>
+            </div>
+            <div>
+              <div class="card" style="width: 18rem;">
+                  <img class="card-img-top" src="{{url_for('static', filename='img/slider-img/17.PNG')}}">
+                </div>
+            </div>
+            <div>
+              <div class="card" style="width: 18rem;">
+                  <img class="card-img-top" src="{{url_for('static', filename='img/slider-img/18.PNG')}}">
+                </div>
+            </div>
+            <div>
+              <div class="card" style="width: 18rem;">
+                  <img class="card-img-top" src="{{url_for('static', filename='img/slider-img/19.PNG')}}">
+                </div>
+            </div>
           </div>
     </div>
 </section>
@@ -705,44 +671,7 @@ $('.slick-carousel').slick({
   ] 
 });
     </script> -->
-
-
-    <script>
-        $('.slick-carousel').slick({
-          infinite: true,
-        //   autoplay: true,
-          slidesToShow: 3,
-          slidesToScroll: 1, 
-          arrows: true, 
-          dots: true,
-          responsive: [
-            {
-              breakpoint: 1024,
-              settings: {
-                slidesToShow: 3,
-                slidesToScroll: 3,
-                infinite: true,
-                dots: true
-              }
-            },
-            {
-              breakpoint: 990,
-              settings: {
-                slidesToShow: 2,
-                slidesToScroll: 2
-              }
-            },
-            {
-              breakpoint: 765,
-              settings: {
-                slidesToShow: 1,
-                slidesToScroll: 1
-              }
-            }
-          ] 
-        });
-            </script>
-
+<script src="{{url_for('static', filename='js/slick.js')}}">
 <script src="{{url_for('static', filename='js/toggle.js')}}">
 </script>
 {% endblock %}
