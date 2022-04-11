@@ -90,7 +90,7 @@ contract AvvenireCitizenMarket is
      * @notice a function to initialize the citizen (just requests a change to set the sex from ipfs)
      * @param citizenId gives the contract a citizen to look for
      */
-    function initializeCitizen(uint256 citizenId) external payable nonReentrant stoppedInEmergency {
+    function initializeCitizen(uint256 citizenId) external payable stoppedInEmergency {
         // make sure the sex is null, or the citizen has already been initialized
         // this is currently disabled as the enumerables are giving us an odd error
         require(
@@ -120,7 +120,6 @@ contract AvvenireCitizenMarket is
     function combine(uint256 citizenId, TraitChanges memory traitChanges)
         external
         payable
-        nonReentrant
         stoppedInEmergency
         canChange(citizenId)
     {
@@ -274,22 +273,22 @@ contract AvvenireCitizenMarket is
             _setTraitData(startTokenId, citizenId, newTraits, toMint);
         }
 
-        // request a character change
-        // send the value of one change
-        avvenireCitizens.requestChange{value: changeCost}(citizenId);
-
         // add the amount paid to track the total cost
         totalCost += changeCost;
+
+        // request a character change
+        avvenireCitizens.requestChange{value: totalCost}(citizenId);
 
         // refund the rest of the transaction value if the transaction is over
         // guarantees that msg.value is > totalCost
         _refundIfOver(totalCost);
 
+
         // for every new trait to mint, a change will be requested, so send the appropriate amount of eth (do so directly, as safe mint is not payable)
-        if (totalCost > 0) {
-            (bool success, ) = address(avvenireCitizens).call{value: totalCost}("");
-            require(success, "Unsuccessful transfer");
-        }
+        // if (totalCost > 0) {
+        //     (bool success, ) = address(avvenireCitizens).call{value: totalCost}("");
+        //     require(success, "Unsuccessful transfer");
+        // }
     }
 
     function _setTraitData(uint256 _startTokenId, uint256 _citizenId, TraitChange[11] memory newTraits, uint256 _toMint ) internal {
