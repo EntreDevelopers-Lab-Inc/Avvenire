@@ -702,6 +702,10 @@ contract AvvenireCitizens is
         return avvenireCitizensData.getTrait(tokenId);
     }
 
+    // function setCitizenURI(uint256 tokenId, string memory _uri) external callerIsAllowed {
+        
+    // }
+
     /**
      * @notice a burn function to burn an nft.  The tx.origin must be the owner
      * @param tokenId the desired token to be burned

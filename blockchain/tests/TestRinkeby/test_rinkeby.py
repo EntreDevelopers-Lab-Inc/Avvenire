@@ -181,7 +181,7 @@ def test_trait_changes_no_cost(citizens_minted):
             1, 
             # Need to start @ 4...
             trait_indexes[4-x] + 1,  # Adjusted for the fact that TraitTypes start at 1 in contract
-            0, 
+            1, 
             )
         # update the uri
         trait_manager = TraitManager(citizens_contract, end_trait_id - x)
@@ -208,7 +208,6 @@ def test_trait_changes_with_cost():
     dev_account = get_dev_account()
     
     citizens_contract.setMutabilityCost(REQUEST_COST, {"from": admin_account})
-    citizens_contract.setDevRoyalty(50, {"from": dev_account})
 
     supply_before_combine = citizens_contract.getTotalSupply()
     

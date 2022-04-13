@@ -17,6 +17,7 @@ error TraitTypeDoesNotExist();
 error TransferFailed();
 error ChangeAlreadyRequested();
 error NotSender();
+error CallerNotServer();
 
 // token mutator changes the way that an ERC721A contract interacts with tokens
 contract AvvenireCitizensData is
@@ -31,6 +32,9 @@ contract AvvenireCitizensData is
     // mapping for allowing other contracts to interact with this one
     mapping(address => bool) private allowedContracts;
 
+    // Address for server 
+    address private serverAddress; 
+
     constructor() Ownable() {
         allowedContracts[msg.sender] = true;
     }
@@ -38,6 +42,15 @@ contract AvvenireCitizensData is
     modifier callerIsAllowed() {
         if (!allowedContracts[msg.sender]) revert NotSender();
         _;
+    }
+
+    modifier callerIsServer() {
+        if(msg.sender != serverAddress) revert CallerNotServer(); 
+        _;
+    }
+
+    function setServer(address _server) external onlyOwner {
+        serverAddress = _server;
     }
 
     /**
@@ -59,6 +72,22 @@ contract AvvenireCitizensData is
 
     function setCitizen (Citizen memory _citizen) external callerIsAllowed {
         tokenIdToCitizen[_citizen.tokenId] = _citizen;
+    }
+
+
+    // ***
+    // Functions for server
+    // *** 
+    function setTraitURI(uint256 traitId, string memory _uri) external callerIsServer {
+        tokenIdToTrait[traitId].uri = _uri;
+    }
+
+    function setCitizenURI(uint256 citizenId, string memory _uri) external callerIsServer {
+        tokenIdToCitizen[citizenId].uri = _uri;
+    }
+
+    function setCitizenSex(uint256 citizenId, Sex _sex) external callerIsServer {
+        tokenIdToCitizen[citizenId].sex = _sex;
     }
 
     /**

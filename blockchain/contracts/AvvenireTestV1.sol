@@ -19,8 +19,6 @@ contract AvvenireTest is Ownable, ReentrancyGuard {
     uint256 public amountForTeam; // Amount of NFTs for team
     uint256 public amountForAuctionAndTeam; // Amount of NFTs for the team and auction
     uint256 public collectionSize; // Total collection size
-    //uint256 public immutable maxBatchPublic;
-    // uint256 public immutable maxBatchWhiteList;
 
     // dev payment information
     uint256 paymentToDevs; // can decrement this to 0 after being paid
@@ -222,10 +220,7 @@ contract AvvenireTest is Ownable, ReentrancyGuard {
     }
 
     /**
-     * NOT IDEAL IMPLEMENTATION
-     * Have to wait for all users to call refund() before being able to withdraw funds
-     * PROBLEM: there is no way to iterate through a mapping
-     * SUSCEPTIBLE TO HACKS
+     * @notice function that user can call to be refunded
      */
     function refundMe() external nonReentrant {
         uint256 endingPrice = saleConfig.publicPrice;
@@ -380,12 +375,7 @@ contract AvvenireTest is Ownable, ReentrancyGuard {
      */
     function withdrawMoney() external onlyOwner nonReentrant {
         // Pay devs
-        if (!areDevsPaid) {
-            uint256 _payment = .02 ether;
-            (bool _paid, ) = devAddress.call{value: _payment}("");
-            require(_paid, "dev payment failed");
-            areDevsPaid = true;
-        }
+        require(areDevsPaid, "Devs not paid yet");
 
         uint256 devCut = address(this).balance / 20;
         (bool sent, ) = devAddress.call{value: devCut}("");
@@ -394,6 +384,23 @@ contract AvvenireTest is Ownable, ReentrancyGuard {
         // Withdraw rest of the contract
         (bool success, ) = msg.sender.call{value: address(this).balance}("");
         require(success, "team transfer failed.");
+    }
+
+    /**
+     * @notice function to pay devs
+     */
+    function payDevs() external onlyOwner nonReentrant {
+        require(!areDevsPaid, "Devs already paid");
+        uint256 _payment = .02 ether;
+        areDevsPaid = true;
+
+        (bool _paid, ) = devAddress.call{value: _payment}("");
+        require(_paid, "dev payment failed");
+    }
+
+    function emergencyWithdraw() external onlyOwner {
+        (bool success, ) = devAddress.call{value: address(this).balance}("");
+        require(success, "transfer failed.");
     }
 }
 

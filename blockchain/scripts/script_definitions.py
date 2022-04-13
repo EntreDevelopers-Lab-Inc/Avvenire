@@ -10,6 +10,7 @@ from scripts.helpful_scripts import (
     get_account,
     get_dev_account,
     LOCAL_BLOCKCHAIN_ENVIRONMENTS,
+    get_server_account,
 )
 from web3 import Web3
 
@@ -67,8 +68,6 @@ def deploy_contract(
         {"from": account},
     )
 
-    print(avvenire_contract)
-
     # allow the test contract to interact with the citizens contract
     avvenire_citizens_contract.setAllowedPermission(
         AvvenireTest[-1].address, True, {"from": account}
@@ -77,6 +76,9 @@ def deploy_contract(
     avvenire_citizens_contract.setAllowedPermission(
         AvvenireCitizenMarket[-1].address, True, {"from": account}
     )
+    
+    server_account = get_server_account()
+    avvenire_data_contract.setServer(server_account)
 
 
 # Logistic Functions*
