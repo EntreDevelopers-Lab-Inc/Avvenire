@@ -1,14 +1,14 @@
 import pytest
 import brownie
 
-from brownie import AvvenireTest, AvvenireCitizens, AvvenireCitizenMarket, accounts
+from brownie import AvvenireTest, AvvenireCitizens, AvvenireCitizenMarket, accounts, AvvenireCitizensData
 from web3 import Web3
 
 from tools.ChainHandler import CitizenMarketBroker
 
 from scripts.helpful_scripts import get_account
 from scripts.script_definitions import drop_interval
-from scripts.auction import setup_auction, perform_auction, end_auction, BASE_URI, LOAD_URI
+from scripts.auction import setup_auction, perform_auction, end_auction, BASE_URI, LOAD_URI, end_auction_and_enable_changes
 from scripts.mint import mint_citizens_and_end, mint_citizens_and_initialize
 
 
@@ -72,6 +72,7 @@ def test_load_uri():
     account = accounts[2]
 
     mint_citizens_and_initialize(2, account)
+    end_auction_and_enable_changes()
 
     # request from the market to remove all the traits of a citizen
     trait_changes = [
@@ -112,13 +113,15 @@ def test_character_uri_after_change():
     # get the contracts
     avvenire_citizens_contract = AvvenireCitizens[-1]
     avvenire_market_contract = AvvenireCitizenMarket[-1]
+    data_contract = AvvenireCitizensData[-1]
 
     # mint an nft
     account = accounts[2]
     mint_citizens_and_initialize(2, account)
+    end_auction_and_enable_changes()
 
     # make the broker
-    broker = CitizenMarketBroker(avvenire_citizens_contract, 0)
+    broker = CitizenMarketBroker(data_contract, 0)
 
     # request from the market to remove all the traits of a citizen --> should be stored on the backend --> will be able to set it later
     trait_changes = [
@@ -141,7 +144,7 @@ def test_character_uri_after_change():
     drop_interval(1)
 
     # this should make all the citizens traits default
-    chain_citizen = avvenire_citizens_contract.tokenIdToCitizen(0)
+    chain_citizen = data_contract.getCitizen(0)
     chain_traits = chain_citizen[4]
     for trait in chain_traits:
         assert trait[3] is False  # make sure it doesn't exist
@@ -151,7 +154,7 @@ def test_character_uri_after_change():
     drop_interval(1)
 
     # get the new citizen from the chain and see if it matches
-    chain_citizen = avvenire_citizens_contract.tokenIdToCitizen(0)
+    chain_citizen = data_contract.getCitizen(0)
     print(chain_citizen)
 
     # make sure the citizens are the same

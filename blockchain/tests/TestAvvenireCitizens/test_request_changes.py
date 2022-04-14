@@ -106,7 +106,7 @@ def test_request_after_existing_request(single_mint):
 
     # Request
     avvenire_market_contract.initializeCitizen(0, {"from": mint_account})
-    assert avvenire_citizens_contract.tokenChangeRequests(0) == True
+    assert data_contract.getTokenChangeRequest(0) == True
 
     # Should throw error... Existing change request outstanding
     with brownie.reverts():
@@ -116,6 +116,7 @@ def test_request_after_existing_request(single_mint):
 def test_request_change_with_cost(single_mint, set_mut_cost):
     avvenire_market_contract = AvvenireCitizenMarket[-1]
     avvenire_citizens_contract = AvvenireCitizens[-1]
+    data_contract = AvvenireCitizensData[-1]
     
     mint_account = accounts[2]
 
@@ -127,13 +128,13 @@ def test_request_change_with_cost(single_mint, set_mut_cost):
     )
 
     assert balance_before_change - mint_account.balance() == REQUEST_COST
-    assert avvenire_citizens_contract.tokenChangeRequests(0) == True
+    assert data_contract.getTokenChangeRequest(0) == True
     assert avvenire_citizens_contract.balance() == REQUEST_COST
 
 
 def test_request_change_with_underpayment(single_mint, set_mut_cost):
     avvenire_market_contract = AvvenireCitizenMarket[-1]
-    avvenire_citizens_contract = AvvenireCitizens[-1]
+    data_contract = AvvenireCitizensData[-1]
     mint_account = accounts[2]
 
     underpayment = REQUEST_COST / 2
@@ -146,13 +147,14 @@ def test_request_change_with_underpayment(single_mint, set_mut_cost):
         )
 
     assert balance_before_change == mint_account.balance()
-    assert avvenire_citizens_contract.tokenChangeRequests(0) == False
+    assert data_contract.getTokenChangeRequest(0) == False
 
 
 
 def test_request_change_with_overpayment(single_mint, set_mut_cost):
     avvenire_market_contract = AvvenireCitizenMarket[-1]
     avvenire_citizens_contract = AvvenireCitizens[-1]
+    data_contract = AvvenireCitizensData[-1]
     mint_account = accounts[2]
 
     balance_before_change = mint_account.balance()
@@ -164,13 +166,15 @@ def test_request_change_with_overpayment(single_mint, set_mut_cost):
     )
 
     assert balance_before_change - mint_account.balance() == REQUEST_COST
-    assert avvenire_citizens_contract.tokenChangeRequests(0) == True
+    assert data_contract.getTokenChangeRequest(0) == True
     assert avvenire_citizens_contract.balance() == REQUEST_COST
 
 
 def test_request_change_with_dev_royalty(single_mint, set_mut_cost):
     avvenire_market_contract = AvvenireCitizenMarket[-1]
     avvenire_citizens_contract = AvvenireCitizens[-1]
+    data_contract = AvvenireCitizensData[-1]
+    
     mint_account = accounts[2]
 
     dev_account = get_dev_account()
@@ -186,7 +190,7 @@ def test_request_change_with_dev_royalty(single_mint, set_mut_cost):
     )
 
     assert balance_before_change - mint_account.balance() == change_cost
-    assert avvenire_citizens_contract.tokenChangeRequests(0) == True
+    assert data_contract.getTokenChangeRequest(0) == True
     assert avvenire_citizens_contract.balance() == change_cost
 
 

@@ -283,15 +283,7 @@ contract AvvenireCitizenMarket is
         // request a character change
         avvenireCitizens.requestChange{value: totalCost}(citizenId);
 
-        // refund the rest of the transaction value if the transaction is over
-        // guarantees that msg.value is > totalCost
-
-
-        // for every new trait to mint, a change will be requested, so send the appropriate amount of eth (do so directly, as safe mint is not payable)
-        // if (totalCost > 0) {
-        //     (bool success, ) = address(avvenireCitizens).call{value: totalCost}("");
-        //     require(success, "Unsuccessful transfer");
-        // }
+         _refundIfOver(totalCost);
     }
 
     function _setTraitData(

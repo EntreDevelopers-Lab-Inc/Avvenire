@@ -109,13 +109,13 @@ def test_trait_changes_no_cost(citizens_minted):
             0, 
             )
         # update the uri
-        trait_manager = TraitManager(citizens_contract, end_trait_id - x)
+        trait_manager = TraitManager(data_contract, end_trait_id - x)
         new_trait = trait_manager.update_trait()  # this is updating the effect
         assert new_trait == data_contract.getTrait(end_trait_id - x)
         assert account == citizens_contract.ownerOf(end_trait_id - x)
 
     # Update the citizen
-    broker = CitizenMarketBroker(citizens_contract, 0)
+    broker = CitizenMarketBroker(data_contract, 0)
     citizen = broker.update_citizen()
     
     # ***
@@ -150,7 +150,7 @@ def test_trait_changes_no_cost(citizens_minted):
     start_trait_id = end_trait_id - 4
     
     # update the male
-    broker = CitizenMarketBroker(citizens_contract, 1)
+    broker = CitizenMarketBroker(data_contract, 1)
     citizen = broker.update_citizen()
     
     for x, index in enumerate(trait_indexes):
@@ -163,7 +163,7 @@ def test_trait_changes_no_cost(citizens_minted):
         # Sex should be male
         assert data_contract.getCitizen(1)[4][index][4] == 1
     
-        trait_manager = TraitManager(citizens_contract, start_trait_id + x)
+        trait_manager = TraitManager(data_contract, start_trait_id + x)
         new_trait = trait_manager.update_trait()  # this is updating the effect
         assert new_trait == data_contract.getTrait(start_trait_id + x)
     
@@ -184,7 +184,7 @@ def test_trait_changes_no_cost(citizens_minted):
             1, 
             )
         # update the uri
-        trait_manager = TraitManager(citizens_contract, end_trait_id - x)
+        trait_manager = TraitManager(data_contract, end_trait_id - x)
         new_trait = trait_manager.update_trait()  # this is updating the effect
         assert new_trait == data_contract.getTrait(end_trait_id - x)
         assert account == citizens_contract.ownerOf(end_trait_id - x)
@@ -290,14 +290,14 @@ def test_trait_changes_with_cost():
             1, 
             )
         # update the uri
-        trait_manager = TraitManager(citizens_contract, end_trait_id - x)
+        trait_manager = TraitManager(data_contract, end_trait_id - x)
         new_trait = trait_manager.update_trait()  # this is updating the effect
 
         assert new_trait == data_contract.getTrait(end_trait_id - x)
         assert dev_account == citizens_contract.ownerOf(end_trait_id - x)
 
     # Update the citizen
-    broker = CitizenMarketBroker(citizens_contract, 0)
+    broker = CitizenMarketBroker(data_contract, 0)
     citizen = broker.update_citizen()
     
     # ***

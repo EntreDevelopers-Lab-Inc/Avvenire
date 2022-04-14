@@ -78,7 +78,7 @@ def deploy_contract(
     )
     
     server_account = get_server_account()
-    avvenire_data_contract.setServer(server_account)
+    avvenire_data_contract.setServer(server_account, {"from": account})
 
 
 # Logistic Functions*

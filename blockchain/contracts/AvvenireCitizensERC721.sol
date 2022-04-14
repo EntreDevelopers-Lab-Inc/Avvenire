@@ -174,13 +174,9 @@ contract AvvenireCitizens is
     function _requestChange(uint256 tokenId) internal {
         // set the token as requested to change (don't change the URI, it's a waste of gas --> will be done once in when the admin sets the token uri)
         if (msg.value < getChangeCost()) revert InsufficcientFunds();
-<<<<<<< HEAD
         avvenireCitizensData.setTokenChangeRequest(tokenId, true);
-=======
-        tokenChangeRequests[tokenId] = true;
-
+        
         emit ChangeRequested(tokenId, msg.sender, tx.origin);
->>>>>>> beta
     }
 
     /**
