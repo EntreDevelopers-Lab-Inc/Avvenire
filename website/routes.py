@@ -9,6 +9,6 @@ def home():
     return render_template('home.html')
 
 
-# @app.route('/mint')
+@app.route('/mint')
 def mint():
     return render_template('mint.html')
