@@ -33,18 +33,17 @@ def mint_citizens_and_end(amount, account):
 def mint_citizens_and_initialize(amount, account):
     avvenire_citizens_contract = AvvenireCitizens[-1]
 
-    mint_citizens(amount, account)
-    
+    mint_citizens_and_end(amount, account)
+
     admin_account = get_account()
-    # avvenire_citizens_contract.setOwnersExplicit(amount, {"from": admin_account})
-    
-    avvenire_citizens_contract = AvvenireCitizens[-1]; 
-    start_index = avvenire_citizens_contract.getTotalSupply() - amount
-    # initialize citizen 0
+    avvenire_citizens_contract.setOwnersExplicit(
+        amount, {"from": admin_account})
+
+    # initialize citizens
     for i in range(amount):
+        # request initialization
+
         # set the citizen's sex
-        broker = CitizenMarketBroker(avvenire_citizens_contract, i + start_index)
+        broker = CitizenMarketBroker(
+            avvenire_citizens_contract, i + start_index)
         broker.set_sex()
-
-
-        

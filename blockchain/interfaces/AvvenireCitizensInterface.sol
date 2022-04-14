@@ -54,9 +54,7 @@ interface AvvenireCitizensInterface is AvvenireCitizenDataInterface, IERC721 {
 // interface AvvenireCitizensWithMappingInterface is AvvenireCitizensInterface {
 //     // public mappings that should return information
 //     function tokenIdToCitizen(uint256) external view returns (Citizen memory);
-
 //     function tokenIdToTrait(uint256) external view returns (Trait memory);
-
 //     function mutabilityConfig() external view returns (MutabilityConfig memory);
 // }
 
@@ -66,7 +64,7 @@ interface AvvenireCitizensMappingsInterface is AvvenireCitizenDataInterface {
 
     function getTrait(uint256) external view returns (Trait memory);
 
-    function setCitizen(Citizen memory) external; 
+    function setCitizen(Citizen memory) external;
 
     function setTrait(Trait memory) external;
 

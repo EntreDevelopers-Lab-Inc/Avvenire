@@ -1,4 +1,6 @@
-import pytest, brownie, time
+import pytest
+import brownie
+import time
 
 from brownie import (
     AvvenireTest,
@@ -25,7 +27,8 @@ REQUEST_COST = Web3.toWei(0.01, "ether")
 def set_mut_cost():
     admin_account = get_account()
     avvenire_citizens_contract = AvvenireCitizens[-1]
-    avvenire_citizens_contract.setMutabilityCost(REQUEST_COST, {"from": admin_account})
+    avvenire_citizens_contract.setMutabilityCost(
+        REQUEST_COST, {"from": admin_account})
 
 
 @pytest.fixture
@@ -44,11 +47,12 @@ def auction_set(fn_isolation):
     # mint_citizens()
     mint_citizens_and_initialize(3, accounts[2])
     # Accounts[2] owns 0, 1, 2
-    
+
     mint_citizens_and_initialize(2, accounts[3])
     # Accounts[3] owns 3, 4
-    
+
     end_auction_and_enable_changes()
+
 
 def test_bind_existing_token():
     market_contract = AvvenireCitizenMarket[-1]
@@ -85,7 +89,7 @@ def test_bind_existing_token():
 
     # set the new trait id
     new_trait_id = citizens_contract.getTotalSupply() - 1
-    
+
     # Make sure the owner is test account
     assert citizens_contract.ownerOf(new_trait_id) == account
 
@@ -98,14 +102,14 @@ def test_bind_existing_token():
     new_trait = trait_manager.update_trait()  # this is updating the effect
 
     assert new_trait == data_contract.getTrait(new_trait_id)
-    
+
     # update the male
     broker = CitizenMarketBroker(citizens_contract, 0)
     citizen = broker.update_citizen()
 
     # ensure that the male on chain is what you set him to
     assert citizen == data_contract.getCitizen(0)
-    
+
     new_trait_uri = data_contract.getTrait(new_trait_id)[1]
 
     # now, put the body on citizen 1
@@ -121,7 +125,8 @@ def test_bind_existing_token():
         [0, False, 1, 9],
         [0, False, 1, 10],
         [0, False, 1, 11],
-    ]         
+    ]
+
     # put on the new body
     market_contract.combine(1, male_trait_changes, {"from": account})
 
@@ -130,22 +135,21 @@ def test_bind_existing_token():
     assert data_contract.getCitizen(1)[4][1][1] == new_trait_uri
     assert data_contract.getCitizen(1)[4][1][2] is False
     assert data_contract.getCitizen(1)[4][1][3] is True
-    
+
     # update the information with a new citizen broker
     broker = CitizenMarketBroker(citizens_contract, 0)
     new_citizen = broker.update_citizen()
 
     # check that the ipfs data made it
     assert new_citizen == citizens_contract.getCitizen(0)
-    
-    
-    # *** 
+
+    # ***
     # Another trait should've been minted
     # ***
-    
+
     # set the new trait id
     new_trait_id = citizens_contract.getTotalSupply() - 1
-    
+
     # Make sure the owners is accounts[2]
     assert citizens_contract.ownerOf(new_trait_id) == account
 
@@ -156,6 +160,7 @@ def test_bind_existing_token():
     # update the hair's uri
     trait_manager = TraitManager(citizens_contract, new_trait_id)
     new_trait = trait_manager.update_trait()  # this is updating the effect
+
 
 def test_attaching_unowned_existing_trait():
     market_contract = AvvenireCitizenMarket[-1]
@@ -200,14 +205,14 @@ def test_attaching_unowned_existing_trait():
     trait_manager = TraitManager(citizens_contract, new_trait_id)
     new_trait = trait_manager.update_trait()  # this is updating the effect
 
-    # The newly minted trait on IPFS should match the on-chain trait 
+    # The newly minted trait on IPFS should match the on-chain trait
     assert new_trait == data_contract.getTrait(new_trait_id)
-    
+
     # update the male
     broker = CitizenMarketBroker(citizens_contract, 0)
     citizen = broker.update_citizen()
 
-    # The citizen on IPFS should match the on-chain data 
+    # The citizen on IPFS should match the on-chain data
     assert citizen == data_contract.getCitizen(0)
 
     # now, put the body on citizen 1
@@ -223,16 +228,17 @@ def test_attaching_unowned_existing_trait():
         [0, False, 1, 9],
         [0, False, 1, 10],
         [0, False, 1, 11],
-    ]         
+    ]
     # Attempt to put the new trait on citizen #3 which accounts[3] owns
     # It should revert considering accounts[3] does not own the trait
     with brownie.reverts():
         market_contract.combine(3, male_trait_changes, {"from": other_account})
-    
-    # Assert that no changes have been made 
+
+    # Assert that no changes have been made
     assert data_contract.getCitizen(3)[4][1][0] == 0
     assert data_contract.getCitizen(3)[4][1][2] is False
     assert data_contract.getCitizen(3)[4][1][3] is True
+
 
 def test_binding_wrong_trait_type():
     market_contract = AvvenireCitizenMarket[-1]
@@ -277,7 +283,7 @@ def test_binding_wrong_trait_type():
     new_trait = trait_manager.update_trait()  # this is updating the effect
 
     assert new_trait == data_contract.getTrait(new_trait_id)
-    
+
     # update the male
     broker = CitizenMarketBroker(citizens_contract, 0)
     citizen = broker.update_citizen()
@@ -288,9 +294,9 @@ def test_binding_wrong_trait_type():
     # now, put the body on citizen 1
     male_trait_changes = [
         [0, False, 1, 1],
-        [0, False, 1, 2],  
+        [0, False, 1, 2],
         [0, False, 1, 3],
-        [new_trait_id, True, 1, 4], # Try to put body on eyes
+        [new_trait_id, True, 1, 4],  # Try to put body on eyes
         [0, False, 1, 5],
         [0, False, 1, 6],
         [0, False, 1, 7],
@@ -298,10 +304,11 @@ def test_binding_wrong_trait_type():
         [0, False, 1, 9],
         [0, False, 1, 10],
         [0, False, 1, 11],
-    ]         
+    ]
     # put on the new body
     with brownie.reverts():
         market_contract.combine(0, male_trait_changes, {"from": account})
+
 
 def test_transfer_trait_then_combine():
     market_contract = AvvenireCitizenMarket[-1]
@@ -316,7 +323,7 @@ def test_transfer_trait_then_combine():
     # request from the market to remove the hair of a citizen
     male_trait_changes = [
         [0, False, 1, 1],
-        [0, False, 1, 2],  
+        [0, False, 1, 2],
         [0, False, 1, 3],
         [0, False, 1, 4],
         [0, False, 1, 5],
@@ -324,7 +331,7 @@ def test_transfer_trait_then_combine():
         [0, False, 1, 7],
         [0, False, 1, 8],
         [0, False, 1, 9],
-        [0, True, 1, 10], # put on default hair
+        [0, True, 1, 10],  # put on default hair
         [0, False, 1, 11],
     ]
 
@@ -340,7 +347,7 @@ def test_transfer_trait_then_combine():
 
     # set the new trait id
     new_trait_id = citizens_contract.getTotalSupply() - 1
-    
+
     # Make sure the owners is accounts[2]
     assert citizens_contract.ownerOf(new_trait_id) == account
 
@@ -351,27 +358,28 @@ def test_transfer_trait_then_combine():
     # update the hair's uri
     trait_manager = TraitManager(citizens_contract, new_trait_id)
     new_trait = trait_manager.update_trait()  # this is updating the effect
-    
+
     assert new_trait == data_contract.getTrait(new_trait_id)
-    
+
     # update the male
     broker = CitizenMarketBroker(citizens_contract, 0)
     citizen = broker.update_citizen()
 
     # ensure that the male on chain is what you set him to
     assert citizen == data_contract.getCitizen(0)
-    
-    # *** 
-    # Transfer trait to other account 
+
     # ***
-    tx = citizens_contract.safeTransferFrom(account, other_account, new_trait_id, {"from": account})
+    # Transfer trait to other account
+    # ***
+    tx = citizens_contract.safeTransferFrom(
+        account, other_account, new_trait_id, {"from": account})
     tx.wait(1)
 
     new_trait_uri = data_contract.getTrait(new_trait_id)[1]
     # now, put the body on citizen 3
     male_trait_changes = [
         [0, False, 1, 1],
-        [0, False, 1, 2], 
+        [0, False, 1, 2],
         [0, False, 1, 3],
         [0, False, 1, 4],
         [0, False, 1, 5],
@@ -379,9 +387,9 @@ def test_transfer_trait_then_combine():
         [0, False, 1, 7],
         [0, False, 1, 8],
         [0, False, 1, 9],
-        [new_trait_id, True, 1, 10], # put hair on citizen from oter account
+        [new_trait_id, True, 1, 10],  # put hair on citizen from oter account
         [0, False, 1, 11],
-    ]         
+    ]
     # put on the new body
     market_contract.combine(3, male_trait_changes, {"from": other_account})
 
@@ -390,15 +398,17 @@ def test_transfer_trait_then_combine():
     assert data_contract.getCitizen(3)[4][9][1] == new_trait_uri
     assert data_contract.getCitizen(3)[4][9][2] is False
     assert data_contract.getCitizen(3)[4][9][3] is True
-    
+
     # update the information with a new citizen broker
-    broker = CitizenMarketBroker(citizens_contract,3)
+    broker = CitizenMarketBroker(citizens_contract, 3)
     new_citizen = broker.update_citizen()
 
     # check that the ipfs data made it
     assert new_citizen == citizens_contract.getCitizen(3)
 
 # test to bind a false trait id
+
+
 def test_false_trait():
     # keep track of the contract
     market_contract = AvvenireCitizenMarket[-1]
@@ -427,6 +437,8 @@ def test_false_trait():
         market_contract.combine(0, trait_changes, {"from": account})
 
 # bind a real trait to the wrong sex
+
+
 def test_wrong_sex():
     # keep track of the contracts
     market_contract = AvvenireCitizenMarket[-1]
