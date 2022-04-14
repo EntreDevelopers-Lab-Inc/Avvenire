@@ -1,16 +1,17 @@
 import requests
 import json
 import os
+from brownie import network 
 
 # import modules selectively to see if you are in test or production mode
 try:
-    from blockchain.scripts.helpful_scripts import get_server_account
+    from blockchain.scripts.helpful_scripts import get_server_account, LOCAL_BLOCKCHAIN_ENVIRONMENTS
     from blockchain.constants import BASE_URI, EXTENSION
     from blockchain.GenerativeArt.core.art import Art
     from blockchain.tools.ipfs import upload_to_ipfs
 
 except ImportError:
-    from scripts.helpful_scripts import get_server_account
+    from scripts.helpful_scripts import get_server_account, LOCAL_BLOCKCHAIN_ENVIRONMENTS
     from constants import BASE_URI, EXTENSION, WAIT_BLOCKS
     from GenerativeArt.core.art import Art
     from tools.ipfs import upload_to_ipfs
@@ -211,17 +212,17 @@ class CitizenCreator:
 
 # make a market broker that interacts with the avvenire citizens market
 class CitizenMarketBroker:
-    def __init__(self, contract, citizen_id):
-        # store the contract
-        self.contract = contract
-
+    def __init__(self, data_contract, citizen_id):
+        #store the data contract
+        self.data_contract = data_contract
+        
         # store the citizen id
         self.citizen_id = citizen_id
 
     # get the citizen
     def get_citizen(self):
         # need to connect to other contract to get the citizen
-        citizen = list(self.contract.getCitizen(self.citizen_id))
+        citizen = list(self.data_contract.getCitizen(self.citizen_id))
         
         return citizen
 
@@ -249,23 +250,25 @@ class CitizenMarketBroker:
         if citizen[3] == 0:
             sex_id = int(SEX_ORDER.index(
                 ipfs_data["attributes"][0]["value"])) + 1
+                # set the citizen's data --> no need to update further, as the citizen's data is already stored
+            
+            server_account = get_server_account()
+            
+            tx = self.data_contract.setCitizenSex(self.citizen_id, sex_id, {"from": server_account})
+            if network.show_active() not in LOCAL_BLOCKCHAIN_ENVIRONMENTS:
+                tx.wait(3)
 
-            # set the sex
-            citizen[3] = sex_id
         else:
             print(f"Already initialized: {citizen}")
 
-        # set the citizen's data --> no need to update further, as the citizen's data is already stored
-        tx = self.contract.setCitizenData(
-            citizen, False, {"from": get_server_account()})
-        tx.wait(3)
+
 
     # function to update a citizen
     def update_citizen(self):
         citizen = self.get_citizen()
 
         # check to make sure that the citizen has a change requested
-        if not self.contract.tokenChangeRequests(self.citizen_id):
+        if not self.data_contract.getTokenChangeRequest(self.citizen_id):
             print(f"No change was requested for citizen {self.citizen_id}")
 
         # get all the existing traits from ipfs (these will be integers)
@@ -291,11 +294,13 @@ class CitizenMarketBroker:
         # change the citizen uri
         citizen[1] = uri
 
-        # set the citizen data with the contract using the admin account --> no need for more changes, set those to false
-        tx = self.contract.setCitizenData(
-            citizen, False, {"from": get_server_account()})
+        server_account = get_server_account()
         
-        tx.wait(3)
+        # set the citizen data with the contract using the admin account --> no need for more changes, set those to false
+        tx = self.data_contract.updateCitizenURI(self.citizen_id, uri, {"from": server_account})
+        
+        if network.show_active() not in LOCAL_BLOCKCHAIN_ENVIRONMENTS:
+            tx.wait(3)
             
 
         # return reconverted version of citizen for better understanding
@@ -326,10 +331,10 @@ class CitizenMarketBroker:
 
 # a class for managing on-chain traits
 class TraitManager:
-    def __init__(self, contract, trait_id):
-        # save the contract
-        self.contract = contract
-
+    def __init__(self, data_contract, trait_id):        
+        # save the data contract
+        self.data_contract = data_contract 
+        
         # saev the trait id
         self.trait_id = trait_id
 
@@ -337,7 +342,7 @@ class TraitManager:
     # on the API, citizen creations will be stored with the exact traits created and dropped --> will have this data
     def update_trait(self):
         # get the trait
-        trait = list(self.contract.getTrait(self.trait_id))
+        trait = list(self.data_contract.getTrait(self.trait_id))
 
         # get the trait data from ipfs by linking it to the origin citizen
         resp = requests.get(f"{BASE_URI}{trait[6]}")
@@ -389,11 +394,14 @@ class TraitManager:
 
         # set the sex to ENSURE that it is in-line with ipfs
         trait[4] = SEX_ORDER.index(citizen_data['attributes'][0]['value']) + 1
+        
+        server_account = get_server_account()
 
-        # set the trait's data using the admin account (set change update to false, as the trait has been updated)
-        tx = self.contract.setTraitData(
-            trait, False, {"from": get_server_account()})
-        tx.wait(3)
+        # set the trait's data using the server account (set change update to false, as the trait has been updated)
+        tx = self.data_contract.updateTraitSexAndURI(self.trait_id, trait[4], metadata_link, {"from": server_account})
+        
+        if network.show_active() not in LOCAL_BLOCKCHAIN_ENVIRONMENTS:
+            tx.wait(3)
 
         return tuple(trait)
 

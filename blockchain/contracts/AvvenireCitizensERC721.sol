@@ -50,9 +50,6 @@ contract AvvenireCitizens is
     // Contract containing data
     AvvenireCitizensMappingsInterface public avvenireCitizensData;
 
-    // mapping of tokenId to change request for information --> being public allows anyone to see if the changes are requested
-    mapping(uint256 => bool) public tokenChangeRequests;
-
     // mapping for allowing other contracts to interact with this one
     mapping(address => bool) private allowedContracts;
 
@@ -121,7 +118,7 @@ contract AvvenireCitizens is
         if (!_exists(tokenId)) revert URIQueryForNonexistentToken(); // error from ERC721A
 
         // if a change has been requested, only show the loading URI
-        if (tokenChangeRequests[tokenId]) {
+        if (avvenireCitizensData.getTokenChangeRequest(tokenId)) {
             return loadURI;
         }
 
@@ -160,7 +157,7 @@ contract AvvenireCitizens is
         require(ownerOf(tokenId) == tx.origin, "Not owner");
 
         // check if the token has already been requested to change
-        if (tokenChangeRequests[tokenId]) revert ChangeAlreadyRequested();
+        if (avvenireCitizensData.getTokenChangeRequest(tokenId)) revert ChangeAlreadyRequested();
 
         _requestChange(tokenId); // call the internal function
     }
@@ -168,7 +165,7 @@ contract AvvenireCitizens is
     function _requestChange(uint256 tokenId) internal {
         // set the token as requested to change (don't change the URI, it's a waste of gas --> will be done once in when the admin sets the token uri)
         if (msg.value < getChangeCost()) revert InsufficcientFunds();
-        tokenChangeRequests[tokenId] = true;
+        avvenireCitizensData.setTokenChangeRequest(tokenId, true);
     }
 
     /**
@@ -186,7 +183,7 @@ contract AvvenireCitizens is
         avvenireCitizensData.setCitizen(citizen);
 
         // set the token change data
-        tokenChangeRequests[citizen.tokenId] = changeUpdate;
+        avvenireCitizensData.setTokenChangeRequest(citizen.tokenId, changeUpdate);
     }
 
     /**
@@ -203,7 +200,7 @@ contract AvvenireCitizens is
         avvenireCitizensData.setTrait(trait);
 
         // set the token change data
-        tokenChangeRequests[trait.tokenId] = changeUpdate;
+        avvenireCitizensData.setTokenChangeRequest(trait.tokenId, changeUpdate);
     }
 
     /**
@@ -475,7 +472,7 @@ contract AvvenireCitizens is
         ) {
             // the tokens SHOULD NOT be awaiting a change (you don't want the user to get surprised)
             if (!mutabilityConfig.tradeBeforeChange) {
-                require(!tokenChangeRequests[tokenId], "Change already requested"); 
+                require(!avvenireCitizensData.getTokenChangeRequest(tokenId), "Change already requested");
             }
 
             // if this is a trait, it must be free to be transferred

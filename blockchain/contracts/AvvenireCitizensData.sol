@@ -32,6 +32,9 @@ contract AvvenireCitizensData is
     // mapping for allowing other contracts to interact with this one
     mapping(address => bool) private allowedContracts;
 
+    // mapping for token change requests
+    mapping(uint256 => bool) public tokenChangeRequests;
+
     // Address for server 
     address private serverAddress; 
 
@@ -51,6 +54,14 @@ contract AvvenireCitizensData is
 
     function setServer(address _server) external onlyOwner {
         serverAddress = _server;
+    }
+
+    function setTokenChangeRequest(uint256 tokenId, bool changeRequest) external callerIsAllowed {
+        tokenChangeRequests[tokenId] = changeRequest;
+    }
+
+    function getTokenChangeRequest(uint256 tokenId) external view returns(bool)  {
+        return tokenChangeRequests[tokenId];
     }
 
     /**
@@ -78,12 +89,15 @@ contract AvvenireCitizensData is
     // ***
     // Functions for server
     // *** 
-    function setTraitURI(uint256 traitId, string memory _uri) external callerIsServer {
+    function updateTraitSexAndURI(uint256 traitId, Sex _sex, string memory _uri) external callerIsServer {
         tokenIdToTrait[traitId].uri = _uri;
+        tokenIdToTrait[traitId].sex = _sex;
+        tokenChangeRequests[traitId] = false; 
     }
 
-    function setCitizenURI(uint256 citizenId, string memory _uri) external callerIsServer {
+    function updateCitizenURI(uint256 citizenId, string memory _uri) external callerIsServer {
         tokenIdToCitizen[citizenId].uri = _uri;
+        tokenChangeRequests[citizenId] = false; 
     }
 
     function setCitizenSex(uint256 citizenId, Sex _sex) external callerIsServer {

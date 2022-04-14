@@ -75,5 +75,9 @@ interface AvvenireCitizensMappingsInterface is AvvenireCitizenDataInterface {
     function setTraitFreedom(uint256, bool) external;
 
     function isCitizenInitialized(uint256) external view returns (bool);
+
+    function setTokenChangeRequest(uint256, bool) external;
+
+    function getTokenChangeRequest(uint256) external view returns(bool);
 }
 
