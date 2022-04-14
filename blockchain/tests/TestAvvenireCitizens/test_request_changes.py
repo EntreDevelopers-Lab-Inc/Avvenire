@@ -3,7 +3,7 @@ from http.client import REQUEST_ENTITY_TOO_LARGE
 import pytest
 import brownie
 
-from brownie import AvvenireTest, AvvenireCitizens, AvvenireCitizenMarket, accounts
+from brownie import AvvenireTest, AvvenireCitizens, AvvenireCitizenMarket, AvvenireCitizensData, accounts
 from web3 import Web3
 from scripts.helpful_scripts import get_account
 
@@ -119,6 +119,7 @@ def test_request_after_existing_request(single_mint):
 def test_request_change_with_cost(single_mint, set_mut_cost):
     avvenire_market_contract = AvvenireCitizenMarket[-1]
     avvenire_citizens_contract = AvvenireCitizens[-1]
+    
     mint_account = accounts[2]
 
     balance_before_change = mint_account.balance()
@@ -149,6 +150,7 @@ def test_request_change_with_underpayment(single_mint, set_mut_cost):
 
     assert balance_before_change == mint_account.balance()
     assert avvenire_citizens_contract.tokenChangeRequests(0) == False
+
 
 
 def test_request_change_with_overpayment(single_mint, set_mut_cost):

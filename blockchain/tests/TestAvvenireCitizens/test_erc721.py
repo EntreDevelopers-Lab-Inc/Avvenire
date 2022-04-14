@@ -88,11 +88,11 @@ def test_transfer_trade_before_change_false():
         citizens_contract.transferFrom(account, other_account, new_trait_id, {"from": account})
 
     # update the hair's uri
-    trait_manager = TraitManager(citizens_contract, new_trait_id)
+    trait_manager = TraitManager(data_contract, new_trait_id)
     new_trait = trait_manager.update_trait()  # this is updating the effect
     
     # update the male
-    broker = CitizenMarketBroker(citizens_contract, 0)
+    broker = CitizenMarketBroker(data_contract, 0)
     citizen = broker.update_citizen()
     
     # ***
