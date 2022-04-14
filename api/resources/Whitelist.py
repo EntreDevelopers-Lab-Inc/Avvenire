@@ -59,14 +59,15 @@ class WhitelistResource(Resource):
             return json_data, code
 
         # check if there is an account with the username, address, and pin
-        whitelist_spot = WhitelistedAccountModel.query.filter_by(discord_username=json_data['discord_username'], address=json_data['eth_address'], pin=json_data['pin']).first()
+        whitelist_spot = WhitelistedAccountModel.query.filter_by(
+            discord_username=json_data['discord_username'], address=json_data['eth_address'], pin=json_data['pin']).first()
 
         # if there is no whitelist spot, return such
         if not whitelist_spot:
             return {'message': 'No whitelist spot found.'}, 404
 
         # else, delete the whitelist spot
-        db.session.delete(white)
+        db.session.delete(whitelist_spot)
         db.session.commit()
 
         return {'status': 'success'}, 201

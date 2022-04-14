@@ -75,10 +75,6 @@ def test_non_existent_token_change():
     with brownie.reverts():
         assert avvenire_market_contract.initializeCitizen(1, {"from": account})
 
-
-# REQUEST CHANGE WILL ALWAYS THROW AN ERROR IF THE ACCOUNT IS NOT AN ALLOWED ACCOUNT
-# **** THEREFORE NEED TO TEST REQUIRE STATEMENTS FROM THE MARKET CONTRACT ****
-
 # Tests request by a non-owner
 def test_request_by_nonowner():
     avvenire_contract = AvvenireTest[-1]
@@ -102,6 +98,7 @@ def test_request_by_nonowner():
 def test_request_after_existing_request(single_mint):
     avvenire_citizens_contract = AvvenireCitizens[-1]
     avvenire_market_contract = AvvenireCitizenMarket[-1]
+    data_contract = AvvenireCitizensData[-1]
     mint_account = accounts[2]
 
     # Confirm that the owner of NFT #0 is Account[1]

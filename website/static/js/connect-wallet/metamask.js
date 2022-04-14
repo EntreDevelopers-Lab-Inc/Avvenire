@@ -45,7 +45,6 @@ function connect() {
     return;
   }
 
-  // window.ethereum.enable();
   window.ethereum
     .request({ method: 'eth_requestAccounts' })
     .then(handleAccountsChanged)
@@ -60,6 +59,9 @@ function connect() {
     });
 
     setChain();
+
+    // now that we are connected, hide the button
+    $('#connect-btn').hide();
 }
 
 
@@ -88,12 +90,7 @@ async function handleChainChanged(_chainId) {
 
 
 // make a document load function
-function loadDocument() {
-    // check if the user is conected (and connect if necessary)
-    if (!window.ethereum.isConnected())
-    {
-      connect();
-    }
+async function loadDocument() {
 
     // hide the conenct wallet button if the user is already logged in
     if (window.ethereum.selectedAddress != null)
@@ -101,10 +98,14 @@ function loadDocument() {
         $('#connect-btn').hide();
     }
 
-    // prompt the user to change their chain if it is incorrect
-    if (window.ethereum.chainId != CHAIN_STRING)
+    // check if the user is conected (and connect if necessary)
+    if (!window.ethereum.isConnected())
     {
-      setChain();
+      // prompt the user to change their chain if it is incorrect
+      if (window.ethereum.chainId != CHAIN_STRING)
+      {
+        setChain();
+      }
     }
 }
 
