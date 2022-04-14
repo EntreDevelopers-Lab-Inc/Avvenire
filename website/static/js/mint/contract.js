@@ -11,7 +11,7 @@ let CONTRACT_PROVIDER = new ethers.providers.Web3Provider(window.ethereum, netwo
 const TRANSACTION_TYPE = 2;
 
 // contract address with (currently a test one)
-const CONTRACT_ADDRESS = '0xb06cb5c94c1f71761ff6cc8d6c405ec6e70b9836';
+const CONTRACT_ADDRESS = '0x4b0e84165dF9C6d1d674e512e78d058E3Dd7D8aE';
 
 // contract interface
 const CONTRACT_ABI = [

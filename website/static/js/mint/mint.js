@@ -39,18 +39,12 @@ async function getMintPrice()
         // if in the future, get the start price
         if (parseFloat(ethers.utils.formatEther(config[0])) > (Date.now() / 1000))
         {
-            CONTRACT.AUCTION_START_PRICE().then(
-                function (resp) {
-                    price = resp;
-                });
+            price = await CONTRACT.AUCTION_START_PRICE();
         }
         // else, get the auction price
         else
         {
-            CONTRACT.getAuctionPrice().then(
-                function (resp) {
-                    price = resp;
-                });
+            price = await CONTRACT.getAuctionPrice();
 
         }
 
@@ -135,7 +129,7 @@ async function mintNFTs(gasLimit=GAS_LIMIT) {
     var amount = $('#amount').val();
 
     // make the total cost a string for the parse ether utilty
-    var totalCost = $('#total-cost').text().toString();
+    var totalCost = ethers.utils.parseEther($('#total-cost').text().toString());
 
     // check if the user is whitelisted
     var whitelisted;
