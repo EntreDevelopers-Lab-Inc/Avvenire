@@ -3,6 +3,8 @@
 // get some constants
 var PRICE;
 
+const PUBLIC_SALE_KEY = 777;
+
 
 // function to get the mint price
 // mint order: 1000 DA (3) --> WL (2) --> public (2000)
@@ -11,12 +13,21 @@ async function getMintPrice()
 {
     // contract data
     var config;
-    var price;
+    var price = 0;
     var whitelisted;
 
     // input box data
     var max;
     var value;
+    var remainder;
+
+    // get the current balance
+    var userBalance = await ERC721_CONTRACT.balanceOf(window.ethereum.selectedAddress);
+    var collectionSize = parseInt(ethers.utils.formatUnits(await CONTRACT.collectionSize(), 'wei'));
+    var totalSupply = parseInt(ethers.utils.formatUnits(await ERC721_CONTRACT.getTotalSupply(), 'wei'));
+
+    // mint button
+    var mintBtn = $('#mint-btn');
 
 
     // get the whitelist information
@@ -35,54 +46,88 @@ async function getMintPrice()
     if (parseFloat(ethers.utils.formatEther(config[0])) > 0)  // this will be set to 0 when the auction is over
     {
         // if in the future, get the start price
-        if (parseFloat(ethers.utils.formatEther(config[0])) > Date.now())
+        if (parseFloat(ethers.utils.formatEther(config[0])) > (Date.now() / 1000))
         {
-            CONTRACT.AUCTION_START_PRICE().then(
-                function (resp) {
-                    price = resp;
-                });
+            price = await CONTRACT.AUCTION_START_PRICE();
         }
         // else, get the auction price
         else
         {
-            CONTRACT.getAuctionPrice().then(
-                function (resp) {
-                    price = resp;
-                });
+            price = await CONTRACT.getAuctionPrice();
 
         }
 
         // set the max and value
-        max = 3;
+        max = await CONTRACT.maxPerAddressDuringAuction();  // set this to the amount that can be minted (check balance of)
         value = max;
+
+        remainder = max - userBalance;
     }
     // check if the user is whitelisted and the price is greater than 0
-    else if ((parseFloat(ethers.utils.formatEther(config[2])) > 0) && (whitelisted))
+    else if ((parseFloat(ethers.utils.formatEther(config[2])) > 0) && (config[1] > (Date.now() / 1000)))
     {
-        // if the user is whitelisted saleConfig.mintlistPrice
-        price = config[2];
+        if (whitelisted)
+        {
+            // if the user is whitelisted saleConfig.mintlistPrice
+            price = config[2];
 
-        max = 2;
-        value = max;
+            max = await CONTRACT.maxPerAddressDuringWhiteList();
+            value = max;
+
+            remainder = (max + (await CONTRACT.maxPerAddressDuringAuction())) - userBalance;
+        }
+        else
+        {
+            mintBtn.text('Minting Whitelist...');
+            $('#mint-btn').attr('class', 'btn more-btn disabled');
+            $('#mint-info').hide();
+        }
     }
     // else, use the public sale price by calling saleConfig.publicPrice
-    else
+    else if (totalSupply < collectionSize)
     {
         price = config[3];
 
         max = 2000;
         value = 5;
     }
+    else
+    {
+        // make the default case that is is not mintable --> remove everything, change the mint buton's text to SOLD OUT
+        $('#mint-info').hide();
 
-    // convert the price to eth from gwei
-    price = parseFloat(ethers.utils.formatEther(price));
+        mintBtn.text('SOLD OUT');
 
-    // change the max and value
-    $('#amount').attr('max', max);
-    $('#amount').val(value);
+        $('#mint-btn').attr('class', 'btn more-btn disabled');
+    }
 
-    // set the global variable
-    PRICE = price;
+    // only set everything if the price is more than 0
+    if (price > 0)
+    {
+        // if balance of is greater than or equal to max, diasble the mint button
+        if (remainder <= 0)
+        {
+            $('#mint-btn').attr('class', 'btn more-btn disabled');
+        }
+        else if ((remainder < max) && (remainder < 5))
+        {
+            value = remainder;
+        }
+
+        // decrement the max
+        max = remainder;
+
+        // convert the price to eth from gwei
+        price = parseFloat(ethers.utils.formatEther(price));
+
+        // change the max and value
+        $('#amount').attr('max', max);
+        $('#amount').val(value);
+
+        // set the global variable
+        PRICE = price;
+    }
+
 }
 
 
@@ -117,7 +162,17 @@ async function mintNFTs(gasLimit=GAS_LIMIT) {
     var amount = $('#amount').val();
 
     // make the total cost a string for the parse ether utilty
-    totalCost = totalCost.toString();
+    var totalCost = ethers.utils.parseEther($('#total-cost').text().toString());
+
+    // check if the user is whitelisted
+    var whitelisted;
+    await CONTRACT.allowlist(window.ethereum.selectedAddress).then(function (resp) {
+        // set whether this address is whitelisted
+        whitelisted = ethers.utils.formatUnits(resp) != 0;
+    });
+
+    // keep track of the transaction
+    var txn;
 
     // decide which contract to interact with
     // get the sale information
@@ -129,50 +184,37 @@ async function mintNFTs(gasLimit=GAS_LIMIT) {
     // check if the auction is on with saleConfig.auctionSaleStartTime <= block.time_stamp
     if (parseFloat(ethers.utils.formatEther(config[0])) > 0)  // this will be set to 0 when the auction is over
     {
-        // if in the future, get the start price
-        if (parseFloat(ethers.utils.formatEther(config[0])) > Date.now())
-        {
-            CONTRACT.AUCTION_START_PRICE().then(
-                function (resp) {
-                    price = resp;
-                });
-        }
-        // else, get the auction price
-        else
-        {
-            CONTRACT.getAuctionPrice().then(
-                function (resp) {
-                    price = resp;
-                });
-
-        }
-
-        // set the max and value
-        max = 3;
-        value = max;
+        // mint using the auction
+        txn = CONTRACT.auctionMint(amount, {value: totalCost});
     }
     // check if the user is whitelisted and the price is greater than 0
-    else if ((parseFloat(ethers.utils.formatEther(config[2])) > 0) && (whitelisted))
+    else if ((parseFloat(ethers.utils.formatEther(config[2])) > 0) && (config[1] > (Date.now() / 1000)))
     {
-        // if the user is whitelisted saleConfig.mintlistPrice
-        price = config[2];
-
-        max = 2;
-        value = max;
+        // whitelist mint
+        txn = CONTRACT.whiteListMint(amount, {value: totalCost});
     }
     // else, use the public sale price by calling saleConfig.publicPrice
     else
     {
-        price = config[3];
-
-        max = 2000;
-        value = 5;
+        // public sale mint
+        txn = CONTRACT.publicSaleMint(amount, PUBLIC_SALE_KEY, {value: totalCost});
     }
 
+    // on the transaction, do different things
+    txn.then(function (resp) {
 
-    await CONTRACT.mintNFTs(2, {value: ethers.utils.parseEther(totalCost), gasLimit: gasLimit});
+        // wait for the confirmed blocks
+        resp.wait(CONFIRMED_BLOCKS).then(function (receipt) {
+            // alert that the mint went through
+            alert("Congratulations on your purchase of " + amount + " Avvenire Citizens!")
+            location.href = '/mint';
+        });
 
-    alert("Congratulations on your purchase of " + amount + "Avvenire Citizens!")
+    }).catch((error) => {
+        // send whatever error happened
+        alert('Error on mint: ' + error.message);
+    });
+
 }
 
 async function loadDocument()
@@ -181,12 +223,18 @@ async function loadDocument()
     const provider = new ethers.providers.Web3Provider(window.ethereum);
     let currentBlock = await provider.getBlockNumber();
 
+    // if there is no selected address, reroute to home
+    if (window.ethereum.selectedAddress == null)
+    {
+        location.href = '/';
+    }
+
     // get the mint price --> sets global variable
     await getMintPrice();
 
     // if the mint start time is past the current time and the public sale has not started yet, enable the button
     CONTRACT.saleConfig().then(function (resp) {
-        if ((Date.now() > resp[0]) && (Date.now() > resp[1]))
+        if (((Date.now() / 1000) > resp[0]) && ((Date.now() / 1000) > resp[1]))
         {
             // enable the button
             $('#mint-btn').attr('class', 'btn more-btn');
