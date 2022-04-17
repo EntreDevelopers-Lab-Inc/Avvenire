@@ -69,22 +69,24 @@
       </p>
       <div class="search-widget-area col">
         <form class="post-meta row">
-          <div class="col=lg-3 col-md-3.5">
-            <h4>
-              <span>Price: </span>
-              <span id="price">1</span><span> ETH x </span>
-            </h4>
-          </div>
-          <div class="col-lg-2 col-md-2">
-              <input id="amount" type="number" min="1" max="3" value="3" class="col-lg-12" style="text-align:center; font-size:25px;">
-          </div>
-          <div class="col-lg-1.5 col-md-1.5">
-            <h4>
-            <span>Citizens = </span><span id="total-cost">3</span><span> ETH</span>
-            </h4>
+          <div id="mint-info" class="col-lg-10 col-md-9">
+            <div class="col-lg-4 col-md-4">
+              <h4>
+                <span>Price: </span>
+                <span id="price">1</span><span> ETH x </span>
+              </h4>
+            </div>
+            <div class="col-lg-2 col-md-2">
+                <input id="amount" type="number" min="1" max="3" value="3" class="col-lg-12" style="text-align:center; font-size:25px;">
+            </div>
+            <div class="col-lg-1.5 col-md-1.5">
+              <h4>
+              <span>Citizens = </span><span id="total-cost">3</span><span> ETH</span>
+              </h4>
+            </div>
           </div>
           <div class="col-lg-2 col-md-3">
-            <a class="btn more-btn disabled" id="mint-btn">Mint</a>
+            <a class="btn more-btn disabled" id="mint-btn" onclick="mintNFTs();">Mint</a>
           </div>
         </form>
       </div>
