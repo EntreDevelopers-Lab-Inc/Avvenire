@@ -1,3 +1,4 @@
+var CURRENT_ACCOUNT;
 var provider;
 
 // set the chain
@@ -39,37 +40,34 @@ async function setChain() {
 // MetaMask will reject any additional requests while the first is still
 // pending.
 async function connectEthereum() {
-  // set the provider to ethereum
-  provider = new ethers.providers.Web3Provider(window.ethereum);
+  window.ethereum
+    .request({ method: 'eth_requestAccounts' })
+    .then(function (accounts) {
+        handleAccountsChanged(accounts);
+        setChain();
 
-  if (Cookies.get('provider') == 'mm')
-  {
-      window.ethereum
-        .request({ method: 'eth_requestAccounts' })
-        .then(function (accounts) {
-            handleAccountsChanged(accounts);
-            setChain();
+        // now that we are connected, update the button
+        setButtonName();
 
-            // now that we are connected, hide the button
-            $('#connect-btn').hide();
+        // set the provider to ethereum
+        provider = new ethers.providers.Web3Provider(window.ethereum);
 
-            // set the cookie
-            Cookies.set('provider', 'mm');
+        // set the cookie
+        Cookies.set('provider', 'mm');
 
-            // setup the provider
-            setupProvider();
+        // setup the provider
+        setupProvider();
 
-        })
-        .catch((err) => {
-          if (err.code === 4001) {
-            // EIP-1193 userRejectedRequest error
-            // If this happens, the user rejected the connection request.
-            alert('Please connect wallet.');
-          } else {
-            alert(err);
-          }
-        });
-  }
+    })
+    .catch((err) => {
+      if (err.code === 4001) {
+        // EIP-1193 userRejectedRequest error
+        // If this happens, the user rejected the connection request.
+        alert('Please connect wallet.');
+      } else {
+        alert(err);
+      }
+    });
 }
 
 async function connectWalletConnect() {
@@ -92,10 +90,25 @@ async function connectWalletConnect() {
 
     // setup the provider
     setupProvider();
+
   });
 
 }
 
+
+// abbreviate an account
+function setButtonName()
+{
+    var name;
+    var start;
+    var end;
+
+    start = CURRENT_ACCOUNT.substr(0, 5);
+    end = CURRENT_ACCOUNT.substr(window.ethereum.selectedAddress.length - 5);
+    name = start + '...' + end;
+
+    $('#connect-wallet').text(name);
+}
 
 // For now, 'eth_accounts' will continue to always return an array
 function handleAccountsChanged(accounts) {
@@ -103,11 +116,14 @@ function handleAccountsChanged(accounts) {
     // MetaMask is locked or the user has not connected any accounts
 
     // show the connect button
-    $('#connect-btn').show();
+    $('#connect-wallet').show();
 
   } else {
-    // hide the button
-    $('#connect-btn').hide();
+    // set the current account
+    CURRENT_ACCOUNT = accounts[0];
+
+    // update the button
+    setButtonName();
   }
 }
 
@@ -147,18 +163,13 @@ async function loadDocument() {
         p.enable().then(function () {
             // set the provider to wallet connect
             provider = new ethers.providers.Web3Provider(p);
+            setupProvider();
         });
     }
     else
     {
         // no provider
         return;
-    }
-
-    // hide the conenct wallet button if the user is already logged in
-    if (provider.provider.selectedAddress != null)
-    {
-        $('#connect-btn').hide();
     }
 
     // setup the provider
@@ -168,18 +179,19 @@ async function loadDocument() {
 // only set up the document if the window is ethereum
 async function setupProvider()
 {
-  /**********************************************************/
-  /* Handle chain (network) and chainChanged (per EIP-1193) */
-  /**********************************************************/
-  provider.on('chainChanged', handleChainChanged);
 
 
-  /***********************************************************/
-  /* Handle user accounts and accountsChanged (per EIP-1193) */
-  /***********************************************************/
-  if (Cookies.get('provider') == 'mm')
-  {
-      window.ethereum
+    /***********************************************************/
+    /* Handle user accounts and accountsChanged (per EIP-1193) */
+    /***********************************************************/
+    if (Cookies.get('provider') == 'mm')
+    {
+        /**********************************************************/
+        /* Handle chain (network) and chainChanged (per EIP-1193) */
+        /**********************************************************/
+        window.ethereum.on('chainChanged', handleChainChanged);
+
+        window.ethereum
         .request({ method: 'eth_accounts' })
         .then(handleAccountsChanged)
         .catch((err) => {
@@ -188,12 +200,16 @@ async function setupProvider()
           // eth_accounts will return an empty array.
           console.error(err);
         });
-  }
 
-  // Note that this event is emitted on page load.
-  // If the array of accounts is non-empty, you're already
-  // connected.
-  provider.on('accountsChanged', handleAccountsChanged);
+        // Note that this event is emitted on page load.
+        // If the array of accounts is non-empty, you're already
+        // connected.
+        window.ethereum.on('accountsChanged', handleAccountsChanged);
+    }
+
+
+    // hide the modal
+    $('#connect-wallet-modal').hide();
 }
 
 
