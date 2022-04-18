@@ -21,6 +21,8 @@ contract AvvenireCitizenMarket is
     // store the avvenireCitizensData contract
     AvvenireCitizensMappingsInterface public avvenireCitizensData;
 
+    AvvenireTraitsInterface public avvenireTraits;
+
     bool isStopped = false;
 
     // struct for storing a trait change
@@ -52,6 +54,7 @@ contract AvvenireCitizenMarket is
      */
     constructor(
         address avvenireCitizensContractAddress,
+        address avvenireTraitsAddress,
         address avvenireCitizensDataAddress
     ) Ownable() {
         avvenireCitizens = AvvenireCitizensInterface(
@@ -60,6 +63,8 @@ contract AvvenireCitizenMarket is
         avvenireCitizensData = AvvenireCitizensMappingsInterface(
             avvenireCitizensDataAddress
         );
+
+        avvenireTraits = AvvenireTraitsInterface(avvenireTraitsAddress);
     }
 
     /**
@@ -266,9 +271,9 @@ contract AvvenireCitizenMarket is
             }
 
             // mint the citzens --> this will only set ownership, will not indicate how to set traits and sexes
-            uint256 startTokenId = avvenireCitizens.getTotalSupply();
-            avvenireCitizens.safeMint(tx.origin, toMint);
-            avvenireCitizens.setOwnersExplicit(toMint);
+            uint256 startTokenId = avvenireTraits.getTotalSupply();
+            avvenireTraits.safeMint(tx.origin, toMint);
+            avvenireTraits.setOwnersExplicit(toMint);
 
             // this can be implied with toMint, as we minted exactly that many
             // uint256 pastLimit = avvenireCitizens.getTotalSupply();
@@ -314,7 +319,7 @@ contract AvvenireCitizenMarket is
             // in an accessory (tattoo) contract, if the token URIs are set, we can set those here too, but we don't have them for freshly minted tokens (as the trait's values, not types, are on ipfs and have NO relation to the tokenId)
             // would need to manufacture a relationship between token id and trait uri to bind the uri here
             // still need to update the uri, so keep the update as true
-            avvenireCitizens.setTraitData(_trait, true);
+            avvenireTraits.setTraitData(_trait, true);
         }
     }
 
