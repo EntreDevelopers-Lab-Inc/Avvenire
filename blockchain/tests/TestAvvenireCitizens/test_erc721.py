@@ -4,6 +4,7 @@ from brownie import (
     AvvenireCitizens,
     AvvenireCitizenMarket,
     AvvenireCitizensData,
+    AvvenireTraits, 
     testAvvenireBurn,
     accounts,
     exceptions,
@@ -131,5 +132,19 @@ def test_burn_wrong_account(burn_setup):
         burn_test_contract.burnToken(0, {"from": other_account})
     
     
+def test_safe_mint_from_individual():
+    citizens_contract = AvvenireCitizens[-1]
+    traits_contract = AvvenireTraits[-1]
     
+    admin_account = get_account()
+    random_account = accounts[5]
+    citizens_contract.setAllowedPermission(random_account, True, {"from": admin_account})
+    traits_contract.setAllowedPermission(random_account, True, {"from": admin_account})
+    
+    with brownie.reverts():
+        citizens_contract.safeMint(random_account.address, 1, {"from": random_account})
+    
+    with brownie.reverts():
+        traits_contract.safeMint(random_account.address, 1, {"from": random_account})
+        
     

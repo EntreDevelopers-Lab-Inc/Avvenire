@@ -66,6 +66,19 @@ contract AvvenireTraits is
         _;
     }
 
+    /**
+     * @notice sets an address's allowed list permission (for future interaction)
+     * @param address_ is the address to set the data for
+     * @param setting is the boolean for the data
+     */
+    function setAllowedPermission(address address_, bool setting)
+        external
+        onlyOwner
+    {
+        allowedContracts[address_] = setting;
+    }
+
+
      /**
      * @notice returns the tokenURI of a token id (overrides ERC721 function)
      * @param tokenId allows the user to request the tokenURI for a particular token id

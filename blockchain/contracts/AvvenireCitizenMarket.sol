@@ -54,7 +54,7 @@ contract AvvenireCitizenMarket is
      */
     constructor(
         address avvenireCitizensContractAddress,
-        address avvenireTraitsAddress,
+        address avvenireTraitsContractAddress,
         address avvenireCitizensDataAddress
     ) Ownable() {
         avvenireCitizens = AvvenireCitizensInterface(
@@ -64,7 +64,7 @@ contract AvvenireCitizenMarket is
             avvenireCitizensDataAddress
         );
 
-        avvenireTraits = AvvenireTraitsInterface(avvenireTraitsAddress);
+        avvenireTraits = AvvenireTraitsInterface(avvenireTraitsContractAddress);
     }
 
     /**
