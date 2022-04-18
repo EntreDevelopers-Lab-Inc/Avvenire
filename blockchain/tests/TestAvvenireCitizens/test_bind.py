@@ -81,10 +81,7 @@ def test_bind_existing_token():
     # put on default body
     drop_interval(1)
     print(data_contract.getCitizen(0))
-    time.sleep(1)
-    tx = market_contract.combine(0, male_trait_changes, {"from": account})
-    tx.wait(1)
-    time.sleep(1)
+    market_contract.combine(0, male_trait_changes, {"from": account})
 
     # make sure that the trait came off of the citizen
     assert data_contract.getCitizen(0)[4][1][2] is False
@@ -131,8 +128,7 @@ def test_bind_existing_token():
     ]
 
     # put on the new body
-    tx = market_contract.combine(1, male_trait_changes, {"from": account})
-    tx.wait(1)
+    market_contract.combine(1, male_trait_changes, {"from": account})
 
     # make sure that the trait is on the citizen
     assert data_contract.getCitizen(1)[4][1][0] == new_trait_id
@@ -192,8 +188,7 @@ def test_attaching_unowned_existing_trait():
     ]
 
     # put on default body
-    tx = market_contract.combine(0, male_trait_changes, {"from": trait_owner})
-    tx.wait(1)
+    market_contract.combine(0, male_trait_changes, {"from": trait_owner})
 
     # make sure that the trait came off of the citizen
     assert data_contract.getCitizen(0)[4][1][2] is False
@@ -237,8 +232,7 @@ def test_attaching_unowned_existing_trait():
     # Attempt to put the new trait on citizen #3 which accounts[3] owns
     # It should revert considering accounts[3] does not own the trait
     with brownie.reverts():
-        tx = market_contract.combine(3, male_trait_changes, {"from": other_account})
-        tx.wait(1)
+        market_contract.combine(3, male_trait_changes, {"from": other_account})
 
     # Assert that no changes have been made
     assert data_contract.getCitizen(3)[4][1][0] == 0
@@ -271,8 +265,7 @@ def test_binding_wrong_trait_type():
     ]
 
     # put on default body
-    tx = market_contract.combine(0, male_trait_changes, {"from": account})
-    tx.wait(1)
+    market_contract.combine(0, male_trait_changes, {"from": account})
 
     # make sure that the trait came off of the citizen
     assert data_contract.getCitizen(0)[4][2][2] is False
@@ -398,8 +391,7 @@ def test_transfer_trait_then_combine():
         [0, False, 1, 11],
     ]
     # put on the new body
-    tx = market_contract.combine(3, male_trait_changes, {"from": other_account})
-    tx.wait(1)
+    market_contract.combine(3, male_trait_changes, {"from": other_account})
 
     # make sure that the trait is on the citizen
     assert data_contract.getCitizen(3)[4][9][0] == new_trait_id
@@ -473,8 +465,7 @@ def test_wrong_sex():
     ]
 
     # put on default hair
-    tx = market_contract.combine(0, male_trait_changes, {"from": account})
-    tx.wait(1)
+    market_contract.combine(0, male_trait_changes, {"from": account})
 
     # make sure that the trait came off of the citizen
     assert citizens_contract.getCitizen(0)[4][9][3] is False

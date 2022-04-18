@@ -34,6 +34,7 @@ def test_set_trait_data(single_mint):
 
     # Admin account should be "Allowed Contract"
 
+    
 
 
 # *** MISC SETTERS ****

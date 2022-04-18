@@ -3,7 +3,6 @@ from brownie import (
     AvvenireCitizens,
     AvvenireCitizenMarket,
     AvvenireCitizensData,
-    AvvenireTraits,
     network,
     chain,
 )
@@ -52,33 +51,12 @@ def deploy_contract(
         {"from": account},
     )
     
-        # constructor(
-        # string memory ERC721Name_,
-        # string memory ERC721AId_,
-        # string memory baseURI_,
-        # string memory loadURI_,
-        # address dataContractAddress_
-    
-    avvenire_traits_contract = AvvenireTraits.deploy(
-        "AvvenireTraits",
-        "AVT",
-        "",
-        "",
-        AvvenireCitizensData[-1].address,
-        {"from": account}
-    )
-    
     avvenire_data_contract.setAllowedPermission(AvvenireCitizens[-1].address, True, {"from": account})
-    avvenire_data_contract.setAllowedPermission(AvvenireTraits[-1].address, True, {"from": account})
 
     avvenire_market_contract = AvvenireCitizenMarket.deploy(
-        AvvenireCitizens[-1].address, 
-        AvvenireTraits[-1].address,
-        AvvenireCitizensData[-1].address, 
-        {"from": account}
-        )
+        AvvenireCitizens[-1].address, AvvenireCitizensData[-1].address, {"from": account})
 
-    avvenire_auction_contract = AvvenireTest.deploy(
+    avvenire_contract = AvvenireTest.deploy(
         max_per_address_during_auction,
         max_per_address_during_whitelist,
         collection_size,
@@ -96,10 +74,6 @@ def deploy_contract(
     )
 
     avvenire_citizens_contract.setAllowedPermission(
-        AvvenireCitizenMarket[-1].address, True, {"from": account}
-    )
-    
-    avvenire_traits_contract.setAllowedPermission(
         AvvenireCitizenMarket[-1].address, True, {"from": account}
     )
     
