@@ -1,9 +1,10 @@
 let CURRENT_ACCOUNT = null;
+var provider;
 
 // set the chain
 async function setChain() {
     try {
-      await window.ethereum.request({
+      await provider.request({
         method: 'wallet_switchEthereumChain',
         params: [{ chainId: CHAIN_ID_STR }],
       });
@@ -12,7 +13,7 @@ async function setChain() {
       // This error code indicates that the chain has not been added to MetaMask.
       if (switchError.code === 4902) {
         try {
-          await window.ethereum.request({
+          await provider.request({
             method: 'wallet_addEthereumChain',
             params: [
               {
@@ -38,14 +39,11 @@ async function setChain() {
 // any buttons the user can click to initiate the request.
 // MetaMask will reject any additional requests while the first is still
 // pending.
-function connect() {
-  if (window.ethereum == undefined)
-  {
-    alert('No wallet found,.')
-    return;
-  }
+async function connectEthereum() {
+  // set the provider to ethereum
+  provider = window.ethereum;
 
-  window.ethereum
+  provider
     .request({ method: 'eth_requestAccounts' })
     .then(handleAccountsChanged)
     .catch((err) => {
@@ -62,6 +60,21 @@ function connect() {
 
     // now that we are connected, hide the button
     $('#connect-btn').hide();
+}
+
+async function connectWalletConnect() {
+  //  Create WalletConnect Provider
+  const p = new WalletConnectProvider.default({
+    chainId: CHAIN_ID_INT,
+    infuraId: "27e484dcd9e3efcfd25a83a78777cdf1",
+  });
+
+  //  Enable session (triggers QR Code modal)
+  await p.enable();
+
+  // bind the provider to wallet connect
+  provider = new ethers.providers.Web3Provider(p);
+
 }
 
 
@@ -91,18 +104,23 @@ async function handleChainChanged(_chainId) {
 
 // make a document load function
 async function loadDocument() {
+    // check if the provider even exists
+    if (provider == undefined)
+    {
+      return;
+    }
 
     // hide the conenct wallet button if the user is already logged in
-    if (window.ethereum.selectedAddress != null)
+    if (provider.selectedAddress != null)
     {
         $('#connect-btn').hide();
     }
 
     // check if the user is conected (and connect if necessary)
-    if (!window.ethereum.isConnected())
+    if (!provider.isConnected())
     {
       // prompt the user to change their chain if it is incorrect
-      if (window.ethereum.chainId != CHAIN_STRING)
+      if (provider.chainId != CHAIN_STRING)
       {
         setChain();
       }
@@ -110,19 +128,19 @@ async function loadDocument() {
 }
 
 // only set up the document if the window is ethereum
-if (window.ethereum != undefined)
+if (provider != undefined)
 {
   /**********************************************************/
   /* Handle chain (network) and chainChanged (per EIP-1193) */
   /**********************************************************/
-  window.ethereum.on('chainChanged', handleChainChanged);
+  provider.on('chainChanged', handleChainChanged);
 
 
   /***********************************************************/
   /* Handle user accounts and accountsChanged (per EIP-1193) */
   /***********************************************************/
 
-  window,ethereum
+  provider
     .request({ method: 'eth_accounts' })
     .then(handleAccountsChanged)
     .catch((err) => {
@@ -135,7 +153,7 @@ if (window.ethereum != undefined)
   // Note that this event is emitted on page load.
   // If the array of accounts is non-empty, you're already
   // connected.
-  window.ethereum.on('accountsChanged', handleAccountsChanged);
+  provider.on('accountsChanged', handleAccountsChanged);
 
   // call the load document function
   loadDocument();

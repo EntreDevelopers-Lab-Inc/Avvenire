@@ -22,15 +22,6 @@
       <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/slick-carousel/1.5.8/slick-theme.min.css">
       <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/slick-carousel/1.5.8/slick.css">
 
-
-      <!-- jQuery js -->
-      <script src="{{url_for('static', filename='js/jquery.min.js')}}">
-      </script>
-      <!-- ethers js -->
-      <script src="https://cdn.ethers.io/lib/ethers-5.4.umd.min.js" type="application/javascript"></script>
-      <!--constants.js-->
-      <script src="{{url_for('static', filename='js/constants.js')}}"></script>
-
       <!-- <style>
             .slick-carousel {
                margin: 0 auto;
@@ -155,6 +146,13 @@
       </footer>
       <!-- ##### Footer Area End ##### -->
       <!-- ########## All JS ########## -->
+      <!-- jQuery js -->
+      <script src="{{url_for('static', filename='js/jquery.min.js')}}">
+      </script>
+      <!-- ethers js -->
+      <script src="https://cdn.ethers.io/lib/ethers-5.4.umd.min.js" type="application/javascript"></script>
+      <!--constants.js-->
+      <script src="{{url_for('static', filename='js/constants.js')}}"></script>
       <!-- Popper js -->
       <script src="{{url_for('static', filename='js/popper.min.js')}}">
       </script>
@@ -169,9 +167,14 @@
       <!-- script js -->
       <script src="{{url_for('static', filename='js/script.js')}}">
       </script>
-      <!-- metamask js -->
-      <script src="{{url_for('static', filename='js/connect-wallet/metamask.js')}}">
+      <!--Cookies-->
+      <script src="https://cdn.jsdelivr.net/npm/js-cookie@3.0.1/dist/js.cookie.min.js"></script>
+      <!--wallet connect js-->
+      <script src="{{url_for('static', filename='js/node_modules/@walletconnect/web3-provider/dist/umd/index.min.js')}}"></script>
+      <!-- connect wallet js -->
+      <script src="{{url_for('static', filename='js/connect-wallet/connect-wallet.js')}}">
       </script>
+      {% block scripts %}{% endblock scripts %}
 </body>
 
 </html>

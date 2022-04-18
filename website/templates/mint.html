@@ -97,6 +97,9 @@
  </div>
 </section>
 <!-- ##### Blog Area End ##### -->
+{% endblock content %}
+
+{% block scripts %}
 <!-- contract information -->
 <script src="{{url_for('static', filename='js/mint/contract.js')}}">
 </script>
@@ -106,4 +109,4 @@
 <!-- mint js -->
 <script src="{{url_for('static', filename='js/mint/mint.js')}}">
 </script>
-{% endblock content %}
+{% endblock scripts %}
