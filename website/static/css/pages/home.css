@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 .welcome-img
 {
   max-height: 180px;
@@ -56,3 +57,63 @@
     width: 420px;
   }
 } */
+=======
+.welcome-img
+{
+  max-height: 180px;
+  display: block;
+  margin-left: auto;
+  margin-right: auto;
+}
+
+.welcome-row
+{
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+
+.slick-list
+{
+  margin-left: 4%;
+}
+
+@media only screen and (max-width: 765px) {
+    .slick-dots{
+        bottom: -85px;
+        width: 100%;
+    }
+    .slickSlider{
+        max-width: 320px;
+    }
+}
+
+@media only screen and (max-width: 766px) {
+    /* .card-img-top{
+        width: 74%;
+    } */
+    .slick-slider {
+        margin: 0;
+    }
+}
+
+/* .slick-prev{
+  display: none;
+}
+
+@media only screen and (max-width: 480px) {
+  .container {
+    padding-left: 60px;
+  }
+  .slick-prev:before {
+    display: none;
+  }
+}
+
+@media only screen and (max-width: 800px) {
+  .slick-current{
+    width: 420px;
+  }
+} */
+>>>>>>> beta

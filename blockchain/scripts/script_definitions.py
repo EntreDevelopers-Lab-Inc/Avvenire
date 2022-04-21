@@ -25,7 +25,7 @@ WHITELIST_DISCOUNT = 0.7
 # Deployment Script
 # Implementation can be changed so that specifications are passed as params instead of intiialized within the function
 def deploy_contract(
-    max_per_address_during_auctioin,
+    max_per_address_during_auction,
     max_per_address_during_whitelist,
     collection_size,
     amount_for_auction_and_team,
@@ -57,7 +57,7 @@ def deploy_contract(
         AvvenireCitizens[-1].address, AvvenireCitizensData[-1].address, {"from": account})
 
     avvenire_contract = AvvenireTest.deploy(
-        max_per_address_during_auctioin,
+        max_per_address_during_auction,
         max_per_address_during_whitelist,
         collection_size,
         amount_for_auction_and_team,
@@ -78,7 +78,7 @@ def deploy_contract(
     )
     
     server_account = get_server_account()
-    avvenire_data_contract.setServer(server_account)
+    avvenire_data_contract.setServer(server_account, {"from": account})
 
 
 # Logistic Functions*

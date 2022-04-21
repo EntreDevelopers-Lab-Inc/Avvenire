@@ -16,7 +16,7 @@ from scripts.helpful_scripts import (
 
 import time
 
-SALE_START_TIME = 10
+SALE_START_TIME = 0
 PUBLIC_SALE_START_TIME = 120
 PUBLIC_SALE_KEY = 12345
 DEV_PAYMENT = Web3.toWei(0.02, "ether")
@@ -97,3 +97,10 @@ def end_auction_and_enable_changes():
     # set mutability mode to true and end the character mint
     avvenire_citizens_contract.setMutabilityMode(True, {"from": admin_account})
     avvenire_citizens_contract.setCitizenMintActive(False, {"from": admin_account})
+
+
+def main():
+    auction_contract = AvvenireTest[-1]
+    account = get_account()
+    whitelist = ['0xEE5d2a730868D1af42246c78594C2Fcbf8fBa382']
+    auction_contract.seedWhitelist(whitelist, {"from": account})

@@ -2,7 +2,7 @@ import brownie
 
 
 from web3 import Web3
-from brownie import network, chain, AvvenireTest, AvvenireCitizens, AvvenireCitizenMarket
+from brownie import network, chain, AvvenireTest, AvvenireCitizens, AvvenireCitizenMarket, AvvenireCitizensData
 from scripts.helpful_scripts import get_account
 
 from tools.ChainHandler import CitizenMarketBroker
@@ -31,19 +31,18 @@ def mint_citizens_and_end(amount, account):
 
 # mint and initialize
 def mint_citizens_and_initialize(amount, account):
+    data_contract = AvvenireCitizensData[-1]
     avvenire_citizens_contract = AvvenireCitizens[-1]
-
-    mint_citizens_and_end(amount, account)
-
-    admin_account = get_account()
-    avvenire_citizens_contract.setOwnersExplicit(
-        amount, {"from": admin_account})
-
-    # initialize citizens
+    
+    mint_citizens(amount, account)
+    
+    # avvenire_citizens_contract.setOwnersExplicit(amount, {"from": admin_account})
+    
+    start_index = avvenire_citizens_contract.getTotalSupply() - amount
+    # initialize citizen 0
     for i in range(amount):
         # request initialization
 
         # set the citizen's sex
-        broker = CitizenMarketBroker(
-            avvenire_citizens_contract, i + start_index)
+        broker = CitizenMarketBroker(data_contract, i + start_index)
         broker.set_sex()
