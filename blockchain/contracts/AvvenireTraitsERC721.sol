@@ -14,6 +14,7 @@ import "@openzeppelin/contracts/utils/Strings.sol";
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 
 error NotSender();
+error ChangeAlreadyRequested();
 
 contract AvvenireTraits is
     Ownable,
@@ -21,6 +22,8 @@ contract AvvenireTraits is
     ERC721AOwnersExplicit,
     AvvenireTraitsInterface
     {
+
+        event ChangeRequested(uint256 tokenId, address contractAddress, address sender);
 
         string baseURI; // a uri for minting, but this allows the contract owner to change it later
         string public loadURI; // a URI that the NFT will be set to while waiting for changes
@@ -93,7 +96,7 @@ contract AvvenireTraits is
         if (!_exists(tokenId)) revert URIQueryForNonexistentToken(); // error from ERC721A
 
         // if a change has been requested, only show the loading URI
-        if (avvenireCitizensData.getTokenChangeRequest(tokenId)) {
+        if (avvenireCitizensData.getTraitChangeRequest(tokenId)) {
             return loadURI;
         }
 
@@ -119,7 +122,7 @@ contract AvvenireTraits is
         avvenireCitizensData.setTrait(trait);
 
         // set the token change data
-        avvenireCitizensData.setTokenChangeRequest(trait.tokenId, changeUpdate);
+        avvenireCitizensData.setTraitChangeRequest(trait.tokenId, changeUpdate);
     }
 
     /**
@@ -225,6 +228,35 @@ contract AvvenireTraits is
         return totalSupply();
     }
 
+    /**
+     * @notice Requests a change for a token
+     * @param tokenId allows the user to request a change using their token id
+     */
+    function requestChange(uint256 tokenId) external payable callerIsAllowed {
+        // check if you can even request changes at the moment
+        // require(mutabilityConfig.mutabilityMode, "Tokens immutable");
+
+        // check if the token exists
+        if (!_exists(tokenId)) revert URIQueryForNonexistentToken();
+
+        // check that this is the rightful token owner
+        require(ownerOf(tokenId) == tx.origin, "Not owner");
+
+        // check if the token has already been requested to change
+        if (avvenireCitizensData.getTraitChangeRequest(tokenId)) revert ChangeAlreadyRequested();
+
+        _requestChange(tokenId); // call the internal function
+    }
+
+    function _requestChange(uint256 tokenId) internal {
+        // set the token as requested to change (don't change the URI, it's a waste of gas --> will be done once in when the admin sets the token uri)
+
+        // ** Decided to get rid of this revert statement ** 
+        // if (msg.value < getChangeCost()) revert InsufficcientFunds();
+        avvenireCitizensData.setTraitChangeRequest(tokenId, true);
+        emit ChangeRequested(tokenId, msg.sender, tx.origin);
+    }
+
     
     /**
      * @notice This overrides the token transfers to check some conditions
@@ -303,7 +335,6 @@ contract AvvenireTraits is
 
                     // everytime a new trait is created, a change must be requested, as there is no data bound to it yet
                     _requestChange(tokenId);
-                
             }
 
         } // end of for loop

@@ -268,7 +268,7 @@ class CitizenMarketBroker:
         citizen = self.get_citizen()
 
         # check to make sure that the citizen has a change requested
-        if not self.data_contract.getTokenChangeRequest(self.citizen_id):
+        if not self.data_contract.getCitizenChangeRequest(self.citizen_id):
             print(f"No change was requested for citizen {self.citizen_id}")
 
         # get all the existing traits from ipfs (these will be integers)

@@ -35,8 +35,11 @@ contract AvvenireCitizensData is
     // mapping for allowing other contracts to interact with this one
     mapping(address => bool) private allowedContracts;
 
-    // mapping for token change requests
-    mapping(uint256 => bool) public tokenChangeRequests;
+    // mapping for citizen change requests
+    mapping(uint256 => bool) public citizenChangeRequests;
+
+    // mapping for trait change requests 
+    mapping(uint256 => bool) public traitChangeRequests;
 
     // Address for server 
     address private serverAddress; 
@@ -59,18 +62,27 @@ contract AvvenireCitizensData is
         serverAddress = _server;
     }
 
-    function setTokenChangeRequest(uint256 tokenId, bool changeRequest) external callerIsAllowed {
-        tokenChangeRequests[tokenId] = changeRequest;
+    function setCitizenChangeRequest(uint256 citizenId, bool changeRequest) external callerIsAllowed {
+        citizenChangeRequests[citizenId] = changeRequest; 
     }
 
-    function getTokenChangeRequest(uint256 tokenId) external view returns(bool)  {
-        return tokenChangeRequests[tokenId];
+    function getCitizenChangeRequest(uint256 citizenId) external view returns(bool)  {
+        return citizenChangeRequests[citizenId]; 
+    }
+
+    function setTraitChangeRequest (uint256 traitId, bool changeRequest) external callerIsAllowed {
+        traitChangeRequests[traitId] = changeRequest; 
+    }
+
+    function getTraitChangeRequest(uint256 citizenId) external view returns(bool)  {
+        return traitChangeRequests[citizenId]; 
     }
 
     /**
      * @notice trait setter function 
      * @param _trait the trait to store
      */ 
+
     function setTrait (Trait memory _trait) external callerIsAllowed {
         tokenIdToTrait[_trait.tokenId] = _trait; 
         emit SetTrait(_trait.tokenId);
@@ -97,12 +109,12 @@ contract AvvenireCitizensData is
     function updateTraitSexAndURI(uint256 traitId, Sex _sex, string memory _uri) external callerIsServer {
         tokenIdToTrait[traitId].uri = _uri;
         tokenIdToTrait[traitId].sex = _sex;
-        tokenChangeRequests[traitId] = false; 
+        traitChangeRequests[traitId] = false;
     }
 
     function updateCitizenURI(uint256 citizenId, string memory _uri) external callerIsServer {
         tokenIdToCitizen[citizenId].uri = _uri;
-        tokenChangeRequests[citizenId] = false; 
+        citizenChangeRequests[citizenId] = false; 
     }
 
     function setCitizenSex(uint256 citizenId, Sex _sex) external callerIsServer {

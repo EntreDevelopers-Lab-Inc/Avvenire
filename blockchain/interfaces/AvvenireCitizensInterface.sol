@@ -29,8 +29,6 @@ interface AvvenireCitizensInterface is AvvenireCitizenDataInterface, IERC721 {
 
     function getMutabilityMode() external view returns (bool);
 
-    function getCitizenMintActive() external view returns (bool);
-
     function bind(
         uint256,
         uint256,
@@ -81,8 +79,12 @@ interface AvvenireCitizensMappingsInterface is AvvenireCitizenDataInterface {
 
     function isCitizenInitialized(uint256) external view returns (bool);
 
-    function setTokenChangeRequest(uint256, bool) external;
+    function setCitizenChangeRequest(uint256, bool) external;
 
-    function getTokenChangeRequest(uint256) external view returns(bool);
+    function getCitizenChangeRequest(uint256) external view returns(bool);
+ 
+    function setTraitChangeRequest (uint256, bool) external;
+
+    function getTraitChangeRequest(uint256) external view returns(bool);
 }
 

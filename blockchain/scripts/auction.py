@@ -98,7 +98,6 @@ def end_auction_and_enable_changes():
 
     # set mutability mode to true and end the character mint
     avvenire_citizens_contract.setMutabilityMode(True, {"from": admin_account})
-    avvenire_citizens_contract.setCitizenMintActive(False, {"from": admin_account})
 
 
 def main():

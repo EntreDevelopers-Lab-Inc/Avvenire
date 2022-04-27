@@ -17,7 +17,7 @@ error TraitTypeDoesNotExist();
 error TransferFailed();
 error ChangeAlreadyRequested();
 error NotSender();
-error InsufficcientFunds();
+// error InsufficcientFunds();
 
 // token mutator changes the way that an ERC721A contract interacts with tokens
 contract AvvenireCitizens is
@@ -33,11 +33,7 @@ contract AvvenireCitizens is
     event TraitNonTransferrable(uint256 tokenId);
     event TraitBound(uint256 citizenId, uint256 traitId, TraitType traitType);
     event MutabilityModeConfigured(bool configuration);
-    event CitizenMintActivityConfigured(bool configuration);
     event MutabilityCostConfigured(uint256 configuration);
-
-    // mint information (whether or not the platform is minting citizens)
-    bool public citizenMintActive; // this defaults to true, as the platform needs to mint citizens before allowing tradable traits
 
     string baseURI; // a uri for minting, but this allows the contract owner to change it later
     string public loadURI; // a URI that the NFT will be set to while waiting for changes
@@ -86,9 +82,6 @@ contract AvvenireCitizens is
 
         allowedContracts[msg.sender] = true;
 
-        // Set mint to true
-        citizenMintActive = true;
-
         // set the dev address for royalties and payment
         devConfig.devAddress = devAddress_;
 
@@ -133,7 +126,7 @@ contract AvvenireCitizens is
         if (!_exists(tokenId)) revert URIQueryForNonexistentToken(); // error from ERC721A
 
         // if a change has been requested, only show the loading URI
-        if (avvenireCitizensData.getTokenChangeRequest(tokenId)) {
+        if (avvenireCitizensData.getCitizenChangeRequest(tokenId)) {
             return loadURI;
         }
 
@@ -168,16 +161,17 @@ contract AvvenireCitizens is
         require(ownerOf(tokenId) == tx.origin, "Not owner");
 
         // check if the token has already been requested to change
-        if (avvenireCitizensData.getTokenChangeRequest(tokenId)) revert ChangeAlreadyRequested();
+        if (avvenireCitizensData.getCitizenChangeRequest(tokenId)) revert ChangeAlreadyRequested();
 
         _requestChange(tokenId); // call the internal function
     }
 
     function _requestChange(uint256 tokenId) internal {
         // set the token as requested to change (don't change the URI, it's a waste of gas --> will be done once in when the admin sets the token uri)
-        if (msg.value < getChangeCost()) revert InsufficcientFunds();
-        avvenireCitizensData.setTokenChangeRequest(tokenId, true);
-        
+
+        // ** Decided to get rid of this revert statement ** 
+        // if (msg.value < getChangeCost()) revert InsufficcientFunds();
+        avvenireCitizensData.setCitizenChangeRequest(tokenId, true);
         emit ChangeRequested(tokenId, msg.sender, tx.origin);
     }
 
@@ -196,7 +190,7 @@ contract AvvenireCitizens is
         avvenireCitizensData.setCitizen(citizen);
 
         // set the token change data
-        avvenireCitizensData.setTokenChangeRequest(citizen.tokenId, changeUpdate);
+        avvenireCitizensData.setCitizenChangeRequest(citizen.tokenId, changeUpdate);
     }
 
     /**
@@ -476,7 +470,7 @@ contract AvvenireCitizens is
         ) {
             // the tokens SHOULD NOT be awaiting a change (you don't want the user to get surprised)
             if (!mutabilityConfig.tradeBeforeChange) {
-                require(!avvenireCitizensData.getTokenChangeRequest(tokenId), "Change already requested");
+                require(!avvenireCitizensData.getCitizenChangeRequest(tokenId), "Change  requested");
             }
 
             // if this is a trait, it must be free to be transferred
@@ -510,33 +504,9 @@ contract AvvenireCitizens is
             tokenId += 1
         ) {
             // check if the token exists in the citizen or trait mapping
-            if (
-                (!avvenireCitizensData.getCitizen(tokenId).exists) &&
-                (!avvenireCitizensData.getTrait(tokenId).exists)
-            ) {
-                // if the token id does not exist, create a new citizen or trait
-                if (citizenMintActive) {
-                    // create a new citizen if the mint is active
-                    createNewCitizen(tokenId);
-                } else {
-                    // create a new trait if the citizen mint is inactive, and there is no trait mapping to the token id
-                    // no way to know the trait type on token transferm so just set it to null
-                    // create a new trait and put it in the mapping --> just set the token id, that it exists and that it is free
-                    Trait memory _trait = Trait({
-                        tokenId: tokenId,
-                        uri: "",
-                        free: true,
-                        exists: true,
-                        sex: Sex.NULL,
-                        traitType: TraitType.NULL,
-                        originCitizenId: 0 // must set the origin citizen to null, as we have no data
-                    });
-
-                    avvenireCitizensData.setTrait(_trait);
-
-                    // everytime a new trait is created, a change must be requested, as there is no data bound to it yet
-                    _requestChange(tokenId);
-                }
+            if (!avvenireCitizensData.getCitizen(tokenId).exists) {
+                // create a new citizen if the mint is active
+                createNewCitizen(tokenId);
             }
 
         } // end of for loop
@@ -601,23 +571,6 @@ contract AvvenireCitizens is
     function setLoadURI(string calldata loadURI_) external onlyOwner {
         // set thte global loadURI to this new loadURI_
         loadURI = loadURI_;
-    }
-
-    /**
-     * @notice a function to toggle the citizen mint
-     * @param citizenMintActive_ as the boolean setting
-     */
-    function setCitizenMintActive(bool citizenMintActive_) external onlyOwner {
-        citizenMintActive = citizenMintActive_;
-
-        emit CitizenMintActivityConfigured(citizenMintActive_);
-    }
-
-    /**
-     * @notice a function to get the citizen mint information
-     */
-    function getCitizenMintActive() public view returns (bool) {
-        return citizenMintActive;
     }
 
     /**
