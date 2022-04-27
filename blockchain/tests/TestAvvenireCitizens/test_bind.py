@@ -89,8 +89,10 @@ def test_bind_existing_token():
     assert data_contract.getCitizen(0)[4][1][2] is False
     assert data_contract.getCitizen(0)[4][1][3] is False
 
-    # set the new trait id
-    new_trait_id = traits_contract.getTotalSupply() - 1
+    # ***
+    # Traits are indexed @ 1...
+    # ***
+    new_trait_id = traits_contract.getTotalSupply()
 
     # Make sure the owner is test account
     assert traits_contract.ownerOf(new_trait_id) == account
@@ -149,8 +151,10 @@ def test_bind_existing_token():
     # Another trait should've been minted
     # ***
 
-    # set the new trait id
-    new_trait_index = traits_contract.getTotalSupply() - 1
+    # ***
+    # Traits are indexed @ 1
+    # *** 
+    new_trait_index = traits_contract.getTotalSupply()
     new_trait_id = traits_contract.getTrait(new_trait_index)[0]
     # Make sure the owners is accounts[2]
     assert traits_contract.ownerOf(new_trait_id) == account

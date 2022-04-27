@@ -301,7 +301,7 @@ contract AvvenireCitizenMarket is
     ) internal {
 
         uint256 tokenId;
-        uint256 startTokenId = avvenireTraits.getTotalSupply() - 1;
+        uint256 startTokenId = avvenireTraits.getTotalSupply() - _toMint;
 
         Trait memory _trait;
 

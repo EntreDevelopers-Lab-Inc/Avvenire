@@ -70,6 +70,13 @@ contract AvvenireTraits is
     }
 
     /**
+     * Starting tokenId must be 1....
+     */
+    function _startTokenId() internal view override returns (uint256) {
+        return 1;
+    }
+
+    /**
      * @notice sets an address's allowed list permission (for future interaction)
      * @param address_ is the address to set the data for
      * @param setting is the boolean for the data
