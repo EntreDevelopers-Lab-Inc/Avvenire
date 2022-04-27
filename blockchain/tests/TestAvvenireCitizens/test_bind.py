@@ -82,18 +82,18 @@ def test_bind_existing_token():
 
     # put on default body
     drop_interval(1)
-    print(data_contract.getCitizen(0))
-    market_contract.combine(0, male_trait_changes, {"from": account})
+    tx = market_contract.combine(0, male_trait_changes, {"from": account})
+    tx.wait(1)
 
     # make sure that the trait came off of the citizen
     assert data_contract.getCitizen(0)[4][1][2] is False
     assert data_contract.getCitizen(0)[4][1][3] is False
 
     # set the new trait id
-    new_trait_id = citizens_contract.getTotalSupply() - 1
+    new_trait_id = traits_contract.getTotalSupply() - 1
 
     # Make sure the owner is test account
-    assert citizens_contract.ownerOf(new_trait_id) == account
+    assert traits_contract.ownerOf(new_trait_id) == account
 
     # check that the new trait has the proper information
     assert data_contract.getTrait(new_trait_id) == (
@@ -150,10 +150,10 @@ def test_bind_existing_token():
     # ***
 
     # set the new trait id
-    new_trait_id = citizens_contract.getTotalSupply() - 1
-
+    new_trait_index = traits_contract.getTotalSupply() - 1
+    new_trait_id = traits_contract.getTrait(new_trait_index)[0]
     # Make sure the owners is accounts[2]
-    assert citizens_contract.ownerOf(new_trait_id) == account
+    assert traits_contract.ownerOf(new_trait_id) == account
 
     # check that the new trait has the proper information
     assert data_contract.getTrait(new_trait_id) == (
@@ -167,6 +167,7 @@ def test_bind_existing_token():
 def test_attaching_unowned_existing_trait():
     market_contract = AvvenireCitizenMarket[-1]
     citizens_contract = AvvenireCitizens[-1]
+    traits_contract = AvvenireTraits[-1]
     data_contract = AvvenireCitizensData[-1]
 
     # use account 2 for the test user
@@ -197,7 +198,8 @@ def test_attaching_unowned_existing_trait():
     assert data_contract.getCitizen(0)[4][1][3] is False
 
     # set the new trait id
-    new_trait_id = citizens_contract.getTotalSupply() - 1
+    new_trait_index = traits_contract.getTotalSupply() - 1
+    new_trait_id = traits_contract.getTrait(new_trait_index)[0]
 
     # check that the new trait has the proper information
     assert data_contract.getTrait(new_trait_id) == (
@@ -245,6 +247,7 @@ def test_attaching_unowned_existing_trait():
 def test_binding_wrong_trait_type():
     market_contract = AvvenireCitizenMarket[-1]
     citizens_contract = AvvenireCitizens[-1]
+    traits_contract = AvvenireTraits[-1]
     data_contract = AvvenireCitizensData[-1]
 
     # use account 2 for the test user
@@ -274,7 +277,8 @@ def test_binding_wrong_trait_type():
     assert data_contract.getCitizen(0)[4][2][3] is False
 
     # set the new trait id
-    new_trait_id = citizens_contract.getTotalSupply() - 1
+    new_trait_index = traits_contract.getTotalSupply() - 1
+    new_trait_id = traits_contract.getTrait(new_trait_index)[0]
 
     # check that the new trait has the proper information
     assert data_contract.getTrait(new_trait_id) == (
@@ -316,6 +320,7 @@ def test_transfer_trait_then_combine():
     market_contract = AvvenireCitizenMarket[-1]
     citizens_contract = AvvenireCitizens[-1]
     data_contract = AvvenireCitizensData[-1]
+    traits_contract = AvvenireTraits[-1]
 
     # use account 2 for the test user
     account = accounts[2]
@@ -348,7 +353,8 @@ def test_transfer_trait_then_combine():
     assert data_contract.getCitizen(0)[4][9][3] is False
 
     # set the new trait id
-    new_trait_id = citizens_contract.getTotalSupply() - 1
+    new_trait_index = traits_contract.getTotalSupply() - 1
+    new_trait_id = traits_contract.getTrait(new_trait_index)[0]
 
     # Make sure the owners is accounts[2]
     assert citizens_contract.ownerOf(new_trait_id) == account
@@ -446,6 +452,7 @@ def test_wrong_sex():
     market_contract = AvvenireCitizenMarket[-1]
     citizens_contract = AvvenireCitizens[-1]
     data_contract = AvvenireCitizensData[-1]
+    traits_contract = AvvenireTraits[-1]
 
     # use account 2 for the test user
     account = accounts[2]
@@ -473,10 +480,11 @@ def test_wrong_sex():
     assert citizens_contract.getCitizen(0)[4][9][3] is False
 
     # set the new trait id
-    new_trait_id = citizens_contract.getTotalSupply() - 1
+    new_trait_index = traits_contract.getTotalSupply() - 1
+    new_trait_id = traits_contract.getTrait(new_trait_index)[0]
 
     # check that the new trait has the proper information
-    assert citizens_contract.getTrait(new_trait_id) == (
+    assert traits_contract.getTrait(new_trait_id) == (
         new_trait_id, '', True, True, 1, 10, 0)
 
     # update the hair's uri
@@ -484,7 +492,7 @@ def test_wrong_sex():
     new_trait = trait_manager.update_trait()  # this is updating the effect
 
     # check that the new trait was updated
-    assert new_trait == citizens_contract.getTrait(new_trait_id)
+    assert new_trait == traits_contract.getTrait(new_trait_id)
 
     # put the male hair on a female
     female_trait_changes = [

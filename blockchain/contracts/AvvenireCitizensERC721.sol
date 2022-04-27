@@ -143,10 +143,6 @@ contract AvvenireCitizens is
             return avvenireCitizensData.getCitizen(tokenId).uri;
         }
 
-        if (bytes(avvenireCitizensData.getTrait(tokenId).uri).length > 0) {
-            return avvenireCitizensData.getTrait(tokenId).uri;
-        }
-
         // if there is no load uri, citizen uri, or trait uri, just return the base
         return string(abi.encodePacked(baseURI, Strings.toString(tokenId)));
     }
@@ -705,18 +701,6 @@ contract AvvenireCitizens is
     function getCitizen(uint256 tokenId) external view returns (Citizen memory) {
         return avvenireCitizensData.getCitizen(tokenId);
     }
-
-    /**
-     * @notice getter function for trait data
-     * @param tokenId the trait's id
-     */
-    function getTrait(uint256 tokenId) external view returns (Trait memory) {
-        return avvenireCitizensData.getTrait(tokenId);
-    }
-
-    // function setCitizenURI(uint256 tokenId, string memory _uri) external callerIsAllowed {
-        
-    // }
 
     /**
      * @notice a burn function to burn an nft.  The tx.origin must be the owner

@@ -122,6 +122,14 @@ contract AvvenireTraits is
         avvenireCitizensData.setTokenChangeRequest(trait.tokenId, changeUpdate);
     }
 
+    /**
+     * @notice getter function for trait data
+     * @param tokenId the trait's id
+     */
+    function getTrait(uint256 tokenId) external view returns (Trait memory) {
+        return avvenireCitizensData.getTrait(tokenId);
+    }
+
 
     /**
      * @notice external safemint function for allowed contracts
@@ -215,6 +223,90 @@ contract AvvenireTraits is
      */
     function getTotalSupply() external view returns (uint256) {
         return totalSupply();
+    }
+
+    
+    /**
+     * @notice This overrides the token transfers to check some conditions
+     * @param from indicates the previous address
+     * @param to indicates the new address
+     * @param startTokenId indicates the first token id
+     * @param quantity shows how many tokens have been minted
+     */
+    function _beforeTokenTransfers(
+        address from,
+        address to,
+        uint256 startTokenId,
+        uint256 quantity
+    ) internal override {
+        // token id end counter
+        uint256 endTokenId = startTokenId + quantity;
+
+        // iterate over all the tokens
+        for (
+            uint256 tokenId = startTokenId;
+            tokenId < endTokenId;
+            tokenId += 1
+        ) {
+            // the tokens SHOULD NOT be awaiting a change (you don't want the user to get surprised)
+            // if (!mutabilityConfig.tradeBeforeChange) {
+            //     require(!avvenireCitizensData.getTokenChangeRequest(tokenId), "Change  requested");
+            // }
+
+            // if this is a trait, it must be free to be transferred
+            if (avvenireCitizensData.getTrait(tokenId).exists) {
+                require(
+                    avvenireCitizensData.getTrait(tokenId).free, "Trait non-transferrable");
+            }
+
+        } // end of loop
+    }
+
+        /**
+     * @notice This overrides the after token transfers function to create structs and request changes if they are traits
+     * @param from indicates the previous address
+     * @param to indicates the new address
+     * @param startTokenId indicates the first token id
+     * @param quantity shows how many tokens have been minted
+     */
+    function _afterTokenTransfers(
+        address from,
+        address to,
+        uint256 startTokenId,
+        uint256 quantity
+    ) internal override {
+        // token id end counter
+        uint256 endTokenId = startTokenId + quantity;
+
+        // iterate over all the tokens
+        for (
+            uint256 tokenId = startTokenId;
+            tokenId < endTokenId;
+            tokenId += 1
+        ) {
+            // check if the token exists in the citizen or trait mapping
+            if (!avvenireCitizensData.getTrait(tokenId).exists) {
+                    // create a new trait if the citizen mint is inactive, and there is no trait mapping to the token id
+                    // no way to know the trait type on token transferm so just set it to null
+                    // create a new trait and put it in the mapping --> just set the token id, that it exists and that it is free
+                    Trait memory _trait = Trait({
+                        tokenId: tokenId,
+                        uri: "",
+                        free: true,
+                        exists: true,
+                        sex: Sex.NULL,
+                        traitType: TraitType.NULL,
+                        originCitizenId: 0 // must set the origin citizen to null, as we have no data
+                    });
+
+                    avvenireCitizensData.setTrait(_trait);
+
+                    // everytime a new trait is created, a change must be requested, as there is no data bound to it yet
+                    _requestChange(tokenId);
+                
+            }
+
+        } // end of for loop
     }
 
 
