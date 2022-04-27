@@ -5,6 +5,7 @@ import time
 from brownie import (
     AvvenireTest,
     AvvenireCitizens,
+    AvvenireTraits,
     AvvenireCitizenMarket,
     AvvenireCitizensData,
     accounts,
@@ -57,6 +58,7 @@ def auction_set(fn_isolation):
 def test_bind_existing_token():
     market_contract = AvvenireCitizenMarket[-1]
     citizens_contract = AvvenireCitizens[-1]
+    traits_contract = AvvenireTraits[-1]
     data_contract = AvvenireCitizensData[-1]
 
     # use account 2 for the test user

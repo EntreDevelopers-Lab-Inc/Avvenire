@@ -3,6 +3,7 @@ from brownie import (
     AvvenireCitizens,
     AvvenireCitizenMarket,
     AvvenireCitizensData,
+    AvvenireTraits,
     network,
     chain,
 )
@@ -37,8 +38,16 @@ def deploy_contract(
     payment_to_devs_ETH = Web3.toWei(payment_to_devs, "ether")
 
     # if not Web3.isAddress(devAddress):
-    
     avvenire_data_contract = AvvenireCitizensData.deploy({"from": account})
+    
+    avvenire_traits_contract = AvvenireTraits.deploy(
+        "AvvenireTraits",
+        "AVT",
+        "",
+        "",
+        AvvenireCitizensData[-1].address,
+        {"from": account},
+    )
 
     # deploy avvenire citizens contract
     avvenire_citizens_contract = AvvenireCitizens.deploy(
@@ -48,15 +57,18 @@ def deploy_contract(
         "",
         dev_address,
         AvvenireCitizensData[-1].address,
+        AvvenireTraits[-1].address,
         {"from": account},
     )
     
     avvenire_data_contract.setAllowedPermission(AvvenireCitizens[-1].address, True, {"from": account})
+    avvenire_data_contract.setAllowedPermission(AvvenireTraits[-1].address, True, {"from": account})
+    
 
     avvenire_market_contract = AvvenireCitizenMarket.deploy(
-        AvvenireCitizens[-1].address, AvvenireCitizensData[-1].address, {"from": account})
+        AvvenireCitizens[-1].address, AvvenireTraits[-1].address, AvvenireCitizensData[-1].address, {"from": account})
 
-    avvenire_contract = AvvenireTest.deploy(
+    avvenire_auction_contract = AvvenireTest.deploy(
         max_per_address_during_auction,
         max_per_address_during_whitelist,
         collection_size,
@@ -74,6 +86,10 @@ def deploy_contract(
     )
 
     avvenire_citizens_contract.setAllowedPermission(
+        AvvenireCitizenMarket[-1].address, True, {"from": account}
+    )
+    
+    avvenire_traits_contract.setAllowedPermission(
         AvvenireCitizenMarket[-1].address, True, {"from": account}
     )
     

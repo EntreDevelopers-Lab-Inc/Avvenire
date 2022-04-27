@@ -27,8 +27,6 @@ interface AvvenireCitizensInterface is AvvenireCitizenDataInterface, IERC721 {
 
     function setCitizenData(Citizen memory, bool) external;
 
-    function setTraitData(Trait memory, bool) external;
-
     function getMutabilityMode() external view returns (bool);
 
     function getCitizenMintActive() external view returns (bool);
@@ -51,12 +49,21 @@ interface AvvenireCitizensInterface is AvvenireCitizenDataInterface, IERC721 {
     function numberBurned(address) external view returns (uint256);
 }
 
-// interface AvvenireCitizensWithMappingInterface is AvvenireCitizensInterface {
-//     // public mappings that should return information
-//     function tokenIdToCitizen(uint256) external view returns (Citizen memory);
-//     function tokenIdToTrait(uint256) external view returns (Trait memory);
-//     function mutabilityConfig() external view returns (MutabilityConfig memory);
-// }
+interface AvvenireTraitsInterface is AvvenireCitizenDataInterface, IERC721 {
+    function getTotalSupply() external returns (uint256);
+
+    function setTraitData(Trait memory, bool) external;
+
+    function safeMint(address, uint256) external;
+
+    function numberMinted(address) external returns (uint256);
+
+    function setOwnersExplicit(uint256) external;
+
+    function burn(uint256) external;
+
+    function numberBurned(address) external view returns (uint256);
+}
 
 interface AvvenireCitizensMappingsInterface is AvvenireCitizenDataInterface {
 

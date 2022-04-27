@@ -56,8 +56,11 @@ contract AvvenireCitizens is
 
     DevConfig private devConfig; // need to set it this way to avoid stack being too deep
 
-    // Contract containing data
+    // Data contract
     AvvenireCitizensMappingsInterface public avvenireCitizensData;
+
+    // Traits contract
+    AvvenireTraitsInterface public avvenireTraits; 
 
     // mapping for allowing other contracts to interact with this one
     mapping(address => bool) private allowedContracts;
@@ -69,7 +72,8 @@ contract AvvenireCitizens is
         string memory baseURI_,
         string memory loadURI_,
         address devAddress_,
-        address dataContractAddress_
+        address dataContractAddress_, 
+        address traitContractAddress_
     ) ERC721A(ERC721Name_, ERC721AId_) Ownable() {
         // set the mint URI
         baseURI = baseURI_;
@@ -90,6 +94,8 @@ contract AvvenireCitizens is
 
         // Set data contract
         avvenireCitizensData = AvvenireCitizensMappingsInterface(dataContractAddress_);
+
+        avvenireTraits = AvvenireTraitsInterface(traitContractAddress_);
     }
 
     /**
@@ -195,23 +201,6 @@ contract AvvenireCitizens is
 
         // set the token change data
         avvenireCitizensData.setTokenChangeRequest(citizen.tokenId, changeUpdate);
-    }
-
-    /**
-     * @notice set the trait data (id, uri, any traits)
-     * @param trait allows a contract to set the trait's data to new information
-     * @param changeUpdate sets the change data to the correct boolean (allows the option to set the changes to false after something has been updated OR keep it at true if the update isn't done)
-     */
-    function setTraitData(Trait memory trait, bool changeUpdate)
-        external
-        callerIsAllowed
-        stoppedInEmergency
-    {
-        // set the trait data
-        avvenireCitizensData.setTrait(trait);
-
-        // set the token change data
-        avvenireCitizensData.setTokenChangeRequest(trait.tokenId, changeUpdate);
     }
 
     /**
@@ -553,7 +542,8 @@ contract AvvenireCitizens is
                     _requestChange(tokenId);
                 }
             }
-        }
+
+        } // end of for loop
     }
 
     /**

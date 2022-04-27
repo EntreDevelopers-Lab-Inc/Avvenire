@@ -1,4 +1,4 @@
-from brownie import AvvenireTest, AvvenireCitizens, chain, network, accounts
+from brownie import AvvenireTest, AvvenireCitizens, AvvenireTraits, chain, network, accounts
 from web3 import Web3
 
 from constants import BASE_URI, LOAD_URI
@@ -27,9 +27,11 @@ def setup_auction():
     dev_account = get_dev_account()
     deploy_contract(3, 2, 20, 15, 5, dev_account, 2)
     avvenire_citizens_contract = AvvenireCitizens[-1]
-
+    
     avvenire_citizens_contract.setBaseURI(BASE_URI, {"from": admin_account})
     avvenire_citizens_contract.setLoadURI(LOAD_URI, {"from": admin_account})
+    
+    
 
     # Initializations
     set_auction_start_time(SALE_START_TIME)

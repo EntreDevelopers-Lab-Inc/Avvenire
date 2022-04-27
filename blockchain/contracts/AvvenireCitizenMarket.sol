@@ -21,7 +21,9 @@ contract AvvenireCitizenMarket is
     // store the avvenireCitizensData contract
     AvvenireCitizensMappingsInterface public avvenireCitizensData;
 
-    bool isStopped = false;
+    AvvenireTraitsInterface public avvenireTraits; 
+
+    bool isStopped;
 
     // struct for storing a trait change
     struct TraitChange {
@@ -52,11 +54,18 @@ contract AvvenireCitizenMarket is
      */
     constructor(
         address avvenireCitizensContractAddress,
+        address avvenireTraitsContractAddress, 
         address avvenireCitizensDataAddress
     ) Ownable() {
+
+        //Set interface variables to existing contracts...
+
         avvenireCitizens = AvvenireCitizensInterface(
             avvenireCitizensContractAddress
         );
+
+        avvenireTraits = AvvenireTraitsInterface(avvenireTraitsContractAddress);
+
         avvenireCitizensData = AvvenireCitizensMappingsInterface(
             avvenireCitizensDataAddress
         );
@@ -266,15 +275,14 @@ contract AvvenireCitizenMarket is
             }
 
             // mint the citzens --> this will only set ownership, will not indicate how to set traits and sexes
-            uint256 startTokenId = avvenireCitizens.getTotalSupply();
-            avvenireCitizens.safeMint(tx.origin, toMint);
-            avvenireCitizens.setOwnersExplicit(toMint);
+            avvenireTraits.safeMint(tx.origin, toMint);
+            avvenireTraits.setOwnersExplicit(toMint);
 
             // this can be implied with toMint, as we minted exactly that many
             // uint256 pastLimit = avvenireCitizens.getTotalSupply();
 
             // iterate between the start token id and the limit --> set the trait data to the correct citizen, sex, and trait type --> only the URI will need to be set
-            _setTraitData(startTokenId, citizenId, newTraits, toMint);
+            _setTraitData(citizenId, newTraits, toMint);
         }
 
         // add the amount paid to track the total cost
@@ -287,17 +295,19 @@ contract AvvenireCitizenMarket is
     }
 
     function _setTraitData(
-        uint256 _startTokenId,
         uint256 _citizenId,
         TraitChange[11] memory newTraits,
         uint256 _toMint
     ) internal {
+
         uint256 tokenId;
+        uint256 startTokenId = avvenireTraits.getTotalSupply();
+
         Trait memory _trait;
 
         for (uint256 i = 0; i < _toMint; i += 1) {
             // get the old trait information (some has been set already)
-            tokenId = _startTokenId + i;
+            tokenId = startTokenId + i;
 
             _trait = Trait({
                 tokenId: tokenId,
@@ -314,7 +324,7 @@ contract AvvenireCitizenMarket is
             // in an accessory (tattoo) contract, if the token URIs are set, we can set those here too, but we don't have them for freshly minted tokens (as the trait's values, not types, are on ipfs and have NO relation to the tokenId)
             // would need to manufacture a relationship between token id and trait uri to bind the uri here
             // still need to update the uri, so keep the update as true
-            avvenireCitizens.setTraitData(_trait, true);
+            avvenireTraits.setTraitData(_trait, true);
         }
     }
 
