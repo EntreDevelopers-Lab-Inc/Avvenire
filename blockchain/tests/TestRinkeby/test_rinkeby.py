@@ -1,6 +1,6 @@
 import brownie, pytest
 
-from brownie import AvvenireTest, AvvenireCitizenMarket
+from brownie import AvvenireTest, AvvenireCitizenMarket, AvvenireTraits, AvvenireCitizens
 from web3 import Web3
 from pytest import approx
 
@@ -27,11 +27,124 @@ def citizens_minted():
     account = get_dev_account()
     mint_citizens_and_initialize(3, account)
     end_auction_and_enable_changes()
+    
+def test_bind_existing_token(citizens_minted):
+    market_contract = AvvenireCitizenMarket[-1]
+    citizens_contract = AvvenireCitizens[-1]
+    traits_contract = AvvenireTraits[-1]
+    data_contract = AvvenireCitizensData[-1]
+
+    # use account 2 for the test user
+    account = get_dev_account()
+
+    # take off the male body
+    # request from the market to remove the hair of a citizen
+    male_trait_changes = [
+        [0, False, 1, 1],
+        [0, True, 1, 2],  # put on default body
+        [0, False, 1, 3],
+        [0, False, 1, 4],
+        [0, False, 1, 5],
+        [0, False, 1, 6],
+        [0, False, 1, 7],
+        [0, False, 1, 8],
+        [0, False, 1, 9],
+        [0, False, 1, 10],
+        [0, False, 1, 11],
+    ]
+
+    # put on default body
+    drop_interval(1)
+    tx = market_contract.combine(0, male_trait_changes, {"from": account})
+    tx.wait(1)
+
+    # make sure that the trait came off of the citizen
+    assert data_contract.getCitizen(0)[4][1][2] is False
+    assert data_contract.getCitizen(0)[4][1][3] is False
+
+    # ***
+    # Traits are indexed @ 1...
+    # ***
+    new_trait_id = traits_contract.getTotalSupply()
+
+    # Make sure the owner is test account
+    assert traits_contract.ownerOf(new_trait_id) == account
+
+    # check that the new trait has the proper information
+    assert data_contract.getTrait(new_trait_id) == (
+        new_trait_id, '', True, True, 1, 2, 0)
+
+    # update the hair's uri
+    trait_manager = TraitManager(data_contract, new_trait_id)
+    new_trait = trait_manager.update_trait()  # this is updating the effect
+
+    assert new_trait == data_contract.getTrait(new_trait_id)
+
+    # update the male
+    broker = CitizenMarketBroker(data_contract, 0)
+    citizen = broker.update_citizen()
+
+    # ensure that the male on chain is what you set him to
+    assert citizen == data_contract.getCitizen(0)
+
+    new_trait_uri = data_contract.getTrait(new_trait_id)[1]
+
+    # now, put the body on citizen 1
+    male_trait_changes = [
+        [0, False, 1, 1],
+        [new_trait_id, True, 1, 2],  # put on different body
+        [0, False, 1, 3],
+        [0, False, 1, 4],
+        [0, False, 1, 5],
+        [0, False, 1, 6],
+        [0, False, 1, 7],
+        [0, False, 1, 8],
+        [0, False, 1, 9],
+        [0, False, 1, 10],
+        [0, False, 1, 11],
+    ]
+
+    # put on the new body
+    market_contract.combine(1, male_trait_changes, {"from": account})
+
+    # make sure that the trait is on the citizen
+    assert data_contract.getCitizen(1)[4][1][0] == new_trait_id
+    assert data_contract.getCitizen(1)[4][1][1] == new_trait_uri
+    assert data_contract.getCitizen(1)[4][1][2] is False
+    assert data_contract.getCitizen(1)[4][1][3] is True
+
+    # update the information with a new citizen broker
+    broker = CitizenMarketBroker(data_contract, 0)
+    new_citizen = broker.update_citizen()
+
+    # check that the ipfs data made it
+    assert new_citizen == citizens_contract.getCitizen(0)
+
+    # ***
+    # Another trait should've been minted
+    # ***
+
+    # ***
+    # Traits are indexed @ 1
+    # *** 
+    new_trait_id = traits_contract.getTotalSupply()
+
+    # Make sure the owners is accounts[2]
+    assert traits_contract.ownerOf(new_trait_id) == account
+
+    # check that the new trait has the proper information
+    assert data_contract.getTrait(new_trait_id) == (
+        new_trait_id, '', True, True, 1, 2, 1)
+
+    # update the hair's uri
+    trait_manager = TraitManager(data_contract, new_trait_id)
+    new_trait = trait_manager.update_trait()  # this is updating the effect
 
 def test_trait_changes_no_cost(citizens_minted):
     # keep track of the contracts
     market_contract = AvvenireCitizenMarket[-1]
     citizens_contract = AvvenireCitizens[-1]
+    traits_contract = AvvenireTraits[-1]
     data_contract = AvvenireCitizensData[-1]
 
     # use account 2 for the test user
@@ -96,7 +209,8 @@ def test_trait_changes_no_cost(citizens_minted):
     # Check that the new traits have the proper information
     # ***
 
-    end_trait_id = citizens_contract.getTotalSupply() - 1
+    #Traits indexed @ 1
+    end_trait_id = citizens_contract.getTotalSupply() 
     for x in range(len(trait_indexes)):
         assert citizens_contract.getTrait(end_trait_id - x) == (
             end_trait_id - x, 
@@ -171,7 +285,8 @@ def test_trait_changes_no_cost(citizens_minted):
     # Update minted traits
     # ***
     
-    end_trait_id = citizens_contract.getTotalSupply() - 1
+    #traits indexed @ 1
+    end_trait_id = citizens_contract.getTotalSupply() 
     for x in range(len(trait_indexes)):
         assert citizens_contract.getTrait(end_trait_id - x) == (
             end_trait_id - x, 
@@ -277,7 +392,9 @@ def test_trait_changes_with_cost():
     # Check that the new traits have the proper information
     # ***
 
-    end_trait_id = citizens_contract.getTotalSupply() - 1
+    #traits indexed @ 1
+    end_trait_id = citizens_contract.getTotalSupply()
+    
     for x in range(len(trait_indexes)):
         assert citizens_contract.getTrait(end_trait_id - x) == (
             end_trait_id - x, 

@@ -130,6 +130,13 @@ def test_bind_existing_token():
         [0, False, 1, 10],
         [0, False, 1, 11],
     ]
+    
+    print(f"new_trait_id: {new_trait_id}")
+    
+    assert traits_contract.ownerOf(new_trait_id) == account 
+    assert citizens_contract.ownerOf(1) == account 
+    
+    print("GOT TO THIS POINT")
 
     # put on the new body
     market_contract.combine(1, male_trait_changes, {"from": account})
@@ -151,11 +158,11 @@ def test_bind_existing_token():
     # Another trait should've been minted
     # ***
 
-    # ***
-    # Traits are indexed @ 1
     # *** 
-    new_trait_index = traits_contract.getTotalSupply()
-    new_trait_id = traits_contract.getTrait(new_trait_index)[0]
+    # Traits are indexed @ 1
+    # ***
+    new_trait_id = traits_contract.getTotalSupply()
+    
     # Make sure the owners is accounts[2]
     assert traits_contract.ownerOf(new_trait_id) == account
 
@@ -201,9 +208,11 @@ def test_attaching_unowned_existing_trait():
     assert data_contract.getCitizen(0)[4][1][2] is False
     assert data_contract.getCitizen(0)[4][1][3] is False
 
-    # set the new trait id
-    new_trait_index = traits_contract.getTotalSupply() - 1
-    new_trait_id = traits_contract.getTrait(new_trait_index)[0]
+    
+    # *** 
+    # Traits are indexed @ 1
+    # ***
+    new_trait_id = traits_contract.getTotalSupply()
 
     # check that the new trait has the proper information
     assert data_contract.getTrait(new_trait_id) == (
@@ -281,9 +290,12 @@ def test_binding_wrong_trait_type():
     assert data_contract.getCitizen(0)[4][2][3] is False
 
     # set the new trait id
-    new_trait_index = traits_contract.getTotalSupply() - 1
-    new_trait_id = traits_contract.getTrait(new_trait_index)[0]
-
+    
+    # *** 
+    # Traits are indexed @ 1
+    # ***
+    new_trait_id = traits_contract.getTotalSupply()
+    
     # check that the new trait has the proper information
     assert data_contract.getTrait(new_trait_id) == (
         new_trait_id, '', True, True, 1, 2, 0)
@@ -356,9 +368,10 @@ def test_transfer_trait_then_combine():
     assert data_contract.getCitizen(0)[4][9][2] is False
     assert data_contract.getCitizen(0)[4][9][3] is False
 
-    # set the new trait id
-    new_trait_index = traits_contract.getTotalSupply() - 1
-    new_trait_id = traits_contract.getTrait(new_trait_index)[0]
+    # *** 
+    # Traits are indexed @ 1
+    # ***
+    new_trait_id = traits_contract.getTotalSupply()
 
     # Make sure the owners is accounts[2]
     assert citizens_contract.ownerOf(new_trait_id) == account
@@ -483,9 +496,10 @@ def test_wrong_sex():
     # make sure that the trait came off of the citizen
     assert citizens_contract.getCitizen(0)[4][9][3] is False
 
-    # set the new trait id
-    new_trait_index = traits_contract.getTotalSupply() - 1
-    new_trait_id = traits_contract.getTrait(new_trait_index)[0]
+    # *** 
+    # Traits are indexed @ 1
+    # ***
+    new_trait_id = traits_contract.getTotalSupply()
 
     # check that the new trait has the proper information
     assert traits_contract.getTrait(new_trait_id) == (
@@ -520,11 +534,13 @@ def test_trait_changes_no_cost():
     market_contract = AvvenireCitizenMarket[-1]
     citizens_contract = AvvenireCitizens[-1]
     data_contract = AvvenireCitizensData[-1]
+    traits_contract = AvvenireTraits[-1]
+
 
     # use account 2 for the test user
     account = accounts[2]
 
-    supply_before_combine = citizens_contract.getTotalSupply()
+    supply_before_combine = citizens_contract.getTotalSupply() + traits_contract.getTotalSupply()
     
     # take off the male body
     # request from the market to remove the hair of a citizen
@@ -574,15 +590,17 @@ def test_trait_changes_no_cost():
         assert data_contract.getCitizen(0)[4][index][4] == 1
     
     # Make sure that 5 tokens were minted
-    assert citizens_contract.getTotalSupply() - supply_before_combine == 5
+    assert citizens_contract.getTotalSupply() + traits_contract.getTotalSupply() - supply_before_combine == 5
 
     # ***
     # Check that the new traits have the proper information
     # ***
 
-    end_trait_id = citizens_contract.getTotalSupply() - 1
+    # Traits indexed at 1...
+    end_trait_id = citizens_contract.getTotalSupply() 
+    
     for x in range(len(trait_indexes)):
-        assert citizens_contract.getTrait(end_trait_id - x) == (
+        assert traits_contract.getTrait(end_trait_id - x) == (
             end_trait_id - x, 
             "", 
             True, 

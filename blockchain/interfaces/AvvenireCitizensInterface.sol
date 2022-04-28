@@ -61,6 +61,11 @@ interface AvvenireTraitsInterface is AvvenireCitizenDataInterface, IERC721 {
     function burn(uint256) external;
 
     function numberBurned(address) external view returns (uint256);
+
+    function makeTraitTransferable(uint256, bool) external;
+
+    function makeTraitNonTransferrable(uint256) external;
+
 }
 
 interface AvvenireCitizensMappingsInterface is AvvenireCitizenDataInterface {

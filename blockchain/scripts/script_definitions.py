@@ -93,6 +93,10 @@ def deploy_contract(
         AvvenireCitizenMarket[-1].address, True, {"from": account}
     )
     
+    avvenire_traits_contract.setAllowedPermission(
+        AvvenireCitizens[-1].address, True, {"from": account}
+    )
+    
     server_account = get_server_account()
     avvenire_data_contract.setServer(server_account, {"from": account})
 

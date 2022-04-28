@@ -29,8 +29,6 @@ contract AvvenireCitizens is
 {
     // events
     event ChangeRequested(uint256 tokenId, address contractAddress, address sender);
-    event TraitTransferrable(uint256 tokenId);
-    event TraitNonTransferrable(uint256 tokenId);
     event TraitBound(uint256 citizenId, uint256 traitId, TraitType traitType);
     event MutabilityModeConfigured(bool configuration);
     event MutabilityCostConfigured(uint256 configuration);
@@ -254,19 +252,8 @@ contract AvvenireCitizens is
      * @param traitId for locating the trait
      * @param exists for if the trait exists
      */
-    function makeTraitTransferable(uint256 traitId, bool exists) internal {
-        // only execute if the trait exists (want to account for default case)
-        // if the trait doesn't exist yet, you want to mint all of them at once
-        if ((exists) && (traitId != 0)) {
-            // set the ownership to the transaction origin
-            _ownerships[traitId].addr = tx.origin;
-
-            // set the trait to free (should be tradable and combinable)
-            avvenireCitizensData.setTraitFreedom(traitId, true);
-
-            emit TraitTransferrable(traitId);
-        }
-
+    function _makeTraitTransferable(uint256 traitId, bool exists) internal {
+        avvenireTraits.makeTraitTransferable(traitId, exists);
     }
 
     /**
@@ -274,16 +261,8 @@ contract AvvenireCitizens is
      * checks that a trait exists (makes user unable to set a default to a default)
      * @param traitId to indicate which trait to change
      */
-    function makeTraitNonTransferrable(uint256 traitId) internal {
-        require(avvenireCitizensData.getTrait(traitId).exists, "This trait does not exist");
-
-        // set the ownership to null
-        _ownerships[traitId].addr = address(this);
-
-        // set the trait to not free (should not be tradable or combinable any longer)
-        avvenireCitizensData.setTraitFreedom(traitId, false);
-
-        emit TraitNonTransferrable(traitId);
+    function _makeTraitNonTransferrable(uint256 traitId) internal {
+        avvenireTraits.makeTraitNonTransferrable(traitId);
     }
 
     /**
@@ -334,7 +313,7 @@ contract AvvenireCitizens is
             // the trait exists and can be found
 
             // disallow trading of the bound trait
-            makeTraitNonTransferrable(traitId);
+            _makeTraitNonTransferrable(traitId);
             _trait = avvenireCitizensData.getTrait(traitId);
 
             // require that the trait's type is the same type as the trait Id (if the user tries to put traits on the wrong parts of NFTs)
@@ -348,57 +327,57 @@ contract AvvenireCitizens is
         // *** 
         if (traitType == TraitType.BACKGROUND) {
             // make the old trait transferrable
-            makeTraitTransferable(_citizen.traits.background.tokenId, _citizen.traits.background.exists);
+            _makeTraitTransferable(_citizen.traits.background.tokenId, _citizen.traits.background.exists);
             _citizen.traits.background = _trait;
 
         } else if (traitType == TraitType.BODY) {
             // make the old trait transferrable
-            makeTraitTransferable(_citizen.traits.body.tokenId, _citizen.traits.body.exists);
+            _makeTraitTransferable(_citizen.traits.body.tokenId, _citizen.traits.body.exists);
             _citizen.traits.body = _trait;
 
         } else if (traitType == TraitType.TATTOO) {
             // make the old trait transferrable
-            makeTraitTransferable(_citizen.traits.tattoo.tokenId, _citizen.traits.tattoo.exists);
+            _makeTraitTransferable(_citizen.traits.tattoo.tokenId, _citizen.traits.tattoo.exists);
             _citizen.traits.tattoo = _trait;
 
         } else if (traitType == TraitType.EYES) {
             // make the old trait transferrable
-            makeTraitTransferable(_citizen.traits.eyes.tokenId, _citizen.traits.eyes.exists);
+            _makeTraitTransferable(_citizen.traits.eyes.tokenId, _citizen.traits.eyes.exists);
             _citizen.traits.eyes = _trait;
 
         } else if (traitType == TraitType.MOUTH) {
             // make the old trait transferrable
-            makeTraitTransferable(_citizen.traits.mouth.tokenId, _citizen.traits.mouth.exists);
+            _makeTraitTransferable(_citizen.traits.mouth.tokenId, _citizen.traits.mouth.exists);
             _citizen.traits.mouth = _trait;
 
         } else if (traitType == TraitType.MASK) {
             // make the old trait transferrable
-            makeTraitTransferable(_citizen.traits.mask.tokenId, _citizen.traits.mask.exists);
+            _makeTraitTransferable(_citizen.traits.mask.tokenId, _citizen.traits.mask.exists);
             _citizen.traits.mask = _trait;
 
         } else if (traitType == TraitType.NECKLACE) {
             // make the old trait transferrable
-            makeTraitTransferable(_citizen.traits.necklace.tokenId, _citizen.traits.necklace.exists);
+            _makeTraitTransferable(_citizen.traits.necklace.tokenId, _citizen.traits.necklace.exists);
             _citizen.traits.necklace = _trait;
 
         } else if (traitType == TraitType.CLOTHING) {
             // make the old trait transferrable
-            makeTraitTransferable(_citizen.traits.clothing.tokenId, _citizen.traits.clothing.exists);
+            _makeTraitTransferable(_citizen.traits.clothing.tokenId, _citizen.traits.clothing.exists);
             _citizen.traits.clothing = _trait;
 
         } else if (traitType == TraitType.EARRINGS) {
             // make the old trait transferrable
-            makeTraitTransferable(_citizen.traits.earrings.tokenId, _citizen.traits.earrings.exists);
+            _makeTraitTransferable(_citizen.traits.earrings.tokenId, _citizen.traits.earrings.exists);
             _citizen.traits.earrings = _trait;
 
         } else if (traitType == TraitType.HAIR) {
             // make the old trait transferrable
-            makeTraitTransferable(_citizen.traits.hair.tokenId, _citizen.traits.hair.exists);
+            _makeTraitTransferable(_citizen.traits.hair.tokenId, _citizen.traits.hair.exists);
             _citizen.traits.hair = _trait;
 
         } else if (traitType == TraitType.EFFECT) {
             // make the old trait transferrable
-            makeTraitTransferable(_citizen.traits.effect.tokenId, _citizen.traits.effect.exists);
+            _makeTraitTransferable(_citizen.traits.effect.tokenId, _citizen.traits.effect.exists);
             _citizen.traits.effect = _trait;
         } else {
             // return an error that the trait type does not exist

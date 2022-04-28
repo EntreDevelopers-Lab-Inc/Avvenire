@@ -24,6 +24,8 @@ contract AvvenireTraits is
     {
 
         event ChangeRequested(uint256 tokenId, address contractAddress, address sender);
+        event TraitTransferrable(uint256 tokenId);
+        event TraitNonTransferrable(uint256 tokenId);
 
         string baseURI; // a uri for minting, but this allows the contract owner to change it later
         string public loadURI; // a URI that the NFT will be set to while waiting for changes
@@ -70,7 +72,7 @@ contract AvvenireTraits is
     }
 
     /**
-     * Starting tokenId must be 1....
+     * Starting tokenId must be 1 because bind in AvvenireCitizen's checks if the traitId is 0
      */
     function _startTokenId() internal view override returns (uint256) {
         return 1;
@@ -345,6 +347,44 @@ contract AvvenireTraits is
             }
 
         } // end of for loop
+    }
+
+        /**
+     * @notice internal function to make traits transferrable (used when binding traits)
+     * checks that a trait exists (makes user unable to set a default to a default)
+     * @param traitId for locating the trait
+     * @param exists for if the trait exists
+     */
+    function makeTraitTransferable(uint256 traitId, bool exists) external callerIsAllowed {
+        // only execute if the trait exists (want to account for default case)
+        // if the trait doesn't exist yet, you want to mint all of them at once
+        if ((exists) && (traitId != 0)) {
+            // set the ownership to the transaction origin
+            _ownerships[traitId].addr = tx.origin;
+
+            // set the trait to free (should be tradable and combinable)
+            avvenireCitizensData.setTraitFreedom(traitId, true);
+
+            emit TraitTransferrable(traitId);
+        }
+
+    }
+
+    /**
+     * @notice internal function to make traits non-transferrable
+     * checks that a trait exists (makes user unable to set a default to a default)
+     * @param traitId to indicate which trait to change
+     */
+    function makeTraitNonTransferrable(uint256 traitId) external callerIsAllowed {
+        require(avvenireCitizensData.getTrait(traitId).exists, "This trait does not exist");
+
+        // set the ownership to null
+        _ownerships[traitId].addr = address(this);
+
+        // set the trait to not free (should not be tradable or combinable any longer)
+        avvenireCitizensData.setTraitFreedom(traitId, false);
+
+        emit TraitNonTransferrable(traitId);
     }
 
 
