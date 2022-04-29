@@ -115,39 +115,17 @@ def test_request_after_existing_request(single_mint):
     with brownie.reverts():
         assert avvenire_market_contract.initializeCitizen(0, {"from": mint_account})
     
-    male_trait_changes = [
-        [0, False, 1, 1],
-        [0, True, 1, 2],  # put on default body
-        [0, False, 1, 3],
-        [0, False, 1, 4],
-        [0, False, 1, 5],
-        [0, False, 1, 6],
-        [0, False, 1, 7],
-        [0, False, 1, 8],
-        [0, False, 1, 9],
-        [0, False, 1, 10],
-        [0, False, 1, 11],
-    ]
 
-    # put on default body
-    drop_interval(1)
-    tx = avvenire_market_contract.combine(0, male_trait_changes, {"from": account})
-    tx.wait(1)
+    traits_contract.safeMint(admin_account, 1)
     
-    # ***
-    # Traits are indexed @ 1...
-    # ***
     new_trait_id = traits_contract.getTotalSupply()
     
     traits_contract.requestChange(new_trait_id, {"from": admin_account}); 
     
+    with brownie.reverts():
+        traits_contract.requestChange(new_trait_id, {"from": admin_account}); 
+
     
-        
-
-
-
-
-
 def test_request_change_with_cost(single_mint, set_mut_cost):
     avvenire_market_contract = AvvenireCitizenMarket[-1]
     avvenire_citizens_contract = AvvenireCitizens[-1]
