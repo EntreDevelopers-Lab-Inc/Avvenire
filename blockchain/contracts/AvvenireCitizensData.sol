@@ -25,6 +25,10 @@ contract AvvenireCitizensData is
     // events
     event SetTrait(uint256 tokenId);
     event SetCitizen(uint256 tokenId);
+    event MutabilityModeConfigured(bool configuration);
+    event MutabilityCostConfigured(uint256 configuration);
+
+    MutabilityConfig public mutabilityConfig;
 
     // mapping for tokenId to citizen
     mapping(uint256 => Citizen) private tokenIdToCitizen;
@@ -149,4 +153,62 @@ contract AvvenireCitizensData is
     function isCitizenInitialized(uint256 citizenId) external view returns (bool) {
         return tokenIdToCitizen[citizenId].sex != Sex.NULL;
     }
+
+    /** @notice a function that gives the change cost
+     */
+    function getChangeCost() public view returns (uint256) {
+        return mutabilityConfig.mutabilityCost;
+    }
+
+    /**
+     * @notice returns bool that is true if mutability mode is on
+     */
+    function getMutabilityMode() external view returns (bool) {
+        return mutabilityConfig.mutabilityMode;
+    }
+
+    function getTradeBeforeChange() external view returns (bool) {
+        return mutabilityConfig.tradeBeforeChange;
+    }
+
+    /**
+     * @notice a getter function that returns the mutabilityConfig
+     */
+    function getMutabilityConfig() external view returns (MutabilityConfig memory) {
+        return mutabilityConfig;
+    }
+
+    /**
+     * @notice Sets the mutability of the contract (whether changes are accepted)
+     * @param mutabilityMode_ allows the contract owner to change the mutability of the tokens
+     */
+    function setMutabilityMode(bool mutabilityMode_) external onlyOwner {
+        // set te new mutability mode to this boolean
+        mutabilityConfig.mutabilityMode = mutabilityMode_;
+
+        emit MutabilityModeConfigured(mutabilityMode_);
+    }
+
+    
+    /**
+     * @notice Sets the mutability cost
+     * @param mutabilityCost_ is the new mutability cost
+     */
+    function setMutabilityCost(uint256 mutabilityCost_) external onlyOwner {
+        mutabilityConfig.mutabilityCost = mutabilityCost_;
+
+        emit MutabilityCostConfigured(mutabilityCost_);
+    }
+
+
+    /**
+     * @notice set whether or not the token can be traded while changes are pending
+     * @param setting is a boolean of the change
+     */
+    function setTokenTradeBeforeChange(bool setting) external onlyOwner {
+        mutabilityConfig.tradeBeforeChange = setting;
+    }
+
+
 } 
+

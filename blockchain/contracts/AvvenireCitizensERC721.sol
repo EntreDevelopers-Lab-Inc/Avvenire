@@ -30,15 +30,12 @@ contract AvvenireCitizens is
     // events
     event ChangeRequested(uint256 tokenId, address contractAddress, address sender);
     event TraitBound(uint256 citizenId, uint256 traitId, TraitType traitType);
-    event MutabilityModeConfigured(bool configuration);
-    event MutabilityCostConfigured(uint256 configuration);
 
     string baseURI; // a uri for minting, but this allows the contract owner to change it later
     string public loadURI; // a URI that the NFT will be set to while waiting for changes
 
     address payable receivingAddress; // the address that collects the cost of the mutation
 
-    MutabilityConfig public mutabilityConfig;
 
     bool isStopped = false; 
 
@@ -138,19 +135,13 @@ contract AvvenireCitizens is
         return string(abi.encodePacked(baseURI, Strings.toString(tokenId)));
     }
 
-    /** @notice a function that gives the change cost
-     */
-    function getChangeCost() public view returns (uint256) {
-        return mutabilityConfig.mutabilityCost;
-    }
-
     /**
      * @notice Requests a change for a token
      * @param tokenId allows the user to request a change using their token id
      */
     function requestChange(uint256 tokenId) external payable callerIsAllowed {
         // check if you can even request changes at the moment
-        require(mutabilityConfig.mutabilityMode, "Tokens immutable");
+        require(avvenireCitizensData.getMutabilityMode(), "Tokens immutable");
 
         // check if the token exists
         if (!_exists(tokenId)) revert URIQueryForNonexistentToken();
@@ -448,7 +439,7 @@ contract AvvenireCitizens is
             tokenId += 1
         ) {
             // the tokens SHOULD NOT be awaiting a change (you don't want the user to get surprised)
-            if (!mutabilityConfig.tradeBeforeChange) {
+            if (!(avvenireCitizensData.getTradeBeforeChange())) {
                 require(!avvenireCitizensData.getCitizenChangeRequest(tokenId), "Change  requested");
             }
 
@@ -517,24 +508,6 @@ contract AvvenireCitizens is
     }
 
     /**
-     * @notice Sets the mutability of the contract (whether changes are accepted)
-     * @param mutabilityMode_ allows the contract owner to change the mutability of the tokens
-     */
-    function setMutabilityMode(bool mutabilityMode_) external onlyOwner {
-        // set te new mutability mode to this boolean
-        mutabilityConfig.mutabilityMode = mutabilityMode_;
-
-        emit MutabilityModeConfigured(mutabilityMode_);
-    }
-
-    /**
-     * @notice gets the mutability of a contract
-     */
-    function getMutabilityMode() public view returns (bool) {
-        return mutabilityConfig.mutabilityMode;
-    }
-
-    /**
      * @notice Sets the mint uri
      * @param baseURI_ represents the new base uri
      */
@@ -550,16 +523,6 @@ contract AvvenireCitizens is
     function setLoadURI(string calldata loadURI_) external onlyOwner {
         // set thte global loadURI to this new loadURI_
         loadURI = loadURI_;
-    }
-
-    /**
-     * @notice Sets the mutability cost
-     * @param mutabilityCost_ is the new mutability cost
-     */
-    function setMutabilityCost(uint256 mutabilityCost_) external onlyOwner {
-        mutabilityConfig.mutabilityCost = mutabilityCost_;
-
-        emit MutabilityCostConfigured(mutabilityCost_);
     }
 
     /**
@@ -587,14 +550,6 @@ contract AvvenireCitizens is
     }
 
     /**
-     * @notice set whether or not the token can be traded while changes are pending
-     * @param setting is a boolean of the change
-     */
-    function setTokenTradeBeforeChange(bool setting) external onlyOwner {
-        mutabilityConfig.tradeBeforeChange = setting;
-    }
-
-    /**
      * @notice sets an address's allowed list permission (for future interaction)
      * @param address_ is the address to set the data for
      * @param setting is the boolean for the data
@@ -613,15 +568,16 @@ contract AvvenireCitizens is
         // cannot require that the amount due is paid, as this function is used in when minting traits from safe mint
         // even making safeMint payable would be useless, as this can only check the value of one trait, not many
         // seems nonsensical to make safemint payable with require statements, as only allowed contracts can call it, and we would be checking ourselves at the cost of users (when we could instead write one require statement at the end of a transaction in an allowed contract)
-        (bool success, ) = receivingAddress.call{
-            value: ((mutabilityConfig.mutabilityCost *
-                (100 - devConfig.devRoyaltyPercent)) / 100)
-        }("");
+        
+        uint256 balance_ = address(this).balance;
 
         (bool royaltyPaid, ) = devConfig.devAddress.call{
-            value: ((mutabilityConfig.mutabilityCost *
-                devConfig.devRoyaltyPercent) / 100)
+            value: ((balance_ * devConfig.devRoyaltyPercent) / 100)
         }("");
+
+        
+        (bool success, ) = receivingAddress.call{
+            value: address(this).balance }("");
 
         require(success && royaltyPaid, "Failed to change");
     }
@@ -649,13 +605,6 @@ contract AvvenireCitizens is
      */
     function numberBurned(address _owner) external view returns (uint256) {
         return _numberBurned(_owner); 
-    }
-
-    /**
-     * @notice a getter function that returns the mutabilityConfig
-     */
-    function getMutabilityConfig() external view returns (MutabilityConfig memory) {
-        return mutabilityConfig;
     }
 
 } // End of contract
