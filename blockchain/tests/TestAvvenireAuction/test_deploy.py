@@ -21,24 +21,24 @@ def test_deployment():
     # address devAddress_,
     # uint256 paymentToDevs_
     deploy_contract(3, 2, 20, 15, 5, dev_account, DEV_PAYMENT)
-    avvenire_contract = AvvenireTest[-1]
+    auction_contract = AvvenireTest[-1]
 
-    assert avvenire_contract.maxPerAddressDuringAuction() == 3
-    assert avvenire_contract.maxPerAddressDuringWhiteList() == 2
-    assert avvenire_contract.collectionSize() == 20
-    assert avvenire_contract.amountForAuctionAndTeam() == 15
-    assert avvenire_contract.amountForTeam() == 5
+    assert auction_contract.maxPerAddressDuringAuction() == 3
+    assert auction_contract.maxPerAddressDuringWhiteList() == 2
+    assert auction_contract.collectionSize() == 20
+    assert auction_contract.amountForAuctionAndTeam() == 15
+    assert auction_contract.amountForTeam() == 5
 
     # Try to get auction price before auction is set...
     with brownie.reverts():
-        assert avvenire_contract.getAuctionPrice()
+        assert auction_contract.getAuctionPrice()
 
     # Try to mint before start of auction...
     eth = Web3.toWei(1, "ether")
     with brownie.reverts():
-        assert avvenire_contract.whiteListMint(1, {"from": dev_account, "value": eth})
+        assert auction_contract.whiteListMint(1, {"from": dev_account, "value": eth})
 
     with brownie.reverts():
-        assert avvenire_contract.auctionMint(1, {"from": dev_account, "value": eth})
+        assert auction_contract.auctionMint(1, {"from": dev_account, "value": eth})
     
     avvenire_market_contract = AvvenireCitizenMarket[-1]

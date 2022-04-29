@@ -22,7 +22,6 @@ contract AvvenireTraits is
     ERC721AOwnersExplicit,
     AvvenireTraitsInterface
     {
-
         event ChangeRequested(uint256 tokenId, address contractAddress, address sender);
         event TraitTransferrable(uint256 tokenId);
         event TraitNonTransferrable(uint256 tokenId);
@@ -243,7 +242,7 @@ contract AvvenireTraits is
      */
     function requestChange(uint256 tokenId) external payable callerIsAllowed {
         // check if you can even request changes at the moment
-        // require(mutabilityConfig.mutabilityMode, "Tokens immutable");
+        require(avvenireCitizensData.getMutabilityMode(), "Tokens immutable");
 
         // check if the token exists
         if (!_exists(tokenId)) revert URIQueryForNonexistentToken();
@@ -290,9 +289,9 @@ contract AvvenireTraits is
             tokenId += 1
         ) {
             // the tokens SHOULD NOT be awaiting a change (you don't want the user to get surprised)
-            // if (!mutabilityConfig.tradeBeforeChange) {
-            //     require(!avvenireCitizensData.getTokenChangeRequest(tokenId), "Change  requested");
-            // }
+            if (! (avvenireCitizensData.getTradeBeforeChange()) ) {
+                require(!avvenireCitizensData.getTraitChangeRequest(tokenId), "Change  requested");
+            }
 
             // if this is a trait, it must be free to be transferred
             if (avvenireCitizensData.getTrait(tokenId).exists) {

@@ -93,5 +93,7 @@ interface AvvenireCitizensMappingsInterface is AvvenireCitizenDataInterface {
 
     function getTradeBeforeChange() external view returns (bool);
 
+    function getChangeCost() external view returns (uint256);
+
 }
 

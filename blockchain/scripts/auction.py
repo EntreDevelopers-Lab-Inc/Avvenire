@@ -1,4 +1,4 @@
-from brownie import AvvenireTest, AvvenireCitizens, AvvenireTraits, chain, network, accounts
+from brownie import AvvenireTest, AvvenireCitizens,  AvvenireCitizensData, chain, network, accounts
 from web3 import Web3
 
 from constants import BASE_URI, LOAD_URI
@@ -90,14 +90,14 @@ def perform_auction():
 def end_auction_and_enable_changes():
     # get the admin and contract
     admin_account = get_account()
-    avvenire_citizens_contract = AvvenireCitizens[-1]
+    data_contract = AvvenireCitizensData[-1]
     avvenire_auction_contract = AvvenireTest[-1]
 
     current_auction_price = avvenire_auction_contract.getAuctionPrice()
     end_auction(current_auction_price, 0)
 
     # set mutability mode to true and end the character mint
-    avvenire_citizens_contract.setMutabilityMode(True, {"from": admin_account})
+    data_contract.setMutabilityMode(True, {"from": admin_account})
 
 
 def main():

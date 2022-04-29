@@ -3,7 +3,7 @@ from http.client import REQUEST_ENTITY_TOO_LARGE
 import pytest
 import brownie
 
-from brownie import AvvenireTest, AvvenireCitizens, AvvenireCitizenMarket, AvvenireCitizensData, accounts
+from brownie import AvvenireTest, AvvenireCitizens, AvvenireTraits, AvvenireCitizenMarket, AvvenireCitizensData, accounts
 from web3 import Web3
 from scripts.helpful_scripts import get_account
 
@@ -99,18 +99,53 @@ def test_request_after_existing_request(single_mint):
     avvenire_citizens_contract = AvvenireCitizens[-1]
     avvenire_market_contract = AvvenireCitizenMarket[-1]
     data_contract = AvvenireCitizensData[-1]
+    traits_contract = AvvenireTraits[-1]
+    
     mint_account = accounts[2]
+    admin_account = get_account()
 
     # Confirm that the owner of NFT #0 is Account[1]
     assert avvenire_citizens_contract.ownerOf(0) == mint_account
 
     # Request
     avvenire_market_contract.initializeCitizen(0, {"from": mint_account})
-    assert data_contract.getTokenChangeRequest(0) == True
+    assert data_contract.getCitizenChangeRequest(0) == True
 
     # Should throw error... Existing change request outstanding
     with brownie.reverts():
         assert avvenire_market_contract.initializeCitizen(0, {"from": mint_account})
+    
+    male_trait_changes = [
+        [0, False, 1, 1],
+        [0, True, 1, 2],  # put on default body
+        [0, False, 1, 3],
+        [0, False, 1, 4],
+        [0, False, 1, 5],
+        [0, False, 1, 6],
+        [0, False, 1, 7],
+        [0, False, 1, 8],
+        [0, False, 1, 9],
+        [0, False, 1, 10],
+        [0, False, 1, 11],
+    ]
+
+    # put on default body
+    drop_interval(1)
+    tx = avvenire_market_contract.combine(0, male_trait_changes, {"from": account})
+    tx.wait(1)
+    
+    # ***
+    # Traits are indexed @ 1...
+    # ***
+    new_trait_id = traits_contract.getTotalSupply()
+    
+    traits_contract.requestChange(new_trait_id, {"from": admin_account}); 
+    
+    
+        
+
+
+
 
 
 def test_request_change_with_cost(single_mint, set_mut_cost):

@@ -48,6 +48,8 @@ contract AvvenireCitizensData is
     // Address for server 
     address private serverAddress; 
 
+    bool public isStopped; 
+
     constructor() Ownable() {
         allowedContracts[msg.sender] = true;
     }
@@ -65,6 +67,19 @@ contract AvvenireCitizensData is
     function setServer(address _server) external onlyOwner {
         serverAddress = _server;
     }
+
+    modifier stoppedInEmergency {
+        require(!isStopped, "Emergency stop active");
+        _;
+    }
+
+    /**
+     * @notice setter for emergency stop
+     */
+    function setEmergencyStop(bool _isStopped) external onlyOwner {
+        isStopped = _isStopped; 
+    }
+
 
     function setCitizenChangeRequest(uint256 citizenId, bool changeRequest) external callerIsAllowed {
         citizenChangeRequests[citizenId] = changeRequest; 
@@ -97,7 +112,7 @@ contract AvvenireCitizensData is
      * @param tokenId the trait's token id
      * @param _free bool to what trait.free should be set to
      */
-    function setTraitFreedom(uint256 tokenId, bool _free) external callerIsAllowed {
+    function setTraitFreedom(uint256 tokenId, bool _free) external callerIsAllowed stoppedInEmergency {
         tokenIdToTrait[tokenId].free = _free;
     }
 
@@ -110,18 +125,18 @@ contract AvvenireCitizensData is
     // ***
     // Functions for server
     // *** 
-    function updateTraitSexAndURI(uint256 traitId, Sex _sex, string memory _uri) external callerIsServer {
+    function updateTraitSexAndURI(uint256 traitId, Sex _sex, string memory _uri) external callerIsServer stoppedInEmergency{
         tokenIdToTrait[traitId].uri = _uri;
         tokenIdToTrait[traitId].sex = _sex;
         traitChangeRequests[traitId] = false;
     }
 
-    function updateCitizenURI(uint256 citizenId, string memory _uri) external callerIsServer {
+    function updateCitizenURI(uint256 citizenId, string memory _uri) external callerIsServer stoppedInEmergency {
         tokenIdToCitizen[citizenId].uri = _uri;
         citizenChangeRequests[citizenId] = false; 
     }
 
-    function setCitizenSex(uint256 citizenId, Sex _sex) external callerIsServer {
+    function setCitizenSex(uint256 citizenId, Sex _sex) external callerIsServer stoppedInEmergency {
         tokenIdToCitizen[citizenId].sex = _sex;
     }
 
@@ -156,7 +171,7 @@ contract AvvenireCitizensData is
 
     /** @notice a function that gives the change cost
      */
-    function getChangeCost() public view returns (uint256) {
+    function getChangeCost() external view returns (uint256) {
         return mutabilityConfig.mutabilityCost;
     }
 
@@ -167,6 +182,9 @@ contract AvvenireCitizensData is
         return mutabilityConfig.mutabilityMode;
     }
 
+    /**
+     * @notice returns bool that is true if you can trade before a change takes place
+     */
     function getTradeBeforeChange() external view returns (bool) {
         return mutabilityConfig.tradeBeforeChange;
     }

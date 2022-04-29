@@ -36,8 +36,7 @@ contract AvvenireCitizens is
 
     address payable receivingAddress; // the address that collects the cost of the mutation
 
-
-    bool isStopped = false; 
+    bool public isStopped; 
 
     // dev payment
     struct DevConfig {

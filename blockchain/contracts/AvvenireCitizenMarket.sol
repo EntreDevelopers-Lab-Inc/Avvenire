@@ -78,7 +78,7 @@ contract AvvenireCitizenMarket is
     modifier canChange(uint256 citizenId) {
         // make sure that tokens are mutable
         require(
-            avvenireCitizens.getMutabilityMode(),
+            avvenireCitizensData.getMutabilityMode(),
             "Tokens are currently immutable."
         );
 
@@ -114,7 +114,7 @@ contract AvvenireCitizenMarket is
             "This citizen has already been initialized."
         );
 
-        uint256 cost = avvenireCitizens.getChangeCost();
+        uint256 cost = avvenireCitizensData.getChangeCost();
 
         // just request a change --> sets the sex
         // this function will perform all ownership and mutability checks in the other contract
@@ -146,7 +146,7 @@ contract AvvenireCitizenMarket is
         uint256 toMint;
 
         // get the cost of requesting one change
-        uint256 changeCost = avvenireCitizens.getChangeCost();
+        uint256 changeCost = avvenireCitizensData.getChangeCost();
 
         // track the total cost
         uint256 totalCost;

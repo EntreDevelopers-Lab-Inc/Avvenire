@@ -211,6 +211,7 @@ def test_trait_changes_no_cost(citizens_minted):
 
     #Traits indexed @ 1
     end_trait_id = citizens_contract.getTotalSupply() 
+    
     for x in range(len(trait_indexes)):
         assert citizens_contract.getTrait(end_trait_id - x) == (
             end_trait_id - x, 
