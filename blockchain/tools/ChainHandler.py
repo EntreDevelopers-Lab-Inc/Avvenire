@@ -1,7 +1,7 @@
 import requests
 import json
 import os
-from brownie import network 
+from brownie import network
 
 # import modules selectively to see if you are in test or production mode
 try:
@@ -53,6 +53,8 @@ class CitizenCreator:
     def __init__(self, ipfs_data, chain_data):
         # save each group of traits
         self.ipfs_data = ipfs_data
+        print(type(ipfs_data))
+        print(ipfs_data)
         self.ipfs_files = {
             trait["trait_type"]: trait["file"]
             for trait in self.ipfs_data["trait_files"]
@@ -213,9 +215,9 @@ class CitizenCreator:
 # make a market broker that interacts with the avvenire citizens market
 class CitizenMarketBroker:
     def __init__(self, data_contract, citizen_id):
-        #store the data contract
+        # store the data contract
         self.data_contract = data_contract
-        
+
         # store the citizen id
         self.citizen_id = citizen_id
 
@@ -223,7 +225,7 @@ class CitizenMarketBroker:
     def get_citizen(self):
         # need to connect to other contract to get the citizen
         citizen = list(self.data_contract.getCitizen(self.citizen_id))
-        
+
         return citizen
 
     # get the traits of the citizen
@@ -250,20 +252,20 @@ class CitizenMarketBroker:
         if citizen[3] == 0:
             sex_id = int(SEX_ORDER.index(
                 ipfs_data["attributes"][0]["value"])) + 1
-                # set the citizen's data --> no need to update further, as the citizen's data is already stored
-            
+            # set the citizen's data --> no need to update further, as the citizen's data is already stored
+
             server_account = get_server_account()
-            
-            tx = self.data_contract.setCitizenSex(self.citizen_id, sex_id, {"from": server_account})
+
+            tx = self.data_contract.setCitizenSex(
+                self.citizen_id, sex_id, {"from": server_account})
             if network.show_active() not in LOCAL_BLOCKCHAIN_ENVIRONMENTS:
                 tx.wait(3)
 
         else:
             print(f"Already initialized: {citizen}")
 
-
-
     # function to update a citizen
+
     def update_citizen(self):
         citizen = self.get_citizen()
 
@@ -295,13 +297,13 @@ class CitizenMarketBroker:
         citizen[1] = uri
 
         server_account = get_server_account()
-        
+
         # set the citizen data with the contract using the admin account --> no need for more changes, set those to false
-        tx = self.data_contract.updateCitizenURI(self.citizen_id, uri, {"from": server_account})
-        
+        tx = self.data_contract.updateCitizenURI(
+            self.citizen_id, uri, {"from": server_account})
+
         if network.show_active() not in LOCAL_BLOCKCHAIN_ENVIRONMENTS:
             tx.wait(3)
-            
 
         # return reconverted version of citizen for better understanding
         return tuple(citizen)
@@ -331,10 +333,10 @@ class CitizenMarketBroker:
 
 # a class for managing on-chain traits
 class TraitManager:
-    def __init__(self, data_contract, trait_id):        
+    def __init__(self, data_contract, trait_id):
         # save the data contract
-        self.data_contract = data_contract 
-        
+        self.data_contract = data_contract
+
         # saev the trait id
         self.trait_id = trait_id
 
@@ -394,12 +396,13 @@ class TraitManager:
 
         # set the sex to ENSURE that it is in-line with ipfs
         trait[4] = SEX_ORDER.index(citizen_data['attributes'][0]['value']) + 1
-        
+
         server_account = get_server_account()
 
         # set the trait's data using the server account (set change update to false, as the trait has been updated)
-        tx = self.data_contract.updateTraitSexAndURI(self.trait_id, trait[4], metadata_link, {"from": server_account})
-        
+        tx = self.data_contract.updateTraitSexAndURI(
+            self.trait_id, trait[4], metadata_link, {"from": server_account})
+
         if network.show_active() not in LOCAL_BLOCKCHAIN_ENVIRONMENTS:
             tx.wait(3)
 
