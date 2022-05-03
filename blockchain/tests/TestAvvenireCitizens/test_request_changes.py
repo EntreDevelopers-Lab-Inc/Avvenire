@@ -34,8 +34,8 @@ def single_mint():
 @pytest.fixture
 def set_mut_cost():
     admin_account = get_account()
-    avvenire_citizens_contract = AvvenireCitizens[-1]
-    avvenire_citizens_contract.setMutabilityCost(REQUEST_COST, {"from": admin_account})
+    data_contract = AvvenireCitizensData[-1]
+    data_contract.setMutabilityCost(REQUEST_COST, {"from": admin_account})
 
 
 # try to change a token before it is mutable
@@ -95,14 +95,14 @@ def test_request_by_nonowner():
         assert avvenire_market_contract.initializeCitizen(0, {"from": accounts[2]})
 
 
-def test_request_after_existing_request(single_mint):
+# *** 
+# Attempts to do multiple requests for both citizen and trait contracts 
+# ***
+def test_multiple_citizen_requests(single_mint):
     avvenire_citizens_contract = AvvenireCitizens[-1]
     avvenire_market_contract = AvvenireCitizenMarket[-1]
     data_contract = AvvenireCitizensData[-1]
-    traits_contract = AvvenireTraits[-1]
-    
     mint_account = accounts[2]
-    admin_account = get_account()
 
     # Confirm that the owner of NFT #0 is Account[1]
     assert avvenire_citizens_contract.ownerOf(0) == mint_account
@@ -116,14 +116,51 @@ def test_request_after_existing_request(single_mint):
         assert avvenire_market_contract.initializeCitizen(0, {"from": mint_account})
     
 
-    traits_contract.safeMint(admin_account, 1)
+def test_multiple_trait_requests(single_mint):
+    avvenire_citizens_contract = AvvenireCitizens[-1]
+    avvenire_market_contract = AvvenireCitizenMarket[-1]
+    data_contract = AvvenireCitizensData[-1]
+    traits_contract = AvvenireTraits[-1]
     
+    admin_account = get_account()
+    mint_account = accounts[3]
+    
+    male_trait_changes = [
+        [0, False, 1, 1],
+        [0, True, 1, 2],  # put on default body
+        [0, False, 1, 3],
+        [0, False, 1, 4],
+        [0, False, 1, 5],
+        [0, False, 1, 6],
+        [0, False, 1, 7],
+        [0, False, 1, 8],
+        [0, False, 1, 9],
+        [0, False, 1, 10],
+        [0, False, 1, 11],
+    ]
+
+    # put on default body
+    drop_interval(1)
+    tx = avvenire_market_contract.combine(0, male_trait_changes, {"from": mint_account})
+    tx.wait(1)
+    
+    # *** 
+    # IDs of Trait Contract start @ 1 
+    # ***
     new_trait_id = traits_contract.getTotalSupply()
     
-    traits_contract.requestChange(new_trait_id, {"from": admin_account}); 
+    # Make sure the owner is test account
+    assert traits_contract.ownerOf(new_trait_id) == mint_account
     
+    traits_contract.setAllowedPermission(mint_account, True, {"from": admin_account})
+    
+    traits_contract.requestChange(new_trait_id, {"from": mint_account}); 
+    
+    # ***
+    # Attempt to request second change 
+    # ***
     with brownie.reverts():
-        traits_contract.requestChange(new_trait_id, {"from": admin_account}); 
+        traits_contract.requestChange(new_trait_id, {"from": mint_account}); 
 
     
 def test_request_change_with_cost(single_mint, set_mut_cost):

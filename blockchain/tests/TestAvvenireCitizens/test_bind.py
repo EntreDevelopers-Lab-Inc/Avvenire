@@ -615,7 +615,7 @@ def test_trait_changes_no_cost():
         new_trait = trait_manager.update_trait()  # this is updating the effect
 
         assert new_trait == data_contract.getTrait(end_trait_id - x)
-        assert account == citizens_contract.ownerOf(end_trait_id - x)
+        assert account == traits_contract.ownerOf(end_trait_id - x)
 
     # Update the citizen
     broker = CitizenMarketBroker(data_contract, 0)
