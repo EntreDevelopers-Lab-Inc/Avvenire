@@ -16,20 +16,12 @@
       <link href="{{url_for('static', filename='css/style.css')}}" rel="stylesheet" />
       <!-- Responsive Stylesheet -->
       <link href="{{url_for('static', filename='css/responsive.css')}}" rel="stylesheet" />
-
+      <!--Modal -->
+      <link href="{{url_for('static', filename='css/modal.css')}}" rel="stylesheet" />
       <!-- Slider CDN -->
-
       <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/slick-carousel/1.5.8/slick-theme.min.css">
       <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/slick-carousel/1.5.8/slick.css">
 
-
-      <!-- jQuery js -->
-      <script src="{{url_for('static', filename='js/jquery.min.js')}}">
-      </script>
-      <!-- ethers js -->
-      <script src="https://cdn.ethers.io/lib/ethers-5.4.umd.min.js" type="application/javascript"></script>
-      <!--constants.js-->
-      <script src="{{url_for('static', filename='js/constants.js')}}"></script>
 
       <!-- <style>
             .slick-carousel {
@@ -126,7 +118,7 @@
                               </li>
                               <!--Put Mint Here-->
                               <li class="lh-55px" id="connect-btn">
-                                    <a class="btn login-btn ml-50" onclick="connect();">
+                                    <a class="btn login-btn ml-50" id="connect-wallet">
                                           Connect Wallet
                                     </a>
                               </li>
@@ -136,6 +128,23 @@
       </nav>
       <!-- ##### Header Area End ##### -->
       {% block content %}{% endblock %}
+
+      <!--#### Connect Wallet Modal #####-->
+      <div id="connect-wallet-modal" class="modal">
+            <div class="modal-content">
+                    <div class="features-list modal-body">
+                        <div class="who-we-contant text-center">
+                            <img src="{{url_for('static', filename='img/icons/wallet.png')}}" class="mb-15" width="90" alt="">
+                            <div class="pricing-item v2" onclick="connectEthereum();">
+                                <img src="{{url_for('static', filename='img/icons/w1.png')}}" width="30" class="wal-icon" alt="">Browser (e.g. Metamask)
+                            </div>
+                            <div class="pricing-item v2" onclick="connectWalletConnect();">
+                                <img src="{{url_for('static', filename='img/icons/w2.png')}}" width="30" class="wal-icon" alt="">WalletConnect
+                            </div>
+                        </div>
+                    </div>
+                </div>
+      </div>
 
       <!-- ##### Footer Area Start ##### -->
       <footer class="main-footer text-center">
@@ -155,6 +164,13 @@
       </footer>
       <!-- ##### Footer Area End ##### -->
       <!-- ########## All JS ########## -->
+      <!-- jQuery js -->
+      <script src="{{url_for('static', filename='js/jquery.min.js')}}">
+      </script>
+      <!-- ethers js -->
+      <script src="https://cdn.ethers.io/lib/ethers-5.4.umd.min.js" type="application/javascript"></script>
+      <!--constants.js-->
+      <script src="{{url_for('static', filename='js/constants.js')}}"></script>
       <!-- Popper js -->
       <script src="{{url_for('static', filename='js/popper.min.js')}}">
       </script>
@@ -169,9 +185,16 @@
       <!-- script js -->
       <script src="{{url_for('static', filename='js/script.js')}}">
       </script>
-      <!-- metamask js -->
-      <script src="{{url_for('static', filename='js/connect-wallet/metamask.js')}}">
+      <!--Cookies-->
+      <script src="https://cdn.jsdelivr.net/npm/js-cookie@3.0.1/dist/js.cookie.min.js"></script>
+      <!--wallet connect js-->
+      <script src="{{url_for('static', filename='js/node_modules/@walletconnect/web3-provider/dist/umd/index.min.js')}}"></script>
+      <!-- connect wallet js -->
+      <script src="{{url_for('static', filename='js/connect-wallet/connect-wallet.js')}}">
       </script>
+      <script src="{{url_for('static', filename='js/connect-wallet/modal.js')}}">
+      </script>
+      {% block scripts %}{% endblock %}
 </body>
 
 </html>
