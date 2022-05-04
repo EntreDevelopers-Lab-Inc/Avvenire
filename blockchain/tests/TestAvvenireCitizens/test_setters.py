@@ -37,15 +37,7 @@ def set_server():
 
 
 # ******* MOST IMPORTANT SETTERS of the avvenire citizens contract ********
-def test_set_trait_data(single_mint):
-    avvenire_auction_contract = AvvenireTest[-1]
-    avvenire_citizens_contract = AvvenireCitizens[-1]
-    admin_account = get_account()
-
-    # Admin account should be "Allowed Contract"
-
-
-# *** MISC SETTERS ****
+# *** MISC SETTERS (citizen stuff is really in binding tests) ****
 
 @pytest.mark.parametrize("bool_", [True, False])
 def test_set_mutability_mode(bool_):
