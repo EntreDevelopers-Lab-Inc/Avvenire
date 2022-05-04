@@ -178,8 +178,10 @@ def test_request_change_with_cost(single_mint, set_mut_cost):
     )
 
     assert balance_before_change - mint_account.balance() == REQUEST_COST
-    assert data_contract.getTokenChangeRequest(0) == True
+    assert data_contract.getCitizenChangeRequest(0) == True
     assert avvenire_citizens_contract.balance() == REQUEST_COST
+    
+    
 
 
 def test_request_change_with_underpayment(single_mint, set_mut_cost):
@@ -197,7 +199,7 @@ def test_request_change_with_underpayment(single_mint, set_mut_cost):
         )
 
     assert balance_before_change == mint_account.balance()
-    assert data_contract.getTokenChangeRequest(0) == False
+    assert data_contract.getCitizenChangeRequest(0) == False
 
 
 
@@ -216,7 +218,7 @@ def test_request_change_with_overpayment(single_mint, set_mut_cost):
     )
 
     assert balance_before_change - mint_account.balance() == REQUEST_COST
-    assert data_contract.getTokenChangeRequest(0) == True
+    assert data_contract.getCitizenChangeRequest(0) == True
     assert avvenire_citizens_contract.balance() == REQUEST_COST
 
 
@@ -240,7 +242,7 @@ def test_request_change_with_dev_royalty(single_mint, set_mut_cost):
     )
 
     assert balance_before_change - mint_account.balance() == change_cost
-    assert data_contract.getTokenChangeRequest(0) == True
+    assert data_contract.getCitizenChangeRequest(0) == True
     assert avvenire_citizens_contract.balance() == change_cost
 
 
