@@ -290,7 +290,7 @@ contract AvvenireTraits is
         ) {
             // the tokens SHOULD NOT be awaiting a change (you don't want the user to get surprised)
             if (! (avvenireCitizensData.getTradeBeforeChange()) ) {
-                require(!avvenireCitizensData.getTraitChangeRequest(tokenId), "Change  requested");
+                require(!avvenireCitizensData.getTraitChangeRequest(tokenId), "Change requested");
             }
 
             // if this is a trait, it must be free to be transferred

@@ -159,6 +159,7 @@ def test_burn_citizen(burn_setup):
 def test_burn_trait(burn_setup, trait_minted):
     traits_contract = AvvenireTraits[-1]
     burn_test_contract = testAvvenireBurn[-1]
+    data_contract = AvvenireCitizensData[-1]
 
     # use account 2 for the test user
     account = accounts[2]
@@ -169,15 +170,20 @@ def test_burn_trait(burn_setup, trait_minted):
     # Traits are indexed @ 1...
     # ***
     new_trait_id = traits_contract.getTotalSupply()
+    
+    # update the hair's uri
+    trait_manager = TraitManager(data_contract, new_trait_id)
+    trait_manager.update_trait()  # this is updating the effect
+
 
     # Make sure the owner is test account
     assert traits_contract.ownerOf(new_trait_id) == account
     
     balance_before_burn = traits_contract.balanceOf(account)
-
-    traits_contract.setAllowedPermission(testAvvenireBurn[-1].address, True, {"from": admin_account})
-    burn_test_contract.burnTrait(new_trait_id, {"from": account})
     
+    print(f"new_trait_id: {new_trait_id}")
+
+    burn_test_contract.burnTrait(new_trait_id, {"from": account})
     
     assert traits_contract.balanceOf(account) == balance_before_burn - 1
     assert traits_contract.numberBurned(account) == 1
