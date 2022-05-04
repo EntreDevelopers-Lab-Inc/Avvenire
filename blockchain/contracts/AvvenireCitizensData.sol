@@ -112,7 +112,7 @@ contract AvvenireCitizensData is
      * @param tokenId the trait's token id
      * @param _free bool to what trait.free should be set to
      */
-    function setTraitFreedom(uint256 tokenId, bool _free) external callerIsAllowed stoppedInEmergency {
+    function setTraitFreedom(uint256 tokenId, bool _free) external callerIsAllowed {
         tokenIdToTrait[tokenId].free = _free;
     }
 
