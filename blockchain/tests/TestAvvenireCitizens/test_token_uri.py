@@ -67,6 +67,7 @@ def test_load_uri():
     # get the contracts
     avvenire_market_contract = AvvenireCitizenMarket[-1]
     avvenire_citizens_contract = AvvenireCitizens[-1]
+    avvenire_citizens_data_contract = AvvenireCitizensData[-1]
 
     # mint an nft
     account = accounts[2]
@@ -91,7 +92,7 @@ def test_load_uri():
 
     # request the combination from the market
     print(
-        f"Cost to make changes: {avvenire_citizens_contract.getChangeCost()}")
+        f"Cost to make changes: {avvenire_citizens_data_contract.getChangeCost()}")
     
     avvenire_market_contract.combine(
         0, trait_changes, {"from": account, "value": Web3.toWei(0.05, "ether")}
