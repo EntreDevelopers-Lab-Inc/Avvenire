@@ -163,6 +163,8 @@ def test_burn_trait(burn_setup, trait_minted):
     # use account 2 for the test user
     account = accounts[2]
     
+    admin_account = get_account()
+    
     # ***
     # Traits are indexed @ 1...
     # ***
@@ -173,7 +175,9 @@ def test_burn_trait(burn_setup, trait_minted):
     
     balance_before_burn = traits_contract.balanceOf(account)
 
+    traits_contract.setAllowedPermission(testAvvenireBurn[-1].address, True, {"from": admin_account})
     burn_test_contract.burnTrait(new_trait_id, {"from": account})
+    
     
     assert traits_contract.balanceOf(account) == balance_before_burn - 1
     assert traits_contract.numberBurned(account) == 1

@@ -246,6 +246,8 @@ def test_attaching_unowned_existing_trait():
     ]
     # Attempt to put the new trait on citizen #3 which accounts[3] owns
     # It should revert considering accounts[3] does not own the trait
+    
+    market_contract.combine(3, male_trait_changes, {"from": other_account})
     with brownie.reverts():
         market_contract.combine(3, male_trait_changes, {"from": other_account})
 
@@ -394,7 +396,7 @@ def test_transfer_trait_then_combine():
     # ***
     # Transfer trait to other account
     # ***
-    tx = citizens_contract.safeTransferFrom(
+    tx = traits_contract.safeTransferFrom(
         account, other_account, new_trait_id, {"from": account})
     tx.wait(1)
 

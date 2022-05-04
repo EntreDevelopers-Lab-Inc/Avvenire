@@ -18,12 +18,12 @@ contract testAvvenireBurn {
         traitsContract = AvvenireTraitsInterface(traitsAddress);
     }
 
-    function burnCitizen(uint256 tokenId) public {
-        citizensContract.burn(tokenId);
+    function burnCitizen(uint256 citizenId) public {
+        citizensContract.burn(citizenId);
     }
 
-    function burnTrait(uint256 tokenId) public {
-        traitsContract.burn(tokenId);
+    function burnTrait(uint256 traitId) public {
+        traitsContract.burn(traitId);
     }
 
 }
