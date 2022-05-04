@@ -135,8 +135,6 @@ def test_bind_existing_token():
     
     assert traits_contract.ownerOf(new_trait_id) == account 
     assert citizens_contract.ownerOf(1) == account 
-    
-    print("GOT TO THIS POINT")
 
     # put on the new body
     market_contract.combine(1, male_trait_changes, {"from": account})

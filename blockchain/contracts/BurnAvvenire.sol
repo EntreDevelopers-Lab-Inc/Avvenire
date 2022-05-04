@@ -11,12 +11,19 @@ import "../interfaces/AvvenireCitizenDataInterface.sol";
 contract testAvvenireBurn {
 
     AvvenireCitizensInterface public citizensContract;
+    AvvenireTraitsInterface public traitsContract; 
 
-    constructor (address contractAddress) {
-        citizensContract = AvvenireCitizensInterface(contractAddress);
+    constructor (address citizensAddress, address traitsAddress) {
+        citizensContract = AvvenireCitizensInterface(citizensAddress);
+        traitsContract = AvvenireTraitsInterface(traitsAddress);
     }
 
-    function burnToken(uint256 tokenId) public {
+    function burnCitizen(uint256 tokenId) public {
         citizensContract.burn(tokenId);
     }
+
+    function burnTrait(uint256 tokenId) public {
+        traitsContract.burn(tokenId);
+    }
+
 }
