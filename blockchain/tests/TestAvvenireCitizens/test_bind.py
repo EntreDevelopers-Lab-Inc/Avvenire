@@ -148,11 +148,11 @@ def test_bind_existing_token():
     assert data_contract.getCitizen(1)[4][1][3] is True
 
     # update the information with a new citizen broker
-    broker = CitizenMarketBroker(data_contract, 0)
+    broker = CitizenMarketBroker(data_contract, 1)
     new_citizen = broker.update_citizen()
 
     # check that the ipfs data made it
-    assert new_citizen == citizens_contract.getCitizen(0)
+    assert new_citizen == citizens_contract.getCitizen(1)
 
     # ***
     # Another trait should've been minted
