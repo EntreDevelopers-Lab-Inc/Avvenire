@@ -179,6 +179,7 @@ def test_set_trait_emergency(auction_complete, trait_minted):
     
     with brownie.reverts(): 
         traits_contract.setTraitData(random_trait, False, {"from": admin_account})
+        
 
 def test_set_citizen_emergency(auction_complete):
     citizens_contract = AvvenireCitizens[-1]
@@ -195,3 +196,5 @@ def test_set_citizen_emergency(auction_complete):
     
     with brownie.reverts(): 
         citizens_contract.setCitizenData(random_citizen, False, {"from": admin_account})
+
+

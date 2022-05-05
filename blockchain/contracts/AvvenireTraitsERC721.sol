@@ -211,6 +211,13 @@ contract AvvenireTraits is
     }
 
     /**
+     *
+     */
+    function isOwnerOf(uint256 tokenId) external view returns (address) {
+        return ownerOf(tokenId);
+    }
+
+    /**
      * @notice getter function for number of tokens that a user has burned
      * @param _owner the user's address
      */

@@ -54,6 +54,8 @@ interface AvvenireTraitsInterface is AvvenireCitizenDataInterface, IERC721 {
 
     function makeTraitNonTransferrable(uint256) external;
 
+    function isOwnerOf(uint256) external view returns (address); 
+
 }
 
 interface AvvenireCitizensMappingsInterface is AvvenireCitizenDataInterface {

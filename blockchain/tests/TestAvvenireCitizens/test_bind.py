@@ -398,6 +398,9 @@ def test_transfer_trait_then_combine():
     tx = traits_contract.safeTransferFrom(
         account, other_account, new_trait_id, {"from": account})
     tx.wait(1)
+    
+    assert other_account == traits_contract.ownerOf(new_trait_id)
+    assert other_account == citizens_contract.ownerOf(3)
 
     new_trait_uri = data_contract.getTrait(new_trait_id)[1]
     # now, put the body on citizen 3
@@ -596,7 +599,7 @@ def test_trait_changes_no_cost():
     # ***
 
     # Traits indexed at 1...
-    end_trait_id = citizens_contract.getTotalSupply() 
+    end_trait_id = traits_contract.getTotalSupply() 
     
     for x in range(len(trait_indexes)):
         assert traits_contract.getTrait(end_trait_id - x) == (

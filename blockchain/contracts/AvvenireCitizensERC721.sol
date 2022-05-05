@@ -299,7 +299,7 @@ contract AvvenireCitizens is
             });
         } else {
             // check the owner of the trait
-            require(ownerOf(traitId) == tx.origin, "The transaction origin does not own the trait");
+            require(avvenireTraits.isOwnerOf(traitId) == tx.origin, "The transaction origin does not own the trait");
             // the trait exists and can be found
 
             // disallow trading of the bound trait
