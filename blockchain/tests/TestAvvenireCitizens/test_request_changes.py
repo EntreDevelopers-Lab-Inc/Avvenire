@@ -115,17 +115,12 @@ def test_multiple_citizen_requests(single_mint):
     
 
 def test_multiple_trait_requests(single_mint):
-    avvenire_citizens_contract = AvvenireCitizens[-1]
     avvenire_market_contract = AvvenireCitizenMarket[-1]
     data_contract = AvvenireCitizensData[-1]
     traits_contract = AvvenireTraits[-1]
     
     admin_account = get_account()
     mint_account = accounts[2]
-    
-    avvenire_market_contract.initializeCitizen(
-        0, {"from": mint_account}
-    )
     
     broker = CitizenMarketBroker(data_contract, 0)
     broker.set_sex()
@@ -153,6 +148,10 @@ def test_multiple_trait_requests(single_mint):
     tx.wait(1)
     
     # *** 
+    # Combine already requests change for token...
+    # ***
+    
+    # *** 
     # IDs of Trait Contract start @ 1 
     # ***
     new_trait_id = traits_contract.getTotalSupply()
@@ -161,8 +160,6 @@ def test_multiple_trait_requests(single_mint):
     assert traits_contract.ownerOf(new_trait_id) == mint_account
     
     traits_contract.setAllowedPermission(mint_account, True, {"from": admin_account})
-    
-    traits_contract.requestChange(new_trait_id, {"from": mint_account}); 
     
     # ***
     # Attempt to request second change 
