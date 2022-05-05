@@ -101,7 +101,7 @@ def test_trait_changes_no_cost(citizens_minted):
     end_trait_id = traits_contract.getTotalSupply() 
     
     for x in range(len(trait_indexes)):
-        assert citizens_contract.getTrait(end_trait_id - x) == (
+        assert traits_contract.getTrait(end_trait_id - x) == (
             end_trait_id - x, 
             "", 
             True, 
@@ -115,7 +115,7 @@ def test_trait_changes_no_cost(citizens_minted):
         trait_manager = TraitManager(data_contract, end_trait_id - x)
         new_trait = trait_manager.update_trait()  # this is updating the effect
         assert new_trait == data_contract.getTrait(end_trait_id - x)
-        assert account == citizens_contract.ownerOf(end_trait_id - x)
+        assert account == traits_contract.ownerOf(end_trait_id - x)
 
     # Update the citizen
     broker = CitizenMarketBroker(data_contract, 0)
@@ -175,9 +175,9 @@ def test_trait_changes_no_cost(citizens_minted):
     # ***
     
     #traits indexed @ 1
-    end_trait_id = citizens_contract.getTotalSupply() 
+    end_trait_id = traits_contract.getTotalSupply() 
     for x in range(len(trait_indexes)):
-        assert citizens_contract.getTrait(end_trait_id - x) == (
+        assert traits_contract.getTrait(end_trait_id - x) == (
             end_trait_id - x, 
             "", 
             True, 
@@ -191,7 +191,7 @@ def test_trait_changes_no_cost(citizens_minted):
         trait_manager = TraitManager(data_contract, end_trait_id - x)
         new_trait = trait_manager.update_trait()  # this is updating the effect
         assert new_trait == data_contract.getTrait(end_trait_id - x)
-        assert account == citizens_contract.ownerOf(end_trait_id - x)
+        assert account == traits_contract.ownerOf(end_trait_id - x)
 
     assert traits_contract.getTotalSupply() - supply_before_combine == 5
     
