@@ -1,7 +1,7 @@
 import pytest
 import brownie
 
-from brownie import AvvenireTest, AvvenireCitizens, AvvenireCitizenMarket, accounts, AvvenireCitizensData
+from brownie import AvvenireCitizens, AvvenireCitizenMarket, accounts, AvvenireCitizensData
 from web3 import Web3
 
 from tools.ChainHandler import CitizenMarketBroker

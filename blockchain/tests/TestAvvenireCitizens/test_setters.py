@@ -1,7 +1,7 @@
 import pytest
 import brownie
 
-from brownie import AvvenireTest, AvvenireCitizens, AvvenireCitizenMarket, AvvenireCitizensData, accounts
+from brownie import AvvenireAuction, AvvenireCitizens, AvvenireCitizenMarket, AvvenireCitizensData, accounts
 from web3 import Web3
 from scripts.helpful_scripts import get_account
 
@@ -16,7 +16,7 @@ def auction_set(module_isolation):
 
 @pytest.fixture
 def single_mint():
-    avvenire_auction_contract = AvvenireTest[-1]
+    avvenire_auction_contract = AvvenireAuction[-1]
     test_account = accounts[2]
     admin_account = get_account()
 
@@ -51,7 +51,7 @@ def test_set_mutability_mode(bool_):
 
 def test_ownership_of():
     avvenire_citizens_contract = AvvenireCitizens[-1]
-    avvenire_auction_contract = AvvenireTest[-1]
+    avvenire_auction_contract = AvvenireAuction[-1]
     admin_account = get_account()
     account = accounts[5]
     cost = Web3.toWei(1, "ether")
