@@ -3,7 +3,6 @@ import brownie
 import time
 
 from brownie import (
-    AvvenireTest,
     AvvenireCitizens,
     AvvenireTraits,
     AvvenireCitizenMarket,

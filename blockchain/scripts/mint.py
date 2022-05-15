@@ -2,7 +2,7 @@ import brownie
 
 
 from web3 import Web3
-from brownie import network, chain, AvvenireTest, AvvenireCitizens, AvvenireCitizenMarket, AvvenireCitizensData
+from brownie import network, chain, AvvenireAuction, AvvenireCitizens, AvvenireCitizenMarket, AvvenireCitizensData
 from scripts.helpful_scripts import get_account
 
 from tools.ChainHandler import CitizenMarketBroker
@@ -14,7 +14,7 @@ from scripts.auction import end_auction_and_enable_changes
 
 # mint some citizens
 def mint_citizens(amount, account):
-    avvenire_auction_contract = AvvenireTest[-1]
+    avvenire_auction_contract = AvvenireAuction[-1]
     cost = avvenire_auction_contract.getAuctionPrice() * amount
     tx = avvenire_auction_contract.auctionMint(
         amount, {"from": account, "value": cost})

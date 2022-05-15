@@ -1,4 +1,4 @@
-from brownie import AvvenireTest, AvvenireCitizens,  AvvenireCitizensData, chain, network, accounts
+from brownie import AvvenireAuction, AvvenireCitizens,  AvvenireCitizensData, chain, network, accounts
 from web3 import Web3
 
 from constants import BASE_URI, LOAD_URI
@@ -46,7 +46,7 @@ def setup_auction():
 
 def perform_auction():
     admin_account = get_account()
-    avvenire_contract = AvvenireTest[-1]
+    avvenire_contract = AvvenireAuction[-1]
 
     # Initializations
     avvenire_contract.teamMint({"from": admin_account})
@@ -91,7 +91,7 @@ def end_auction_and_enable_changes():
     # get the admin and contract
     admin_account = get_account()
     data_contract = AvvenireCitizensData[-1]
-    avvenire_auction_contract = AvvenireTest[-1]
+    avvenire_auction_contract = AvvenireAuction[-1]
 
     current_auction_price = avvenire_auction_contract.getAuctionPrice()
     end_auction(current_auction_price, 0)
@@ -101,7 +101,7 @@ def end_auction_and_enable_changes():
 
 
 def main():
-    auction_contract = AvvenireTest[-1]
+    auction_contract = AvvenireAuction[-1]
     account = get_account()
     whitelist = ['0xEE5d2a730868D1af42246c78594C2Fcbf8fBa382']
     auction_contract.seedWhitelist(whitelist, {"from": account})

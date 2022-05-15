@@ -1,5 +1,5 @@
 from brownie import (
-    AvvenireTest,
+    AvvenireAuction,
     AvvenireCitizens,
     AvvenireCitizenMarket,
     AvvenireCitizensData,
@@ -26,16 +26,12 @@ WHITELIST_DISCOUNT = 0.7
 # Deployment Script
 # Implementation can be changed so that specifications are passed as params instead of intiialized within the function
 def deploy_contract(
-    max_per_address_during_auction,
     max_per_address_during_whitelist,
     collection_size,
     amount_for_auction_and_team,
-    amount_for_team,
-    dev_address,
-    payment_to_devs,
+    amount_for_team
 ):
     account = get_account()
-    payment_to_devs_ETH = Web3.toWei(payment_to_devs, "ether")
 
     # if not Web3.isAddress(devAddress):
     avvenire_data_contract = AvvenireCitizensData.deploy({"from": account})
@@ -68,7 +64,7 @@ def deploy_contract(
     avvenire_market_contract = AvvenireCitizenMarket.deploy(
         AvvenireCitizens[-1].address, AvvenireTraits[-1].address, AvvenireCitizensData[-1].address, {"from": account})
 
-    avvenire_auction_contract = AvvenireTest.deploy(
+    avvenire_auction_contract = AvvenireAuction.deploy(
         max_per_address_during_auction,
         max_per_address_during_whitelist,
         collection_size,
@@ -82,7 +78,7 @@ def deploy_contract(
 
     # allow the test contract to interact with the citizens contract
     avvenire_citizens_contract.setAllowedPermission(
-        AvvenireTest[-1].address, True, {"from": account}
+        AvvenireAuction[-1].address, True, {"from": account}
     )
 
     avvenire_citizens_contract.setAllowedPermission(
@@ -108,7 +104,7 @@ def deploy_contract(
 def set_auction_start_time(time_from_epoch):
     if not isinstance(time_from_epoch, int):
         raise ValueError("Start time isn't an int")
-    avvenire_contract = AvvenireTest[-1]
+    avvenire_contract = AvvenireAuction[-1]
     account = get_account()
 
     start_time = None
@@ -127,13 +123,13 @@ def set_auction_start_time(time_from_epoch):
 def set_public_sale_key(public_key):
     if not isinstance(public_key, int):
         raise ValueError("Public key isn't an int")
-    avvenire_contract = AvvenireTest[-1]
+    avvenire_contract = AvvenireAuction[-1]
     account = get_account()
     avvenire_contract.setPublicSaleKey(public_key, {"from": account})
 
 
 def set_base_uri(baseURI):
-    avvenire_contract = AvvenireTest[-1]
+    avvenire_contract = AvvenireAuction[-1]
     account = get_account()
     avvenire_contract.setBaseURI(baseURI, {"from": account})
 
@@ -143,7 +139,7 @@ def end_auction(ending_auction_price, time_from_epoch):
         raise ValueError("ending_auction_price isn't an int")
     if not isinstance(time_from_epoch, int):
         raise ValueError("time_from_epoch isn't an int")
-    avvenire_contract = AvvenireTest[-1]
+    avvenire_contract = AvvenireAuction[-1]
     account = get_account()
     whitelist_price = int(WHITELIST_DISCOUNT * ending_auction_price)
 
@@ -166,7 +162,7 @@ def end_auction(ending_auction_price, time_from_epoch):
 
 
 def drop_interval(number_of_drops):
-    avvenire_contract = AvvenireTest[-1]
+    avvenire_contract = AvvenireAuction[-1]
     drop_interval = avvenire_contract.AUCTION_DROP_INTERVAL()
     drop_time = int(drop_interval * number_of_drops)
     if network.show_active() in LOCAL_BLOCKCHAIN_ENVIRONMENTS:
@@ -180,28 +176,28 @@ def drop_interval(number_of_drops):
 
 
 def team_mint():
-    avvenire_contract = AvvenireTest[-1]
+    avvenire_contract = AvvenireAuction[-1]
     account = get_account()
     avvenire_contract.teamMint({"from": account})
 
 
 # account variable needs to be changed to user's account
 def auction_mint(quantity):
-    avvenire_contract = AvvenireTest[-1]
+    avvenire_contract = AvvenireAuction[-1]
     account = get_dev_account()
     avvenire_contract.auctionMint(quantity, {"from": account})
 
 
 # account variable needs to be changed to user's account
 def whitelist_mint(quantity):
-    avvenire_contract = AvvenireTest[-1]
+    avvenire_contract = AvvenireAuction[-1]
     account = get_dev_account()
     avvenire_contract.whiteListMint(quantity, {"from": account})
 
 
 # account variable needs to be changed to user's account
 def public_mint(quantity, sale_key):
-    avvenire_contract = AvvenireTest[-1]
+    avvenire_contract = AvvenireAuction[-1]
     account = get_dev_account()
     avvenire_contract.publicSaleMint(quantity, sale_key, {"from": account})
 
@@ -217,7 +213,7 @@ def seed_whitelist(whitelist):
         if not Web3.isAddress(address_):
             raise ValueError(f"Address #{index} is invalid in whitelist")
 
-    avvenire_contract = AvvenireTest[-1]
+    avvenire_contract = AvvenireAuction[-1]
     account = get_account()
     avvenire_contract.seedWhiteList(whitelist, {"from": account})
 
@@ -225,7 +221,7 @@ def seed_whitelist(whitelist):
 def remove_from_whitelist(to_remove):
     if not Web3.isAddress(to_remove):
         raise ValueError("to_remove is not a valid address")
-    avvenire_contract = AvvenireTest[-1]
+    avvenire_contract = AvvenireAuction[-1]
     account = get_account()
     avvenire_contract.removeFromWhitelist(to_remove, {"from": account})
 
@@ -235,7 +231,7 @@ def remove_from_whitelist(to_remove):
 def refund_all(refund_list):
     if not isinstance(refund_list, list):
         raise ValueError("refund_list is not a list")
-    avvenire_contract = AvvenireTest[-1]
+    avvenire_contract = AvvenireAuction[-1]
     account = get_account()
 
     for index, to_refund in enumerate(refund_list):
@@ -248,7 +244,7 @@ def refund_all(refund_list):
 # setOwnersExplicit function
 # Unsure if I should refactor in the contract to just set all owners explicit...
 def set_all_owners_explicit():
-    avvenire_contract = AvvenireTest[-1]
+    avvenire_contract = AvvenireAuction[-1]
     account = get_account()
     supply = avvenire_contract.totalSupply()
     avvenire_contract.setOwnersExplicit(supply, {"from": account})
@@ -256,7 +252,7 @@ def set_all_owners_explicit():
 
 # Withdraw function
 def withdraw():
-    avvenire_contract = AvvenireTest[-1]
+    avvenire_contract = AvvenireAuction[-1]
     account = get_account()
     avvenire_contract.withdrawMoney({"from": account})
 
@@ -265,7 +261,7 @@ def withdraw():
 
 
 def is_public_sale_on(public_price_eth, public_sale_key, public_start_time):
-    avvenire_contract = AvvenireTest[-1]
+    avvenire_contract = AvvenireAuction[-1]
     public_price_wei = Web3.toWei(public_price_eth, "ether")
     return avvenire_contract.isPublicSaleOn(
         public_price_wei, public_sale_key, public_start_time
@@ -273,25 +269,25 @@ def is_public_sale_on(public_price_eth, public_sale_key, public_start_time):
 
 
 def get_auction_price():
-    avvenire_contract = AvvenireTest[-1]
+    avvenire_contract = AvvenireAuction[-1]
     return avvenire_contract.getAuctionPrice()
 
 
 def get_base_uri():
-    avvenire_contract = AvvenireTest[-1]
+    avvenire_contract = AvvenireAuction[-1]
     return avvenire_contract._baseURI()
 
 
 def get_token_uri(tokenID):
-    avvenire_contract = AvvenireTest[-1]
+    avvenire_contract = AvvenireAuction[-1]
     return avvenire_contract.tokenURI(tokenID)
 
 
 def number_minted(account):
-    avvenire_contract = AvvenireTest[-1]
+    avvenire_contract = AvvenireAuction[-1]
     return avvenire_contract.numberMinted(account)
 
 
 def owner_of(tokenID):
-    avvenire_contract = AvvenireTest[-1]
+    avvenire_contract = AvvenireAuction[-1]
     return avvenire_contract.ownerOf(tokenID)

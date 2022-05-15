@@ -1,6 +1,6 @@
 import brownie
 
-from brownie import AvvenireTest, AvvenireCitizenMarket
+from brownie import AvvenireCitizenMarket
 from web3 import Web3
 from pytest import approx
 

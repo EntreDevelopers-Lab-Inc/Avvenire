@@ -1,7 +1,7 @@
 import pytest, brownie, time
 
 from brownie import (
-    AvvenireTest,
+    AvvenireAuction,
     AvvenireCitizens,
     AvvenireCitizenMarket,
     AvvenireCitizensData,
@@ -69,7 +69,7 @@ def test_safemint_emergency():
     admin_account = get_account()
     account = accounts[3]
     citizens_contract = AvvenireCitizens[-1]
-    avvenire_auction_contract = AvvenireTest[-1]
+    avvenire_auction_contract = AvvenireAuction[-1]
     cost = avvenire_auction_contract.getAuctionPrice() * 2
     
     # set emergency stop to true
