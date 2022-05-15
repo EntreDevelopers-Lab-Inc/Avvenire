@@ -1,7 +1,7 @@
 import pytest
 import brownie
 
-from brownie import AvvenireTest, AvvenireCitizens
+from brownie import AvvenireAuction, AvvenireCitizens
 from web3 import Web3
 
 from scripts.script_definitions import *
@@ -18,8 +18,8 @@ WHITELIST_DISCOUNT = 0.3
 def auction_set():
     admin_account = get_account()
     dev_account = get_dev_account()
-    deploy_contract(3, 2, 20, 15, 5, dev_account, 2)
-    avvenire_contract = AvvenireTest[-1]
+    deploy_contract(2, 20, 15, 5)
+    avvenire_contract = AvvenireAuction[-1]
     avvenire_citizens_contract = AvvenireCitizens[-1]
     avvenire_citizens_contract.setBaseURI(
         "https://ipfs.io/ipfs/QmUizisYNzj824jNxuiPTQ1ykBSEjmkp42wMZ7DVFvfZiK/",
@@ -46,7 +46,7 @@ def no_auction():
     # uint256 paymentToDevs_
     deploy_contract(3, 2, 20, 15, 5, dev_account, 2)
 
-    avvenire_contract = AvvenireTest[-1]
+    avvenire_contract = AvvenireAuction[-1]
     public_price_wei = Web3.toWei(PUBLIC_SALE_PRICE_ETH, "ether")
     whitelist_price_wei = (1 - WHITELIST_DISCOUNT) * public_price_wei
     avvenire_contract.endAuctionAndSetupNonAuctionSaleInfo(
@@ -58,7 +58,7 @@ def no_auction():
 
 
 def test_whitelist_mint_1(no_auction):
-    avvenire_contract = AvvenireTest[-1]
+    avvenire_contract = AvvenireAuction[-1]
     avvenire_citizens_contract = AvvenireCitizens[-1]
     mint_quantity = 2
     # Total cost of mint + .1 ETH for gas
@@ -88,7 +88,7 @@ def test_whitelist_mint_1(no_auction):
 
 
 def test_remove_whitelist(no_auction):
-    avvenire_contract = AvvenireTest[-1]
+    avvenire_contract = AvvenireAuction[-1]
     avvenire_citizens_contract = AvvenireCitizens[-1]
     admin_account = get_account()
     whitelist = [accounts[1], accounts[2], accounts[3], accounts[4], accounts[5]]
@@ -112,7 +112,7 @@ def test_remove_whitelist(no_auction):
 
 
 def test_whitelist_mint_2(no_auction):
-    avvenire_contract = AvvenireTest[-1]
+    avvenire_contract = AvvenireAuction[-1]
     mint_quantity = 2
     total_cost = Web3.toWei(
         PUBLIC_SALE_PRICE_ETH * (1 - WHITELIST_DISCOUNT) * mint_quantity, "ether"
@@ -128,7 +128,7 @@ def test_whitelist_mint_2(no_auction):
 
 
 def test_whitelist_mint_past_collection_size(auction_set):
-    avvenire_contract = AvvenireTest[-1]
+    avvenire_contract = AvvenireAuction[-1]
     avvenire_citizens_contract = AvvenireCitizens[-1]
     admin_account = get_account()
     auction_sale_price_wei = Web3.toWei(1, "ether")

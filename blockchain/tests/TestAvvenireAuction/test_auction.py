@@ -2,7 +2,7 @@ import pytest
 import brownie
 import time
 
-from brownie import AvvenireTest, AvvenireCitizens, chain, network
+from brownie import AvvenireAuction, AvvenireCitizens, chain, network
 from web3 import Web3
 
 from scripts.script_definitions import *
@@ -12,7 +12,7 @@ SALE_START_TIME = 100
 
 
 def drop_interval(number_of_drops):
-    avvenire_contract = AvvenireTest[-1]
+    avvenire_contract = AvvenireAuction[-1]
     drop_interval = avvenire_contract.AUCTION_DROP_INTERVAL()
     drop_time = int(drop_interval * number_of_drops)
     if network.show_active() in LOCAL_BLOCKCHAIN_ENVIRONMENTS:
@@ -26,7 +26,7 @@ def drop_interval(number_of_drops):
 def auction_set(fn_isolation):
     admin_account = get_account()
     dev_account = get_dev_account()
-    deploy_contract(3, 2, 20, 15, 5, dev_account, 2)
+    deploy_contract(2, 20, 15, 5)
     avvenire_citizens_contract = AvvenireCitizens[-1]
     avvenire_citizens_contract.setBaseURI(
         "https://ipfs.io/ipfs/QmUizisYNzj824jNxuiPTQ1ykBSEjmkp42wMZ7DVFvfZiK/",
@@ -39,7 +39,6 @@ def auction_set(fn_isolation):
 
 
 def test_mint_before_start():
-    # avvenire_contract = AvvenireTest[-1]
     # account = get_dev_account()
     with brownie.reverts():
         # Should throw a VirtualMachineError
@@ -54,7 +53,7 @@ def test_below_mint_cost():
         time.sleep(SALE_START_TIME + 5)
 
     account = get_dev_account()
-    avvenire_contract = AvvenireTest[-1]
+    avvenire_contract = AvvenireAuction[-1]
     value = avvenire_contract.AUCTION_START_PRICE() / 2
     
     with brownie.reverts():
@@ -68,7 +67,7 @@ def test_mint_too_many():
     else:
         time.sleep(SALE_START_TIME + 5)
 
-    avvenire_contract = AvvenireTest[-1]
+    avvenire_contract = AvvenireAuction[-1]
     cost = avvenire_contract.AUCTION_START_PRICE()
     account = accounts[1]
 
@@ -83,7 +82,7 @@ def test_mint_too_many():
 
 def test_auction_mint():
     # Before drops intervals
-    avvenire_contract = AvvenireTest[-1]
+    avvenire_contract = AvvenireAuction[-1]
     avvenire_citizens_contract = AvvenireCitizens[-1]
     drop_per_step_wei = avvenire_contract.AUCTION_DROP_PER_STEP()
     auction_start_price_wei = avvenire_contract.AUCTION_START_PRICE()
@@ -130,7 +129,7 @@ def test_all_prices():
     # Initial price special case...
 
     # Before drops intervals
-    avvenire_contract = AvvenireTest[-1]
+    avvenire_contract = AvvenireAuction[-1]
     assert avvenire_contract.getAuctionPrice() == avvenire_contract.AUCTION_START_PRICE()
     drop_per_step_wei = avvenire_contract.AUCTION_DROP_PER_STEP()
     auction_start_price_wei = avvenire_contract.AUCTION_START_PRICE()
@@ -154,7 +153,7 @@ def test_all_prices():
 
 
 def test_mint_after_auction_amount():
-    avvenire_contract = AvvenireTest[-1]
+    avvenire_contract = AvvenireAuction[-1]
     avvenire_citizens_contract = AvvenireCitizens[-1]
     auction_sale_price_wei = avvenire_contract.AUCTION_START_PRICE()
     mint_quantity = 3
@@ -182,7 +181,7 @@ def test_mint_after_auction_amount():
 
 # # Only testable in local environment...
 # def test_refund():
-#     avvenire_contract = AvvenireTest[-1]
+#     avvenire_contract = AvvenireAuction[-1]
 #     avvenire_citizens_contract = AvvenireCitizens[-1]
 #     dev_account = get_dev_account()
 #     admin_account = get_account()

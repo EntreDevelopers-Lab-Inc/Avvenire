@@ -2,7 +2,7 @@ import pytest
 import brownie
 import time
 
-from brownie import AvvenireTest, AvvenireCitizens, chain, network
+from brownie import AvvenireAuction, AvvenireCitizens, chain, network
 from web3 import Web3
 
 from scripts.script_definitions import *
@@ -25,9 +25,9 @@ def public_mint(fn_isolation):
     # uint256 amountForTeam_,
     # address devAddress_,
     # uint256 paymentToDevs_
-    deploy_contract(3, 2, 20, 15, 5, dev_account, 2)
+    deploy_contract(2, 20, 15, 5)
 
-    avvenire_contract = AvvenireTest[-1]
+    avvenire_contract = AvvenireAuction[-1]
     avvenire_citizens_contract = AvvenireCitizens[-1]
     avvenire_citizens_contract.setBaseURI(
         "https://ipfs.io/ipfs/QmUizisYNzj824jNxuiPTQ1ykBSEjmkp42wMZ7DVFvfZiK/",
@@ -44,7 +44,7 @@ def public_mint(fn_isolation):
 
 
 def test_public_mint():
-    avvenire_contract = AvvenireTest[-1]
+    avvenire_contract = AvvenireAuction[-1]
     avvenire_citizens_contract = AvvenireCitizens[-1]
     mint_accounts = [accounts[2], accounts[3], accounts[4], accounts[5]]
     public_sale_price_wei = Web3.toWei(PUBLIC_SALE_PRICE_ETH, "ether")
@@ -72,7 +72,7 @@ def test_public_mint():
 
 
 def test_mint_before_start_time():
-    avvenire_contract = AvvenireTest[-1]
+    avvenire_contract = AvvenireAuction[-1]
     avvenire_citizens_contract = AvvenireCitizens[-1]
     public_sale_price_wei = Web3.toWei(PUBLIC_SALE_PRICE_ETH, "ether")
     mint_quantity = 2
@@ -88,7 +88,7 @@ def test_mint_before_start_time():
 
 
 def test_mint_incorrect_public_key():
-    avvenire_contract = AvvenireTest[-1]
+    avvenire_contract = AvvenireAuction[-1]
     avvenire_citizens_contract = AvvenireCitizens[-1]
     public_sale_price_wei = Web3.toWei(PUBLIC_SALE_PRICE_ETH, "ether")
     mint_quantity = 2
@@ -105,7 +105,7 @@ def test_mint_incorrect_public_key():
 
 
 def test_public_mint_past_collection_size():
-    avvenire_contract = AvvenireTest[-1]
+    avvenire_contract = AvvenireAuction[-1]
     avvenire_citizens_contract = AvvenireCitizens[-1]
     public_sale_price_wei = Web3.toWei(PUBLIC_SALE_PRICE_ETH, "ether")
     mint_quantity = 5
@@ -134,7 +134,7 @@ def test_public_mint_past_collection_size():
 
 
 def test_team_mint_past_collection_size():
-    avvenire_contract = AvvenireTest[-1]
+    avvenire_contract = AvvenireAuction[-1]
     avvenire_citizens_contract = AvvenireCitizens[-1]
     public_sale_price_wei = Web3.toWei(PUBLIC_SALE_PRICE_ETH, "ether")
     admin_account = get_account()

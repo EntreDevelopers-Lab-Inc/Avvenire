@@ -51,7 +51,6 @@ def deploy_contract(
         "AVC",
         "",
         "",
-        dev_address,
         AvvenireCitizensData[-1].address,
         AvvenireTraits[-1].address,
         {"from": account},
@@ -65,13 +64,10 @@ def deploy_contract(
         AvvenireCitizens[-1].address, AvvenireTraits[-1].address, AvvenireCitizensData[-1].address, {"from": account})
 
     avvenire_auction_contract = AvvenireAuction.deploy(
-        max_per_address_during_auction,
         max_per_address_during_whitelist,
         collection_size,
         amount_for_auction_and_team,
         amount_for_team,
-        dev_address,
-        payment_to_devs_ETH,
         AvvenireCitizens[-1].address,
         {"from": account},
     )

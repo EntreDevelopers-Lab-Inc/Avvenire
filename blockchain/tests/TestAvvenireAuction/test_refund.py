@@ -2,7 +2,7 @@ import pytest
 import brownie
 import time
 
-from brownie import AvvenireTest, AvvenireCitizens, chain, network
+from brownie import AvvenireAuction, AvvenireCitizens, chain, network
 from web3 import Web3
 
 from scripts.script_definitions import *
@@ -14,7 +14,7 @@ PUBLIC_SALE_START_TIME_FROM_EPOCH = 240
 
 
 def drop_interval(number_of_drops):
-    avvenire_contract = AvvenireTest[-1]
+    avvenire_contract = AvvenireAuction[-1]
     drop_interval = avvenire_contract.AUCTION_DROP_INTERVAL()
     drop_time = int(drop_interval * number_of_drops)
     if network.show_active() in LOCAL_BLOCKCHAIN_ENVIRONMENTS:
@@ -28,8 +28,8 @@ def drop_interval(number_of_drops):
 def post_auction(fn_isolation):
     admin_account = get_account()
     dev_account = get_dev_account()
-    deploy_contract(3, 2, 20, 15, 5, dev_account, 2)
-    avvenire_contract = AvvenireTest[-1]
+    deploy_contract(2, 20, 15, 5)
+    avvenire_contract = AvvenireAuction[-1]
     avvenire_citizens_contract = AvvenireCitizens[-1]
 
     # Don't need to pass in chain.time()...
@@ -54,7 +54,7 @@ def post_auction(fn_isolation):
     # Mint 1 at every drop interval...
     for drops in range(1, 9):
         print(
-            f"AvvenireTest Contract balance after minting: {avvenire_contract.balance()}"
+            f"AvvenireAvvenire Contract balance after minting: {avvenire_contract.balance()}"
         )
         print(
             f"AvvenireCitizens Contract balance after minting: {avvenire_citizens_contract.balance()}"
@@ -70,7 +70,7 @@ def post_auction(fn_isolation):
 
 @pytest.fixture()
 def public_auction_set():
-    avvenire_contract = AvvenireTest[-1]
+    avvenire_contract = AvvenireAuction[-1]
     admin_account = get_account()
     auction_end_price_wei = avvenire_contract.AUCTION_END_PRICE()
     public_price_wei = avvenire_contract.AUCTION_END_PRICE()
@@ -83,7 +83,7 @@ def public_auction_set():
 
 
 def test_refund_before_public_price_set():
-    avvenire_contract = AvvenireTest[-1]
+    avvenire_contract = AvvenireAuction[-1]
     admin_account = get_account()
 
     with brownie.reverts():
@@ -91,14 +91,14 @@ def test_refund_before_public_price_set():
 
 
 def test_refund_me_before_public_price_set():
-    avvenire_contract = AvvenireTest[-1]
+    avvenire_contract = AvvenireAuction[-1]
 
     with brownie.reverts():
         avvenire_contract.refundMe({"from": accounts[1]})
 
 
 def test_refund(public_auction_set):
-    avvenire_contract = AvvenireTest[-1]
+    avvenire_contract = AvvenireAuction[-1]
     admin_account = get_account()
     auction_end_price_wei = avvenire_contract.AUCTION_END_PRICE()
 
@@ -131,7 +131,7 @@ def test_refund(public_auction_set):
 
 
 def test_refund_me(public_auction_set):
-    avvenire_contract = AvvenireTest[-1]
+    avvenire_contract = AvvenireAuction[-1]
     admin_account = get_account()
     auction_end_price_wei = avvenire_contract.AUCTION_END_PRICE()
 

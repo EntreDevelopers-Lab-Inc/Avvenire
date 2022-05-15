@@ -2,7 +2,7 @@ import pytest
 import time
 import brownie
 
-from brownie import AvvenireTest, AvvenireCitizens, chain, network
+from brownie import AvvenireAuction, AvvenireCitizens, chain, network
 from web3 import Web3
 
 from scripts.script_definitions import *
@@ -18,8 +18,8 @@ DEV_PAYMENT = Web3.toWei(2, "ether")
 def auction_set(fn_isolation):
     dev_address = get_dev_account()
     print(dev_address)
-    deploy_contract(3, 2, 20, 15, 5, dev_address, DEV_PAYMENT)
-    avvenire_contract = AvvenireTest[-1]
+    deploy_contract(2, 20, 15, 5)
+    avvenire_contract = AvvenireAuction[-1]
     avvenire_citizens_contract = AvvenireCitizens[-1]
     account = get_account()
     avvenire_citizens_contract.setBaseURI(
@@ -32,7 +32,7 @@ def auction_set(fn_isolation):
     set_auction_start_time(SALE_START_TIME)
 
 def test_explicit_no_supply():
-    avvenire_contract = AvvenireTest[-1]
+    avvenire_contract = AvvenireAuction[-1]
     avvenire_citizens_contract = AvvenireCitizens[-1]
     admin_account = get_account()
     total_supply = avvenire_citizens_contract.totalSupply()
@@ -43,7 +43,7 @@ def test_explicit_no_supply():
 
 
 def test_set_explicit():
-    avvenire_contract = AvvenireTest[-1]
+    avvenire_contract = AvvenireAuction[-1]
     avvenire_citizens_contract = AvvenireCitizens[-1]
     admin_account = get_account()
     dev_account = get_dev_account()

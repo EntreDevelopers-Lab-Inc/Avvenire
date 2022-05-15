@@ -1,7 +1,7 @@
 import pytest, time, brownie
 
 from pytest import approx
-from brownie import AvvenireTest, AvvenireCitizens, chain, network
+from brownie import AvvenireAuction, AvvenireCitizens, chain, network
 from web3 import Web3
 
 from scripts.script_definitions import *
@@ -18,8 +18,8 @@ from scripts.auction import (
 def perform_auction(fn_isolation):
     dev_address = get_dev_account()
     print(dev_address)
-    deploy_contract(3, 2, 20, 15, 5, dev_address, DEV_PAYMENT)
-    avvenire_contract = AvvenireTest[-1]
+    deploy_contract(2, 20, 15, 5)
+    avvenire_contract = AvvenireAuction[-1]
     admin_account = get_account()
 
     # Don't need to pass in chain.time()...
@@ -44,13 +44,13 @@ def perform_auction(fn_isolation):
 
 
 def test_pay_devs():
-    avvenire_auction_contract = AvvenireTest[-1]
+    avvenire_auction_contract = AvvenireAuction[-1]
     admin_account = get_account()
     avvenire_auction_contract.payDevs({"from": admin_account})
 
 
 def test_try_pay_devs_twice():
-    avvenire_auction_contract = AvvenireTest[-1]
+    avvenire_auction_contract = AvvenireAuction[-1]
     admin_account = get_account()
     avvenire_auction_contract.payDevs({"from": admin_account})
     with brownie.reverts():
@@ -58,7 +58,7 @@ def test_try_pay_devs_twice():
 
 
 def test_withdraw_before_devs_paid():
-    avvenire_auction_contract = AvvenireTest[-1]
+    avvenire_auction_contract = AvvenireAuction[-1]
     admin_account = get_account()
     with brownie.reverts():
         avvenire_auction_contract.withdrawMoney({"from": admin_account})
@@ -66,7 +66,7 @@ def test_withdraw_before_devs_paid():
 
 def test_withdraw():
     # Initializations
-    avvenire_auction_contract = AvvenireTest[-1]
+    avvenire_auction_contract = AvvenireAuction[-1]
     avvenire_citizens_contract = AvvenireCitizens[-1]
     admin_account = get_account()
     dev_account = get_dev_account()

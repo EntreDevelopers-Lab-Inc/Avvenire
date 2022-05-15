@@ -1,6 +1,6 @@
 import brownie
 
-from brownie import AvvenireTest, AvvenireCitizenMarket
+from brownie import AvvenireAuction, AvvenireCitizenMarket
 from web3 import Web3
 
 from scripts.script_definitions import *
@@ -20,8 +20,8 @@ def test_deployment():
     # uint256 amountForTeam_,
     # address devAddress_,
     # uint256 paymentToDevs_
-    deploy_contract(3, 2, 20, 15, 5, dev_account, DEV_PAYMENT)
-    auction_contract = AvvenireTest[-1]
+    deploy_contract(2, 20, 15, 5)
+    auction_contract = AvvenireAuction[-1]
 
     assert auction_contract.maxPerAddressDuringAuction() == 3
     assert auction_contract.maxPerAddressDuringWhiteList() == 2
