@@ -60,24 +60,27 @@ def test_below_mint_cost():
         avvenire_contract.auctionMint(1, {"from": account, "value": value})
 
 
-def test_mint_too_many():
+def test_auction_mint():
     if network.show_active() in LOCAL_BLOCKCHAIN_ENVIRONMENTS:
         chain.sleep(SALE_START_TIME)
         chain.mine(1)
     else:
         time.sleep(SALE_START_TIME + 5)
 
-    avvenire_contract = AvvenireAuction[-1]
-    cost = avvenire_contract.AUCTION_START_PRICE()
+    avvenire_auction_contract = AvvenireAuction[-1]
+    avvenire_citizens_contract = AvvenireCitizens[-1]
+    cost = avvenire_auction_contract.AUCTION_START_PRICE()
     account = accounts[1]
+    
+    five_mint_cost = cost * 5
 
     # Mint 1
-    avvenire_contract.auctionMint(1, {"from": account, "value": cost})
+    avvenire_auction_contract.auctionMint(5, {"from": account, "value": five_mint_cost})
+    
+    assert avvenire_citizens_contract.numberMinted(account) == 5
+    assert avvenire_citizens_contract.balanceOf(account) == 5
 
-    three_mint_cost = cost * 3
-    # Mint 3 more
-    with brownie.reverts():
-        avvenire_contract.auctionMint(3, {"from": account, "value": three_mint_cost})
+    
 
 
 def test_auction_mint():

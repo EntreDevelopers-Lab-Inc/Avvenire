@@ -42,59 +42,23 @@ def perform_auction(fn_isolation):
         drop_interval(1)
     # 9 auction mints and 5 team mint = 14 minted total for 5.4 ETH
 
-
-def test_pay_devs():
-    avvenire_auction_contract = AvvenireAuction[-1]
-    admin_account = get_account()
-    avvenire_auction_contract.payDevs({"from": admin_account})
-
-
-def test_try_pay_devs_twice():
-    avvenire_auction_contract = AvvenireAuction[-1]
-    admin_account = get_account()
-    avvenire_auction_contract.payDevs({"from": admin_account})
-    with brownie.reverts():
-        avvenire_auction_contract.payDevs({"from": admin_account})
-
-
-def test_withdraw_before_devs_paid():
-    avvenire_auction_contract = AvvenireAuction[-1]
-    admin_account = get_account()
-    with brownie.reverts():
-        avvenire_auction_contract.withdrawMoney({"from": admin_account})
-
-
 def test_withdraw():
     # Initializations
     avvenire_auction_contract = AvvenireAuction[-1]
     avvenire_citizens_contract = AvvenireCitizens[-1]
     admin_account = get_account()
-    dev_account = get_dev_account()
 
     contract_balance = avvenire_auction_contract.balance()
     # Account balances before withdraw
     admin_before_withdraw_balance = admin_account.balance()
-    dev_before_withdraw_balance = dev_account.balance()
-
-    # Withdrawing...
-    avvenire_auction_contract.payDevs({"from": admin_account})
-    assert dev_before_withdraw_balance + DEV_PAYMENT == dev_account.balance()
 
     # Reset contract balance...
     contract_balance = avvenire_auction_contract.balance()
 
     avvenire_auction_contract.withdrawMoney({"from": admin_account})
 
-    dev_estimation_wei = (
-        dev_before_withdraw_balance + DEV_PAYMENT + (contract_balance / 20)
-    )
-    dev_estimation_eth = Web3.fromWei(dev_estimation_wei, "ether")
-    dev_actual = Web3.fromWei(dev_account.balance(), "ether")
-    # Assertions
-    assert round(dev_actual, 4) == round(dev_estimation_eth, 4)
-
     admin_estimation = Web3.fromWei(
-        admin_before_withdraw_balance + (contract_balance * 19 / 20),
+        admin_before_withdraw_balance + contract_balance,
         "ether",
     )
     admin_actual = Web3.fromWei(admin_account.balance(), "ether")

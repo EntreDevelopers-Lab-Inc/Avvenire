@@ -23,8 +23,6 @@ def test_deployment():
     deploy_contract(2, 20, 15, 5)
     auction_contract = AvvenireAuction[-1]
 
-    assert auction_contract.maxPerAddressDuringAuction() == 3
-    assert auction_contract.maxPerAddressDuringWhiteList() == 2
     assert auction_contract.collectionSize() == 20
     assert auction_contract.amountForAuctionAndTeam() == 15
     assert auction_contract.amountForTeam() == 5
