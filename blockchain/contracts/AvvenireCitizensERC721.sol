@@ -38,14 +38,6 @@ contract AvvenireCitizens is
 
     bool public isStopped; 
 
-    // dev payment
-    struct DevConfig {
-        address devAddress;
-        uint256 devRoyaltyPercent;
-    }
-
-    DevConfig private devConfig; // need to set it this way to avoid stack being too deep
-
     // Data contract
     AvvenireCitizensMappingsInterface public avvenireCitizensData;
 
@@ -61,7 +53,6 @@ contract AvvenireCitizens is
         string memory ERC721AId_,
         string memory baseURI_,
         string memory loadURI_,
-        address devAddress_,
         address dataContractAddress_, 
         address traitContractAddress_
     ) ERC721A(ERC721Name_, ERC721AId_) Ownable() {
@@ -76,9 +67,6 @@ contract AvvenireCitizens is
 
         allowedContracts[msg.sender] = true;
 
-        // set the dev address for royalties and payment
-        devConfig.devAddress = devAddress_;
-
         // Set data contract
         avvenireCitizensData = AvvenireCitizensMappingsInterface(dataContractAddress_);
 
@@ -90,14 +78,6 @@ contract AvvenireCitizens is
     */
     modifier callerIsAllowed() {
         if (!allowedContracts[msg.sender]) revert NotSender();
-        _;
-    }
-
-    /**
-     * modifier to check if it is the devs
-     */
-    modifier onlyDevs() {
-        require(msg.sender == devConfig.devAddress, "Not devs");
         _;
     }
 
@@ -533,22 +513,6 @@ contract AvvenireCitizens is
     }
 
     /**
-     * @notice allow the devs to change their address
-     * @param devAddress_ would be the new dev address
-     */
-    function changeDevAddress(address devAddress_) external onlyDevs {
-        devConfig.devAddress = devAddress_;
-    }
-
-    /**
-     * @notice allow the devs to set their royalties
-     * @param devRoyaltyPercent_ is the percent (out of 100) to pay the devs
-     */
-    function setDevRoyalty(uint256 devRoyaltyPercent_) external onlyDevs {
-        devConfig.devRoyaltyPercent = devRoyaltyPercent_;
-    }
-
-    /**
      * @notice sets an address's allowed list permission (for future interaction)
      * @param address_ is the address to set the data for
      * @param setting is the boolean for the data
@@ -564,21 +528,10 @@ contract AvvenireCitizens is
      * @notice function to withdraw the money from the contract. Only callable by the owner
      */
     function withdrawMoney() external onlyOwner nonReentrant {
-        // cannot require that the amount due is paid, as this function is used in when minting traits from safe mint
-        // even making safeMint payable would be useless, as this can only check the value of one trait, not many
-        // seems nonsensical to make safemint payable with require statements, as only allowed contracts can call it, and we would be checking ourselves at the cost of users (when we could instead write one require statement at the end of a transaction in an allowed contract)
-        
-        uint256 balance_ = address(this).balance;
-
-        (bool royaltyPaid, ) = devConfig.devAddress.call{
-            value: ((balance_ * devConfig.devRoyaltyPercent) / 100)
-        }("");
-
-        
         (bool success, ) = receivingAddress.call{
             value: address(this).balance }("");
 
-        require(success && royaltyPaid, "Failed to change");
+        require(success, "Failed transaction");
     }
 
     /**
