@@ -42,7 +42,7 @@ def perform_auction(fn_isolation):
         drop_interval(1)
     # 9 auction mints and 5 team mint = 14 minted total for 5.4 ETH
 
-def test_withdraw():
+def test_withdraw_functions():
     # Initializations
     avvenire_auction_contract = AvvenireAuction[-1]
     avvenire_citizens_contract = AvvenireCitizens[-1]
@@ -51,17 +51,27 @@ def test_withdraw():
     contract_balance = avvenire_auction_contract.balance()
     # Account balances before withdraw
     admin_before_withdraw_balance = admin_account.balance()
-
     # Reset contract balance...
+    
+    amount_to_withdraw = Web3.toWei(1.2, "ether")
+    
+    avvenire_auction_contract.withdrawQuantity(amount_to_withdraw, {"from": admin_account})
+    
+    assert avvenire_auction_contract.balance() == contract_balance - amount_to_withdraw
+    assert admin_account.balance() == admin_before_withdraw_balance + amount_to_withdraw
+    
+    #Reset contract_balance variable...
     contract_balance = avvenire_auction_contract.balance()
-
-    avvenire_auction_contract.withdrawMoney({"from": admin_account})
+    #Reset admin account balance
+    admin_before_withdraw_balance = admin_account.balance()
+    
+    avvenire_auction_contract.withdrawAll({"from": admin_account})
 
     admin_estimation = Web3.fromWei(
         admin_before_withdraw_balance + contract_balance,
         "ether",
     )
     admin_actual = Web3.fromWei(admin_account.balance(), "ether")
+    
     assert round(admin_estimation, 4) == round(admin_actual, 4)
-
     assert avvenire_auction_contract.balance() == 0

@@ -349,11 +349,21 @@ contract AvvenireAuction is Ownable, ReentrancyGuard {
     /**
      * @notice function to withdraw the money from the contract. Only callable by the owner
      */
-    function withdrawMoney() external onlyOwner nonReentrant {
+    function withdrawQuantity(uint256 toWithdraw) external onlyOwner nonReentrant {
+        // Withdraw rest of the contract
+        (bool success, ) = msg.sender.call{value: toWithdraw}("");
+        require(success, "withdraw failed.");
+    }
+
+        /**
+     * @notice function to withdraw the money from the contract. Only callable by the owner
+     */
+    function withdrawAll() external onlyOwner nonReentrant {
         // Withdraw rest of the contract
         (bool success, ) = msg.sender.call{value: address(this).balance}("");
-        require(success, "team transfer failed.");
+        require(success, "withdraw failed.");
     }
+
 }
 
 /*

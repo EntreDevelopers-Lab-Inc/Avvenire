@@ -17,7 +17,6 @@ WHITELIST_DISCOUNT = 0.3
 @pytest.fixture()
 def auction_set():
     admin_account = get_account()
-    dev_account = get_dev_account()
     deploy_contract(2, 20, 15, 5)
     avvenire_contract = AvvenireAuction[-1]
     avvenire_citizens_contract = AvvenireCitizens[-1]
@@ -35,15 +34,7 @@ def auction_set():
 def no_auction():
     whitelist = [accounts[1], accounts[2], accounts[3], accounts[4], accounts[5]]
     admin_account = get_account()
-    dev_account = get_dev_account()
-
-    # uint256 maxPerAddressDuringAuction_,
-    # uint256 maxPerAddressDuringWhiteList_,
-    # uint256 collectionSize_,
-    # uint256 amountForAuctionAndTeam_,
-    # uint256 amountForTeam_,
-    # address devAddress_,
-    # uint256 paymentToDevs_
+    
     deploy_contract(2, 20, 15, 5)
 
     avvenire_contract = AvvenireAuction[-1]
