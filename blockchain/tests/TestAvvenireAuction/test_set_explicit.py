@@ -32,7 +32,6 @@ def auction_set(fn_isolation):
     set_auction_start_time(SALE_START_TIME)
 
 def test_explicit_no_supply():
-    avvenire_contract = AvvenireAuction[-1]
     avvenire_citizens_contract = AvvenireCitizens[-1]
     admin_account = get_account()
     total_supply = avvenire_citizens_contract.totalSupply()
@@ -41,14 +40,11 @@ def test_explicit_no_supply():
             total_supply, {"from:": admin_account}
         )
 
-
 def test_set_explicit():
     avvenire_contract = AvvenireAuction[-1]
     avvenire_citizens_contract = AvvenireCitizens[-1]
     admin_account = get_account()
-    dev_account = get_dev_account()
     avvenire_contract.teamMint({"from": admin_account})
-    total_balance = 0
 
     # Initial price special case...
     if network.show_active() in LOCAL_BLOCKCHAIN_ENVIRONMENTS:
@@ -62,26 +58,7 @@ def test_set_explicit():
         avvenire_contract.auctionMint(1, {"from": accounts[count], "value": cost})
         drop_interval(1)
 
-    # 9 auction mints and 5 team mint = 14 minted total for 5.4 ETH
-    # 6 left in collection
-
-    public_price_wei = Web3.toWei(0.2, "ether")
-    whitelist_discount = 0.3
-    whitelist_price_wei = public_price_wei * whitelist_discount
-
-    avvenire_contract.endAuctionAndSetupNonAuctionSaleInfo(
-        whitelist_price_wei, public_price_wei, PUBLIC_SALE_START_TIME
-    )
-
-    # Setting public sale key...
-    avvenire_contract.setPublicSaleKey(PUBLIC_SALE_KEY)
-
-    # Mint 6 @ public price
-    for count in range(1, 6):
-        avvenire_contract.publicSaleMint(
-            1, PUBLIC_SALE_KEY, {"from": accounts[count], "value": public_price_wei}
-        )
-        assert avvenire_citizens_contract.numberMinted(accounts[count]) == 2
+    # 9 auction mints and 5 team mint = 14 minted total 
 
     total_supply = avvenire_citizens_contract.totalSupply()
     avvenire_citizens_contract.setOwnersExplicit(total_supply, {"from:": admin_account})

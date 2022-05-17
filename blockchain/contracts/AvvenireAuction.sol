@@ -10,7 +10,6 @@ import "@openzeppelin/contracts/access/Ownable.sol";
 import "@openzeppelin/contracts/utils/Strings.sol";
 import "@openzeppelin/contracts/security/ReentrancyGuard.sol";
 
-// ERC721AOwnersExplicit already inherits from ERC721A
 contract AvvenireAuction is Ownable, ReentrancyGuard {
     // mint information
     uint256 public maxPerAddressDuringWhiteList;
@@ -19,24 +18,23 @@ contract AvvenireAuction is Ownable, ReentrancyGuard {
     uint256 public amountForAuctionAndTeam; // Amount of NFTs for the team and auction
     uint256 public collectionSize; // Total collection size
 
-    // avvenire citizens contract
+    // AvvenireCitizensERC721 contract
     AvvenireCitizensInterface avvenireCitizens;
 
     struct SaleConfig {
-        uint32 auctionSaleStartTime; //
-        uint32 publicSaleStartTime; //
-        uint64 mintlistPrice; //
-        uint64 publicPrice; // where is this set?
-        uint32 publicSaleKey; //
+        uint32 auctionSaleStartTime; 
+        uint32 publicSaleStartTime; 
+        uint64 mintlistPrice; 
+        uint64 publicPrice; 
+        uint32 publicSaleKey; 
     }
 
-    SaleConfig public saleConfig; // use the struct as a constant (why make it public?)
-    // struct is made public so frontend can query
+    SaleConfig private saleConfig; 
 
-    // Whitelist mapping (address => amount they can mint)
+    // whitelist mapping (address => amount they can mint)
     mapping(address => uint256) public allowlist;
 
-    //Do I need to keep public
+    // Mappings used to calculate the amount to refund a user from the dutch auctin
     mapping(address => uint256) public totalPaidDuringAuction;
     mapping(address => uint256) public numberMintedDuringAuction;
 
@@ -46,6 +44,7 @@ contract AvvenireAuction is Ownable, ReentrancyGuard {
      * @param collectionSize_ the number of NFTs in the collection
      * @param amountForTeam_ the number of NFTs for the team
      * @param amountForAuctionAndTeam_ specifies total amount to auction + the total amount for the team
+     * @param avvenireCitizensContractAddress_ address for AvvenireCitizensERC721 contract 
      */
     constructor(
         uint256 maxPerAddressDuringWhiteList_,
@@ -66,7 +65,7 @@ contract AvvenireAuction is Ownable, ReentrancyGuard {
         );
 
         require(
-            amountForAuctionAndTeam_ <= collectionSize_, // make sure that the collection can handle the size of the auction
+            amountForAuctionAndTeam_ <= collectionSize_, 
             "larger collection size needed"
         );
     }
@@ -75,7 +74,7 @@ contract AvvenireAuction is Ownable, ReentrancyGuard {
       Modifier to make sure that the caller is a user and not another contract
      */
     modifier callerIsUser() {
-        require(tx.origin == msg.sender, "The caller is another contract."); // check that a user is accessing a contract
+        require(tx.origin == msg.sender, "The caller is another contract."); 
         _;
     }
 
@@ -85,12 +84,14 @@ contract AvvenireAuction is Ownable, ReentrancyGuard {
      */
     function auctionMint(uint256 quantity) external payable callerIsUser {
         uint256 _saleStartTime = uint256(saleConfig.auctionSaleStartTime);
-        // the auction can start at a particular time --> this allows the contract to be deployed ahead of time and activated later
 
+        // Require that the current time is past the designated start time 
         require(
             _saleStartTime != 0 && block.timestamp >= _saleStartTime,
             "sale has not started yet"
         );
+
+        // Require that quantity does not exceed designated amount 
         require(
             avvenireCitizens.getTotalSupply() + quantity <=
                 amountForAuctionAndTeam,
@@ -98,15 +99,16 @@ contract AvvenireAuction is Ownable, ReentrancyGuard {
         );
 
         uint256 totalCost = getAuctionPrice() * quantity; // total amount of ETH needed for the transaction
-        avvenireCitizens.safeMint(msg.sender, quantity); // mint this amount to the sender
+        avvenireCitizens.safeMint(msg.sender, quantity); 
 
+        //Add to numberMinted mapping 
         numberMintedDuringAuction[msg.sender] =
             numberMintedDuringAuction[msg.sender] +
             quantity;
 
         refundIfOver(totalCost); // make sure to refund the excess
 
-        //Add to totalPaid
+        //Add to totalPaid mapping
         totalPaidDuringAuction[msg.sender] =
             totalPaidDuringAuction[msg.sender] +
             totalCost;
@@ -117,13 +119,14 @@ contract AvvenireAuction is Ownable, ReentrancyGuard {
      * @param quantity amount to mint for whitelisted users
      */
     function whiteListMint(uint256 quantity) external payable callerIsUser {
-        // Sets the price to the mintlistPrice, which was set by endAuctionAndSetupNonAuctionSaleInfo(...)
+        // Sets the price var to the mintlistPrice, which was set by endAuctionAndSetupNonAuctionSaleInfo(...)
+        // mintlistPrice will be set to 30% below the publicSalePrice
         uint256 price = uint256(saleConfig.mintlistPrice);
 
         require(price != 0, "Allowlist sale has not begun yet");
 
-        require(allowlist[msg.sender] > 0, "not eligible for allowlist mint"); // this also checks the decrement
-        // need a require statement to make sure that quantity is less than the limit for each user
+        require(allowlist[msg.sender] > 0, "not eligible for allowlist mint"); 
+
         require(
             avvenireCitizens.getTotalSupply() + quantity <= collectionSize,
             "Reached max supply"
@@ -134,7 +137,6 @@ contract AvvenireAuction is Ownable, ReentrancyGuard {
 
         avvenireCitizens.safeMint(msg.sender, quantity);
 
-        // Give a 30% discount compared to the dutch auction
         uint256 totalCost = quantity * price;
 
         refundIfOver(totalCost);
@@ -150,14 +152,14 @@ contract AvvenireAuction is Ownable, ReentrancyGuard {
         payable
         callerIsUser
     {
-        SaleConfig memory config = saleConfig; // create a coonfiguration to keep track of internal sale data
+        SaleConfig memory config = saleConfig; 
+
         uint256 publicSaleKey = uint256(config.publicSaleKey); // log the key
-        uint256 publicPrice = uint256(config.publicPrice); // get the price configuration
-        uint256 publicSaleStartTime = uint256(config.publicSaleStartTime);
+        uint256 publicPrice = uint256(config.publicPrice); // get the price 
+        uint256 publicSaleStartTime = uint256(config.publicSaleStartTime); 
+
         require(
             publicSaleKey == callerPublicSaleKey,
-            // publicSaleKey is likely the password used to be able to mint???
-            // we can just set our struct to internal...
             "called with incorrect public sale key"
         );
 
@@ -170,12 +172,6 @@ contract AvvenireAuction is Ownable, ReentrancyGuard {
             "reached max supply"
         );
 
-        // Is there a cap for the maxPerAddress during the mint?
-
-        // require(
-        //     avvenireCitizens.numberMinted(msg.sender) + quantity <= maxPerAddressDuringMint,
-        //     "can not mint this many"
-        // );
         avvenireCitizens.safeMint(msg.sender, quantity);
 
         uint256 totalCost = publicPrice * quantity;
@@ -183,15 +179,14 @@ contract AvvenireAuction is Ownable, ReentrancyGuard {
     }
 
     /**
-     * @notice private function that refunds a user if msg.value > currentPrice
+     * @notice private function that refunds a user if msg.value > totalCost
      * @param price current price
      */
     function refundIfOver(uint256 price) private {
-        require(msg.value >= price, "Need to send more ETH."); // not refunding anything if they didn't pay more than the floor --> what happens when the floor is reached? does the last person get anything
-        // Function does not have to do with the floor -- Used if a user sends more ETH than the current price
-        // Let's say the current price is .5 ETH and a user sends 1 ETH; this function refunds them the excess that they sent
+        require(msg.value >= price, "Need to send more ETH"); 
+
         if (msg.value > price) {
-            payable(msg.sender).transfer(msg.value - price); // pay the user the excess
+            payable(msg.sender).transfer(msg.value - price);
         }
     }
 
@@ -249,19 +244,19 @@ contract AvvenireAuction is Ownable, ReentrancyGuard {
         uint256 publicSaleStartTime
     ) public view returns (bool) {
         return
-            publicPriceWei != 0 && // must sell for more than 0
-            publicSaleKey != 0 && // must have a key that is non-zero
-            block.timestamp >= publicSaleStartTime; // must be past the public start time
+            publicPriceWei != 0 && 
+            publicSaleKey != 0 && 
+            block.timestamp >= publicSaleStartTime; 
     }
 
     uint256 public constant AUCTION_START_PRICE = .01 ether; // start price
     uint256 public constant AUCTION_END_PRICE = 0.002 ether; // floor price
     uint256 public constant AUCTION_PRICE_CURVE_LENGTH = 1 hours; // total time of the auction
     uint256 public constant AUCTION_DROP_INTERVAL = 7.5 minutes;
-    // Should be 0.1 ether with the current setup...
+
     uint256 public constant AUCTION_DROP_PER_STEP =
         (AUCTION_START_PRICE - AUCTION_END_PRICE) /
-            (AUCTION_PRICE_CURVE_LENGTH / AUCTION_DROP_INTERVAL); // how much the auction will drop the price per unit of time
+            (AUCTION_PRICE_CURVE_LENGTH / AUCTION_DROP_INTERVAL); // how much the auction price will drop the price per unit of time
 
     /**
      * @notice Returns the current auction price. Uses block.timestamp to properly calculate price
@@ -277,14 +272,14 @@ contract AvvenireAuction is Ownable, ReentrancyGuard {
         } else {
             uint256 steps = (block.timestamp - _saleStartTime) /
                 AUCTION_DROP_INTERVAL;
-            return AUCTION_START_PRICE - (steps * AUCTION_DROP_PER_STEP); // calculate the start price based on how far away from the start we are
+            return AUCTION_START_PRICE - (steps * AUCTION_DROP_PER_STEP); // calculate the price based on how far away from the start we are
         }
     }
 
     /**
-     * @notice function to set up the saleConfig variable
-     * @param mintlistPriceWei the mintlist price in WEI
-     * @param publicPriceWei the public sale price
+     * @notice function to set up the saleConfig variable; sets auctionSaleStartTime to 0
+     * @param mintlistPriceWei the mintlist price in wei
+     * @param publicPriceWei the public sale price in wei
      * @param publicSaleStartTime the start time of the sale
      */
     function endAuctionAndSetupNonAuctionSaleInfo(
@@ -334,7 +329,7 @@ contract AvvenireAuction is Ownable, ReentrancyGuard {
      * @param toRemove the public address of the user
      */
     function removeFromWhitelist(address toRemove) external onlyOwner {
-        require(allowlist[toRemove] > 0, "User already minted");
+        require(allowlist[toRemove] > 0, "allowlist at 0 already");
         allowlist[toRemove] = 0;
     }
 
@@ -350,22 +345,18 @@ contract AvvenireAuction is Ownable, ReentrancyGuard {
      * @notice function to withdraw the money from the contract. Only callable by the owner
      */
     function withdrawQuantity(uint256 toWithdraw) external onlyOwner nonReentrant {
-        // Withdraw rest of the contract
+        require (toWithdraw <= address(this).balance, "quantity to withdraw > balance");
+
         (bool success, ) = msg.sender.call{value: toWithdraw}("");
         require(success, "withdraw failed.");
     }
 
-        /**
+    /**
      * @notice function to withdraw the money from the contract. Only callable by the owner
      */
     function withdrawAll() external onlyOwner nonReentrant {
-        // Withdraw rest of the contract
         (bool success, ) = msg.sender.call{value: address(this).balance}("");
         require(success, "withdraw failed.");
     }
 
 }
-
-/*
-NOTES
-*/

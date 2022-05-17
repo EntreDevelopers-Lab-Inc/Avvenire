@@ -12,7 +12,6 @@ SALE_START_TIME = 100
 WHITELIST_DISCOUNT = 0.3
 PUBLIC_SALE_START_TIME_FROM_EPOCH = 240
 
-
 def drop_interval(number_of_drops):
     avvenire_contract = AvvenireAuction[-1]
     drop_interval = avvenire_contract.AUCTION_DROP_INTERVAL()
@@ -26,11 +25,8 @@ def drop_interval(number_of_drops):
 
 @pytest.fixture(autouse=True)
 def post_auction(fn_isolation):
-    admin_account = get_account()
-    dev_account = get_dev_account()
     deploy_contract(2, 20, 15, 5)
     avvenire_contract = AvvenireAuction[-1]
-    avvenire_citizens_contract = AvvenireCitizens[-1]
 
     # Don't need to pass in chain.time()...
     # Unsure why
@@ -53,13 +49,6 @@ def post_auction(fn_isolation):
 
     # Mint 1 at every drop interval...
     for drops in range(1, 9):
-        print(
-            f"AvvenireAvvenire Contract balance after minting: {avvenire_contract.balance()}"
-        )
-        print(
-            f"AvvenireCitizens Contract balance after minting: {avvenire_citizens_contract.balance()}"
-        )
-
         drop_interval(1)
         implied_price = avvenire_contract.getAuctionPrice()
 
@@ -72,15 +61,13 @@ def post_auction(fn_isolation):
 def public_auction_set():
     avvenire_contract = AvvenireAuction[-1]
     admin_account = get_account()
-    auction_end_price_wei = avvenire_contract.AUCTION_END_PRICE()
     public_price_wei = avvenire_contract.AUCTION_END_PRICE()
     whitelist_price_wei = (1 - WHITELIST_DISCOUNT) * public_price_wei
 
     public_sale_start_time = chain.time() + PUBLIC_SALE_START_TIME_FROM_EPOCH
     avvenire_contract.endAuctionAndSetupNonAuctionSaleInfo(
-        whitelist_price_wei, public_price_wei, public_sale_start_time
+        whitelist_price_wei, public_price_wei, public_sale_start_time, {"from": admin_account}
     )
-
 
 def test_refund_before_public_price_set():
     avvenire_contract = AvvenireAuction[-1]

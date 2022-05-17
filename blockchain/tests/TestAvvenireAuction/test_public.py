@@ -16,15 +16,7 @@ PUBLIC_SALE_KEY = 12345
 @pytest.fixture(autouse=True)
 def public_mint(fn_isolation):
     admin_account = get_account()
-    dev_account = get_dev_account()
 
-    # uint256 maxPerAddressDuringAuction_,
-    # uint256 maxPerAddressDuringWhiteList_,
-    # uint256 collectionSize_,
-    # uint256 amountForAuctionAndTeam_,
-    # uint256 amountForTeam_,
-    # address devAddress_,
-    # uint256 paymentToDevs_
     deploy_contract(2, 20, 15, 5)
 
     avvenire_contract = AvvenireAuction[-1]
@@ -41,6 +33,19 @@ def public_mint(fn_isolation):
         whitelist_price_wei, public_price_wei, public_sale_start_time
     )
     avvenire_contract.setPublicSaleKey(PUBLIC_SALE_KEY)
+
+def test_end_auction():
+    avvenire_contract = AvvenireAuction[-1]
+    random_account = accounts[3]
+    public_price_wei = avvenire_contract.AUCTION_END_PRICE()
+    whitelist_price_wei = (1 - WHITELIST_DISCOUNT) * public_price_wei
+
+    public_sale_start_time = chain.time() + PUBLIC_SALE_START_TIME_FROM_EPOCH
+    
+    with brownie.reverts(): 
+        avvenire_contract.endAuctionAndSetupNonAuctionSaleInfo(
+            whitelist_price_wei, public_price_wei, public_sale_start_time, {"from": random_account}
+        )
 
 
 def test_public_mint():

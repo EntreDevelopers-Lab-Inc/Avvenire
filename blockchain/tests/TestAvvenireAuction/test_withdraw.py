@@ -45,15 +45,18 @@ def perform_auction(fn_isolation):
 def test_withdraw_functions():
     # Initializations
     avvenire_auction_contract = AvvenireAuction[-1]
-    avvenire_citizens_contract = AvvenireCitizens[-1]
     admin_account = get_account()
 
     contract_balance = avvenire_auction_contract.balance()
-    # Account balances before withdraw
     admin_before_withdraw_balance = admin_account.balance()
-    # Reset contract balance...
+
     
-    amount_to_withdraw = Web3.toWei(1.2, "ether")
+    eth = Web3.toWei(1, "ether")
+    
+    with brownie.reverts(): 
+        avvenire_auction_contract.withdrawQuantity(contract_balance + eth, {"from": admin_account})
+    
+    amount_to_withdraw = contract_balance / 20
     
     avvenire_auction_contract.withdrawQuantity(amount_to_withdraw, {"from": admin_account})
     
