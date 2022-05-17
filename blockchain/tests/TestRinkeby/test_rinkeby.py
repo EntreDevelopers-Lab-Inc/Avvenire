@@ -251,8 +251,21 @@ def test_trait_changes_with_cost(citizens_minted):
     # Combining...
     # ***
     trait_supply_before_combine = traits_contract.getTotalSupply()
-    tx = market_contract.combine(0, male_trait_changes, {"from": account})
+    
+    change_cost = data_contract.getChangeCost()
+    
+    combine_cost = 5 * change_cost
+    
+    tx = market_contract.combine(0, male_trait_changes, {"from": account, "value": combine_cost})
     tx.wait(3)
+    
+    # Guarantee correct payment in contract
+    assert citizens_contract.balance() == pre_contract_balance + combine_cost
+    
+    # Make sure that account paid properly
+    # Must account for gas costs...
+    assert account.balance() <= pre_account_balance - combine_cost
+    
 
     # ***
     # Make sure that the traits came off of the citizen and the default is on
@@ -321,9 +334,19 @@ def test_trait_changes_with_cost(citizens_minted):
         [0, False, 1, 11],
     ]
     
+    pre_contract_balance = citizens_contract.balance()
+    pre_account_balance = account.balance()
+    
     supply_before_combine = traits_contract.getTotalSupply()
-    tx = market_contract.combine(1, other_male_trait_changes, {"from": account})
+    tx = market_contract.combine(1, other_male_trait_changes, {"from": account, "value": combine_cost})
     tx.wait(3)
+    
+    # Guarantee correct payment in contract
+    assert citizens_contract.balance() == pre_contract_balance + combine_cost
+    
+    # Make sure that account paid properly
+    # Must account for gas costs...
+    assert account.balance() <= pre_account_balance - combine_cost
     
     # ***
     # Make sure that the new traits attatched to Citizen 1 are correct 
