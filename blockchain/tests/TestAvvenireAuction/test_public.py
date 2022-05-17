@@ -40,8 +40,9 @@ def test_end_auction():
     public_price_wei = avvenire_contract.AUCTION_END_PRICE()
     whitelist_price_wei = (1 - WHITELIST_DISCOUNT) * public_price_wei
 
-    public_sale_start_time = chain.time() + PUBLIC_SALE_START_TIME_FROM_EPOCH
+    public_sale_start_time = chain.time() + PUBLIC_SALE_START_TIME_FROM_EPOCH   
     
+    # Makes sure endAuction... cannot be called by any account other than the owner 
     with brownie.reverts(): 
         avvenire_contract.endAuctionAndSetupNonAuctionSaleInfo(
             whitelist_price_wei, public_price_wei, public_sale_start_time, {"from": random_account}
@@ -59,7 +60,6 @@ def test_public_mint():
     chain.mine()
 
     for account in mint_accounts:
-
         balance_before_mint = account.balance()
 
         # purposefully overpay for mint...

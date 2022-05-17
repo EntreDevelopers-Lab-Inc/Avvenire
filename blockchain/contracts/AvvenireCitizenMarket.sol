@@ -129,7 +129,7 @@ contract AvvenireCitizenMarket is
      * IF the file gets too big, this can be an array, but that would be suboptimal, as it would not require that only one of each trait could be passed
      * in order to decompose traits, just pass all the traits to change as null --> use the frontend to check out what traits are non-defaults --> only change those
      * we never check for the case that there are a bunch of non-changes, as we will do so on the frontend (if someone is interacting with the contract directly, we assume that they know not to request a change with no values)
-     * the bind function used actually sets the citizen trait --> all data on chain will be "correct" (note: tokenURIs may need to be set for newly minted tokens)
+     * the bind function used actually sets the citizen trait --> all data on chain will be "correct" (note: tokenURIs need to be set for newly minted tokens)
      * @param citizenId for getting the citizen
      * @param traitChanges for getting the traits
      */
@@ -271,7 +271,7 @@ contract AvvenireCitizenMarket is
             // pay if the change cost is greater than 0
             if (changeCost > 0) {
                 // add the amount to mint to the total cost
-                totalCost += toMint * changeCost;
+                totalCost += (toMint * changeCost);
             }
 
             // mint the citzens --> this will only set ownership, will not indicate how to set traits and sexes
