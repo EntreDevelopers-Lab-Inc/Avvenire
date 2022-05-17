@@ -256,7 +256,7 @@ def test_trait_changes_with_cost(citizens_minted):
     
     combine_cost = 5 * change_cost
     
-    tx = market_contract.combine(0, male_trait_changes, {"from": account, "value": combine_cost})
+    tx = market_contract.combine(0, male_trait_changes, {"from": account, "value": combine_cost, "gas_limit": 29000000})
     tx.wait(3)
     
     # Guarantee correct payment in contract
@@ -338,7 +338,7 @@ def test_trait_changes_with_cost(citizens_minted):
     pre_account_balance = account.balance()
     
     supply_before_combine = traits_contract.getTotalSupply()
-    tx = market_contract.combine(1, other_male_trait_changes, {"from": account, "value": combine_cost})
+    tx = market_contract.combine(1, other_male_trait_changes, {"from": account, "value": combine_cost, "gas_limit": 29000000})
     tx.wait(3)
     
     # Guarantee correct payment in contract
@@ -400,4 +400,13 @@ def test_trait_changes_with_cost(citizens_minted):
     # ensure that the male on chain is what you set him to
     # ***   
     assert citizen == data_contract.getCitizen(1)   
+    
+    pre_admin_balance = admin_account.balance()
+    pre_contract_balance = citizens_contract.balance()
+    
+    citizens_contract.withdrawMoney({"from": admin_account})
+    
+    assert citizens_contract.balance() == 0
+    assert approx(admin_account.balance(), 0.001) == pre_admin_balance + pre_contract_balance
+    
 

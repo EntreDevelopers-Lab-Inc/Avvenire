@@ -526,7 +526,7 @@ contract AvvenireCitizens is
     function withdrawMoney() external onlyOwner nonReentrant {
         (bool success, ) = receivingAddress.call{
             value: address(this).balance }("");
-
+            
         require(success, "Failed transaction");
     }
 
