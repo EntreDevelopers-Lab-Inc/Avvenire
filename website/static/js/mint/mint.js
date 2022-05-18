@@ -7,7 +7,7 @@ const PUBLIC_SALE_KEY = 777;
 
 
 // function to get the mint price
-// mint order: 1000 DA (3) --> WL (2) --> public (2000)
+// mint order: DA --> WL --> public
 // this should also set the min/max/value of the input button
 async function getMintPrice()
 {
@@ -22,7 +22,7 @@ async function getMintPrice()
     var remainder;
 
     // get the current balance
-    var userBalance = await ERC721_CONTRACT.balanceOf(window.ethereum.selectedAddress);
+    var userBalance = await ERC721_CONTRACT.balanceOf(provider.provider.selectedAddress);
     var collectionSize = parseInt(ethers.utils.formatUnits(await CONTRACT.collectionSize(), 'wei'));
     var totalSupply = parseInt(ethers.utils.formatUnits(await ERC721_CONTRACT.getTotalSupply(), 'wei'));
 
@@ -31,7 +31,7 @@ async function getMintPrice()
 
 
     // get the whitelist information
-    await CONTRACT.allowlist(window.ethereum.selectedAddress).then(function (resp) {
+    await CONTRACT.allowlist(provider.provider.selectedAddress).then(function (resp) {
         // set whether this address is whitelisted
         whitelisted = ethers.utils.formatUnits(resp) != 0;
     });
@@ -58,8 +58,8 @@ async function getMintPrice()
         }
 
         // set the max and value
-        max = await CONTRACT.maxPerAddressDuringAuction();  // set this to the amount that can be minted (check balance of)
-        value = max;
+        max = 1000;  // set this to the amount that can be minted (check balance of)
+        value = 3;
 
         remainder = max - userBalance;
     }
@@ -72,9 +72,9 @@ async function getMintPrice()
             price = config[2];
 
             max = await CONTRACT.maxPerAddressDuringWhiteList();
-            value = max;
+            value = await CONTRACT.allowlist(provider.provider.selectedAddress);
 
-            remainder = (max + (await CONTRACT.maxPerAddressDuringAuction())) - userBalance;
+            remainder = value;
         }
         else
         {
@@ -88,7 +88,7 @@ async function getMintPrice()
     {
         price = config[3];
 
-        max = 2000;
+        max = 1000;
         value = 5;
     }
     else
@@ -120,6 +120,9 @@ async function getMintPrice()
         // convert the price to eth from gwei
         price = parseFloat(ethers.utils.formatEther(price));
 
+        // enable the button
+        $('#mint-btn').attr('class', 'btn more-btn');
+
         // change the max and value
         $('#amount').attr('max', max);
         $('#amount').val(value);
@@ -138,7 +141,7 @@ async function setTotalCost()
     var amount = parseInt($('#amount').val());
 
     // set the initial total cost
-    $('#total-cost').text((PRICE * amount).toFixed(3));
+    $('#total-cost').text((Math.ceil(PRICE * amount * 100000) / 100000).toFixed(5));
 }
 
 
@@ -157,7 +160,12 @@ function getURI(tokenId) {
 }
 
 // function to mint nft
-async function mintNFTs(gasLimit=GAS_LIMIT) {
+async function mintNFTs() {
+    // set loading to true
+    $('#loading').attr('hidden',
+        false);
+    $('#mint-btn').attr('hidden', true);
+
     // get the amount from the input box
     var amount = $('#amount').val();
 
@@ -166,7 +174,7 @@ async function mintNFTs(gasLimit=GAS_LIMIT) {
 
     // check if the user is whitelisted
     var whitelisted;
-    await CONTRACT.allowlist(window.ethereum.selectedAddress).then(function (resp) {
+    await CONTRACT.allowlist(provider.provider.selectedAddress).then(function (resp) {
         // set whether this address is whitelisted
         whitelisted = ethers.utils.formatUnits(resp) != 0;
     });
@@ -208,11 +216,21 @@ async function mintNFTs(gasLimit=GAS_LIMIT) {
             // alert that the mint went through
             alert("Congratulations on your purchase of " + amount + " Avvenire Citizens!")
             location.href = '/mint';
+
+            // set loading to false
+            $('#loading').attr('hidden',
+                true);
+            $('#mint-btn').attr('hidden', false);
         });
 
     }).catch((error) => {
         // send whatever error happened
         alert('Error on mint: ' + error.message);
+
+        // set loading to false
+            $('#loading').attr('hidden',
+                true);
+            $('#mint-btn').attr('hidden', false);
     });
 
 }
@@ -220,11 +238,11 @@ async function mintNFTs(gasLimit=GAS_LIMIT) {
 async function loadDocument()
 {
     // wait until you are connected
-    const provider = new ethers.providers.Web3Provider(window.ethereum);
+    // const provider = new ethers.providers.Web3Provider(window.ethereum);
     let currentBlock = await provider.getBlockNumber();
 
     // if there is no selected address, reroute to home
-    if (window.ethereum.selectedAddress == null)
+    if (provider.provider.selectedAddress == null)
     {
         location.href = '/';
     }
@@ -236,8 +254,7 @@ async function loadDocument()
     CONTRACT.saleConfig().then(function (resp) {
         if (((Date.now() / 1000) > resp[0]) && ((Date.now() / 1000) > resp[1]))
         {
-            // enable the button
-            $('#mint-btn').attr('class', 'btn more-btn');
+
         }
     });
 

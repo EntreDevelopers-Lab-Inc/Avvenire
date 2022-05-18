@@ -1,15 +1,12 @@
 const GWEI_PER_ETH = 1000000000;
 
-// set the gas limit
-const GAS_LIMIT = 100000
-
 // set the transaction type
 // 0 is for legacy, but metamask defaults to 2 (which is EIP-1559)
 const TRANSACTION_TYPE = 2;
 
 // contract address with (currently a test one)
-const CONTRACT_ADDRESS = '0x4b0e84165dF9C6d1d674e512e78d058E3Dd7D8aE';
-const ERC721_CONTRACT_ADDR = '0x1704a0Ae077eF8069126D703B3F1c5515ae9E691';
+const CONTRACT_ADDRESS = '0x90f1B002DCFbfDF40D7F3ae5Eea2c1dda3AAeE69';
+const ERC721_CONTRACT_ADDR = '0x76797991f1F0d3e911dd148bbCe239A7603F0E4C';
 
 // contract interface
 const CONTRACT_ABI = [
@@ -2760,11 +2757,8 @@ const ERC721_ABI = [
   ];
 
 
-// contract provider https://github.com/mikec3/my_tutorials/blob/master/simple_storage/src/SimpleStorage.js
-let CONTRACT_PROVIDER = new ethers.providers.Web3Provider(window.ethereum, network=CHAIN_STRING);
-
 // get the signer
-let SIGNER = CONTRACT_PROVIDER.getSigner();
+let SIGNER = provider.getSigner();
 
 // make contract
 let CONTRACT = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, SIGNER);
