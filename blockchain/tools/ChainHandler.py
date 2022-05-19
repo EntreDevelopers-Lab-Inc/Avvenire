@@ -256,7 +256,7 @@ class CitizenMarketBroker:
             
             tx = self.data_contract.setCitizenSex(self.citizen_id, sex_id, {"from": server_account})
             if network.show_active() not in LOCAL_BLOCKCHAIN_ENVIRONMENTS:
-                tx.wait(3)
+                tx.wait(2)
 
         else:
             print(f"Already initialized: {citizen}")
@@ -300,7 +300,7 @@ class CitizenMarketBroker:
         tx = self.data_contract.updateCitizenURI(self.citizen_id, uri, {"from": server_account})
         
         if network.show_active() not in LOCAL_BLOCKCHAIN_ENVIRONMENTS:
-            tx.wait(3)
+            tx.wait(2)
             
 
         # return reconverted version of citizen for better understanding
@@ -401,7 +401,7 @@ class TraitManager:
         tx = self.data_contract.updateTraitSexAndURI(self.trait_id, trait[4], metadata_link, {"from": server_account})
         
         if network.show_active() not in LOCAL_BLOCKCHAIN_ENVIRONMENTS:
-            tx.wait(3)
+            tx.wait(2)
 
         return tuple(trait)
 

@@ -9,7 +9,6 @@ from scripts.helpful_scripts import *
 from scripts.auction import *
 from scripts.mint import *
 
-DEV_PAYMENT = Web3.toWei(0.5, "ether")
 GAS_LIMIT = 29000000
 REQUEST_COST = Web3.toWei(0.01, "ether")
 

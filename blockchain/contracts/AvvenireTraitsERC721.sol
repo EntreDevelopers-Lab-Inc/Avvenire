@@ -32,6 +32,8 @@ contract AvvenireTraits is
         // Contract containing data
         AvvenireCitizensMappingsInterface public avvenireCitizensData;
 
+        address blackholeAddress; 
+
         // mapping for allowing other contracts to interact with this one
         mapping(address => bool) private allowedContracts;
 
@@ -42,7 +44,8 @@ contract AvvenireTraits is
         string memory ERC721AId_,
         string memory baseURI_,
         string memory loadURI_,
-        address dataContractAddress_
+        address dataContractAddress_,
+        address blackholeAddress_
     ) ERC721A(ERC721Name_, ERC721AId_) Ownable() {
         // set the mint URI
         baseURI = baseURI_;
@@ -55,6 +58,8 @@ contract AvvenireTraits is
 
         // Set data contract
         avvenireCitizensData = AvvenireCitizensMappingsInterface(dataContractAddress_);
+
+        blackholeAddress = blackholeAddress_;
     }
 
     /**
@@ -385,7 +390,7 @@ contract AvvenireTraits is
         require(avvenireCitizensData.getTrait(traitId).exists, "This trait does not exist");
 
         // set the ownership to null
-        _ownerships[traitId].addr = address(this);
+        _ownerships[traitId].addr = blackholeAddress;
 
         // set the trait to not free (should not be tradable or combinable any longer)
         avvenireCitizensData.setTraitFreedom(traitId, false);

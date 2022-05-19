@@ -4,6 +4,7 @@ from brownie import (
     AvvenireCitizenMarket,
     AvvenireCitizensData,
     AvvenireTraits,
+    AvvenireBlackhole,
     network,
     chain,
 )
@@ -36,12 +37,15 @@ def deploy_contract(
     # if not Web3.isAddress(devAddress):
     avvenire_data_contract = AvvenireCitizensData.deploy({"from": account})
     
+    avvenire_blackhole = AvvenireBlackhole.deploy({"from": account})
+    
     avvenire_traits_contract = AvvenireTraits.deploy(
         "AvvenireTraits",
         "AVT",
         "",
         "",
         AvvenireCitizensData[-1].address,
+        AvvenireBlackhole[-1].address
         {"from": account},
     )
 
@@ -175,14 +179,16 @@ def set_public_sale_key(public_key):
     account = get_account()
     avvenire_contract.setPublicSaleKey(public_key, {"from": account})
 
-def end_auction(ending_auction_price, time_from_epoch):
-    if not isinstance(ending_auction_price, int):
+def end_auction(public_price, whitelist_price, time_from_epoch):
+    if not isinstance(public_price, int):
         raise ValueError("ending_auction_price isn't an int")
+    if not isinstance(whitelist_price, int):
+            raise ValueError("whitelist price isn't int")
     if not isinstance(time_from_epoch, int):
         raise ValueError("time_from_epoch isn't an int")
+    
     avvenire_contract = AvvenireAuction[-1]
     account = get_account()
-    whitelist_price = int(WHITELIST_DISCOUNT * ending_auction_price)
 
     public_sale_start_time = None
 
@@ -192,11 +198,10 @@ def end_auction(ending_auction_price, time_from_epoch):
         w3 = Web3(Web3.HTTPProvider(
             "https://mainnet.infura.io/v3/6f8af8dcbb974218a1f3aec661b9fc30"))
         most_recent_block = w3.eth.get_block("latest")
-        public_sale_start_time = most_recent_block["timestamp"] + \
-            time_from_epoch
+        public_sale_start_time = most_recent_block["timestamp"] + time_from_epoch
 
     avvenire_contract.endAuctionAndSetupNonAuctionSaleInfo(
-        whitelist_price, ending_auction_price, public_sale_start_time, {
+        whitelist_price, public_price, public_sale_start_time, {
             "from": account}
     )
 
@@ -213,8 +218,6 @@ def drop_interval(number_of_drops):
 
 
 # Mint Functions
-
-
 def team_mint(quantity):
     avvenire_contract = AvvenireAuction[-1]
     account = get_account()
@@ -227,24 +230,13 @@ def auction_mint(quantity):
     account = get_dev_account()
     avvenire_contract.auctionMint(quantity, {"from": account})
 
-
-# account variable needs to be changed to user's account
-def whitelist_mint(quantity):
-    avvenire_contract = AvvenireAuction[-1]
-    account = get_dev_account()
-    avvenire_contract.whiteListMint(quantity, {"from": account})
-
-
 # account variable needs to be changed to user's account
 def public_mint(quantity, sale_key):
     avvenire_contract = AvvenireAuction[-1]
     account = get_dev_account()
     avvenire_contract.publicSaleMint(quantity, sale_key, {"from": account})
 
-
 # Whitelist and refund functions
-
-
 def seed_whitelist(whitelist):
     if not isinstance(whitelist, list):
         raise ValueError("whitelist argument is not a list")
@@ -284,10 +276,11 @@ def refund_all(refund_list):
 # setOwnersExplicit function
 # Unsure if I should refactor in the contract to just set all owners explicit...
 def set_all_owners_explicit():
-    avvenire_contract = AvvenireAuction[-1]
+    citizens_contract = AvvenireCitizens[-1]
     account = get_account()
-    supply = avvenire_contract.totalSupply()
-    avvenire_contract.setOwnersExplicit(supply, {"from": account})
+    supply = citizens_contract.totalSupply()
+    citizens_contract.setOwnersExplicit(supply, {"from": account})
+
 
 
 # Withdraw function
@@ -298,6 +291,10 @@ def withdraw():
 
 
 # All queryable, view functions*
+
+def turn_off_permissions(): 
+    citizen_contract = AvvenireCitizens[-1]
+    trait_contract = AvvenireTraits[-1]
 
 
 def is_public_sale_on(public_price_eth, public_sale_key, public_start_time):
