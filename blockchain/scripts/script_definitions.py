@@ -175,13 +175,6 @@ def set_public_sale_key(public_key):
     account = get_account()
     avvenire_contract.setPublicSaleKey(public_key, {"from": account})
 
-
-def set_base_uri(baseURI):
-    avvenire_contract = AvvenireAuction[-1]
-    account = get_account()
-    avvenire_contract.setBaseURI(baseURI, {"from": account})
-
-
 def end_auction(ending_auction_price, time_from_epoch):
     if not isinstance(ending_auction_price, int):
         raise ValueError("ending_auction_price isn't an int")
