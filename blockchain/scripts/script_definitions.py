@@ -37,16 +37,13 @@ def deploy_contract(
     # if not Web3.isAddress(devAddress):
     avvenire_data_contract = AvvenireCitizensData.deploy({"from": account})
     
-    avvenire_blackhole = AvvenireBlackhole.deploy({"from": account})
-    
     avvenire_traits_contract = AvvenireTraits.deploy(
         "AvvenireTraits",
         "AVT",
         "",
         "",
         AvvenireCitizensData[-1].address,
-        AvvenireBlackhole[-1].address
-        {"from": account},
+        {"from": account}
     )
 
     # deploy avvenire citizens contract
@@ -57,7 +54,7 @@ def deploy_contract(
         "",
         AvvenireCitizensData[-1].address,
         AvvenireTraits[-1].address,
-        {"from": account},
+        {"from": account}
     )
     
     avvenire_data_contract.setAllowedPermission(AvvenireCitizens[-1].address, True, {"from": account})
@@ -72,7 +69,7 @@ def deploy_contract(
         amount_for_auction_and_team,
         amount_for_team,
         AvvenireCitizens[-1].address,
-        {"from": account},
+        {"from": account}
     )
 
     # allow the test contract to interact with the citizens contract
@@ -113,6 +110,7 @@ def deploy_for_auction(
         "",
         AvvenireCitizensData[-1].address,
         {"from": account},
+        publish_source=True
     )
 
     # deploy avvenire citizens contract
@@ -124,6 +122,7 @@ def deploy_for_auction(
         AvvenireCitizensData[-1].address,
         AvvenireTraits[-1].address,
         {"from": account},
+        publish_source=True
     )
     
     avvenire_data_contract.setAllowedPermission(AvvenireCitizens[-1].address, True, {"from": account})
@@ -136,6 +135,7 @@ def deploy_for_auction(
         amount_for_team,
         AvvenireCitizens[-1].address,
         {"from": account},
+        publish_source=True
     )
 
     # allow the test contract to interact with the citizens contract

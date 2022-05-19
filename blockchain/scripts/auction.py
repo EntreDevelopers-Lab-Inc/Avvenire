@@ -3,6 +3,7 @@ from web3 import Web3
 
 from constants import BASE_URI, LOAD_URI
 from scripts.script_definitions import (
+    WHITELIST_DISCOUNT,
     deploy_contract,
     set_auction_start_time,
     drop_interval,
@@ -94,7 +95,7 @@ def end_auction_and_enable_changes():
     avvenire_auction_contract = AvvenireAuction[-1]
 
     current_auction_price = avvenire_auction_contract.getAuctionPrice()
-    end_auction(current_auction_price, 0)
+    end_auction(current_auction_price, int(current_auction_price * WHITELIST_DISCOUNT), 0)
 
     # set mutability mode to true and end the character mint
     data_contract.setMutabilityMode(True, {"from": admin_account})

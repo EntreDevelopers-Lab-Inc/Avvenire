@@ -227,7 +227,7 @@ def test_request_change_with_overpayment(single_mint, set_mut_cost):
     assert avvenire_citizens_contract.balance() == REQUEST_COST
 
 
-def test_request_change_with_dev_royalty(single_mint, set_mut_cost):
+def test_request_change_with_cost(single_mint, set_mut_cost):
     avvenire_market_contract = AvvenireCitizenMarket[-1]
     avvenire_citizens_contract = AvvenireCitizens[-1]
     data_contract = AvvenireCitizensData[-1]
@@ -236,7 +236,6 @@ def test_request_change_with_dev_royalty(single_mint, set_mut_cost):
 
     dev_account = get_dev_account()
     avvenire_citizens_contract = AvvenireCitizens[-1]
-    avvenire_citizens_contract.setDevRoyalty(50, {"from": dev_account})
 
     change_cost = data_contract.getChangeCost()
     balance_before_change = mint_account.balance()

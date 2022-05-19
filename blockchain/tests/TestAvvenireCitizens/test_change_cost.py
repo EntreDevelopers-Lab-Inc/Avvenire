@@ -26,12 +26,3 @@ def test_change_cost():
 
     # check the change cost before the royalty is set
     assert data_contract.getChangeCost() == change_cost
-
-    # set a royalty
-    royalty = int(random.uniform(0, 1) * 100)
-
-    citizens_contract.setDevRoyalty(royalty, {'from': get_dev_account()})
-
-    # check if the change cost in the contract is correct
-    assert pytest.approx(data_contract.getChangeCost(),
-                         change_cost * ((100 + royalty) / 100))
