@@ -174,7 +174,8 @@ async function loadDocument() {
 
     // setup the provider
     setupProvider();
-}
+
+    // set the button text
 
 // only set up the document if the window is ethereum
 async function setupProvider()
