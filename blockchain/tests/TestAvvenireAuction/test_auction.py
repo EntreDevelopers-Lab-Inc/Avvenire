@@ -33,8 +33,6 @@ def auction_set(fn_isolation):
         {"from": admin_account},
     )
 
-    # Don't need to pass in chain.time()...
-    # Unsure why
     set_auction_start_time(SALE_START_TIME)
 
 

@@ -29,7 +29,7 @@ contract AvvenireAuction is Ownable, ReentrancyGuard {
         uint32 publicSaleKey; 
     }
 
-    SaleConfig private saleConfig; 
+    SaleConfig public saleConfig; 
 
     // whitelist mapping (address => amount they can mint)
     mapping(address => uint256) public allowlist;
@@ -251,8 +251,8 @@ contract AvvenireAuction is Ownable, ReentrancyGuard {
 
     uint256 public constant AUCTION_START_PRICE = .01 ether; // start price
     uint256 public constant AUCTION_END_PRICE = 0.002 ether; // floor price
-    uint256 public constant AUCTION_PRICE_CURVE_LENGTH = 1 hours; // total time of the auction
-    uint256 public constant AUCTION_DROP_INTERVAL = 7.5 minutes;
+    uint256 public constant AUCTION_PRICE_CURVE_LENGTH = 10 minutes; // total time of the auction
+    uint256 public constant AUCTION_DROP_INTERVAL = 75 seconds;
 
     uint256 public constant AUCTION_DROP_PER_STEP =
         (AUCTION_START_PRICE - AUCTION_END_PRICE) /
@@ -336,9 +336,9 @@ contract AvvenireAuction is Ownable, ReentrancyGuard {
     /**
      * @notice function to mint for the team
      */
-    function teamMint() external onlyOwner {
-        require(avvenireCitizens.getTotalSupply() == 0, "NFTs already minted");
-        avvenireCitizens.safeMint(msg.sender, amountForTeam);
+    function teamMint(uint256 quantity) external onlyOwner {
+        require(avvenireCitizens.getTotalSupply() + quantity <= amountForTeam, "NFTs already minted");
+        avvenireCitizens.safeMint(msg.sender, quantity);  
     }
 
     /**

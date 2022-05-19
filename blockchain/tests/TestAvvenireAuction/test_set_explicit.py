@@ -44,7 +44,7 @@ def test_set_explicit():
     avvenire_contract = AvvenireAuction[-1]
     avvenire_citizens_contract = AvvenireCitizens[-1]
     admin_account = get_account()
-    avvenire_contract.teamMint({"from": admin_account})
+    avvenire_contract.teamMint(5, {"from": admin_account})
 
     # Initial price special case...
     if network.show_active() in LOCAL_BLOCKCHAIN_ENVIRONMENTS:

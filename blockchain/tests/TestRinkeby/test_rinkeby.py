@@ -1,6 +1,6 @@
 import brownie, pytest
 
-from brownie import AvvenireCitizenMarket, AvvenireTraits, AvvenireCitizens
+from brownie import AvvenireCitizenMarket, AvvenireTraits, AvvenireCitizens, network
 from web3 import Web3
 from pytest import approx
 
@@ -201,6 +201,7 @@ def test_trait_changes_no_cost(citizens_minted):
     assert citizen == data_contract.getCitizen(1)   
 
 def test_trait_changes_with_cost(citizens_minted):
+    
     # keep track of the contracts
     market_contract = AvvenireCitizenMarket[-1]
     citizens_contract = AvvenireCitizens[-1]
@@ -211,7 +212,7 @@ def test_trait_changes_with_cost(citizens_minted):
     account = get_dev_account()
     admin_account = get_account()
     
-    mut_cost = Web3.toWei(0.1, "ether")
+    mut_cost = Web3.toWei(0.01, "ether")
     data_contract.setMutabilityCost(mut_cost, {"from": admin_account})
     
     pre_account_balance = account.balance()
@@ -254,7 +255,7 @@ def test_trait_changes_with_cost(citizens_minted):
     
     change_cost = data_contract.getChangeCost()
     
-    combine_cost = 5 * change_cost
+    combine_cost = 6 * change_cost
     
     tx = market_contract.combine(0, male_trait_changes, {"from": account, "value": combine_cost, "gas_limit": 29000000})
     tx.wait(3)

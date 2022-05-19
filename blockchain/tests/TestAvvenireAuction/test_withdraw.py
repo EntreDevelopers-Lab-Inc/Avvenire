@@ -26,7 +26,7 @@ def perform_auction(fn_isolation):
     # Unsure why
     set_auction_start_time(SALE_START_TIME)
 
-    avvenire_contract.teamMint({"from": admin_account})
+    avvenire_contract.teamMint(5, {"from": admin_account})
 
     # Move to the auction start time...
     if network.show_active() in LOCAL_BLOCKCHAIN_ENVIRONMENTS:

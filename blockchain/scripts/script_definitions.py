@@ -58,7 +58,6 @@ def deploy_contract(
     
     avvenire_data_contract.setAllowedPermission(AvvenireCitizens[-1].address, True, {"from": account})
     avvenire_data_contract.setAllowedPermission(AvvenireTraits[-1].address, True, {"from": account})
-    
 
     avvenire_market_contract = AvvenireCitizenMarket.deploy(
         AvvenireCitizens[-1].address, AvvenireTraits[-1].address, AvvenireCitizensData[-1].address, {"from": account})
@@ -91,6 +90,59 @@ def deploy_contract(
     
     server_account = get_server_account()
     avvenire_data_contract.setServer(server_account, {"from": account})
+    
+def deploy_for_auction(
+    max_per_address_during_whitelist,
+    collection_size,
+    amount_for_auction_and_team,
+    amount_for_team
+):
+    account = get_account()
+
+    # if not Web3.isAddress(devAddress):
+    avvenire_data_contract = AvvenireCitizensData.deploy({"from": account})
+    
+    avvenire_traits_contract = AvvenireTraits.deploy(
+        "AvvenireTraits",
+        "AVT",
+        "",
+        "",
+        AvvenireCitizensData[-1].address,
+        {"from": account},
+    )
+
+    # deploy avvenire citizens contract
+    avvenire_citizens_contract = AvvenireCitizens.deploy(
+        "AvvenireCitizens",
+        "AVC",
+        "",
+        "",
+        AvvenireCitizensData[-1].address,
+        AvvenireTraits[-1].address,
+        {"from": account},
+    )
+    
+    avvenire_data_contract.setAllowedPermission(AvvenireCitizens[-1].address, True, {"from": account})
+    avvenire_data_contract.setAllowedPermission(AvvenireTraits[-1].address, True, {"from": account})
+
+    avvenire_auction_contract = AvvenireAuction.deploy(
+        max_per_address_during_whitelist,
+        collection_size,
+        amount_for_auction_and_team,
+        amount_for_team,
+        AvvenireCitizens[-1].address,
+        {"from": account},
+    )
+
+    # allow the test contract to interact with the citizens contract
+    avvenire_citizens_contract.setAllowedPermission(
+        AvvenireAuction[-1].address, True, {"from": account}
+    )
+    
+    avvenire_traits_contract.setAllowedPermission(
+        AvvenireCitizens[-1].address, True, {"from": account}
+    )
+
 
 
 # Logistic Functions*
@@ -123,13 +175,6 @@ def set_public_sale_key(public_key):
     account = get_account()
     avvenire_contract.setPublicSaleKey(public_key, {"from": account})
 
-
-def set_base_uri(baseURI):
-    avvenire_contract = AvvenireAuction[-1]
-    account = get_account()
-    avvenire_contract.setBaseURI(baseURI, {"from": account})
-
-
 def end_auction(ending_auction_price, time_from_epoch):
     if not isinstance(ending_auction_price, int):
         raise ValueError("ending_auction_price isn't an int")
@@ -154,7 +199,6 @@ def end_auction(ending_auction_price, time_from_epoch):
         whitelist_price, ending_auction_price, public_sale_start_time, {
             "from": account}
     )
-    drop_interval(1)
 
 
 def drop_interval(number_of_drops):
@@ -171,10 +215,10 @@ def drop_interval(number_of_drops):
 # Mint Functions
 
 
-def team_mint():
+def team_mint(quantity):
     avvenire_contract = AvvenireAuction[-1]
     account = get_account()
-    avvenire_contract.teamMint({"from": account})
+    avvenire_contract.teamMint(quantity, {"from": account})
 
 
 # account variable needs to be changed to user's account
