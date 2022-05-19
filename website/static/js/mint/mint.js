@@ -2,6 +2,7 @@
 
 // get some constants
 var PRICE;
+var LOGGED_IN_ADDRESS;
 
 const PUBLIC_SALE_KEY = 777;
 
@@ -11,6 +12,14 @@ const PUBLIC_SALE_KEY = 777;
 // this should also set the min/max/value of the input button
 async function getMintPrice()
 {
+    // set the address
+    LOGGED_IN_ADDRESS = provider.provider.selectedAddress;
+
+    if (LOGGED_IN_ADDRESS == undefined)
+    {
+        LOGGED_IN_ADDRESS = provider.provider.accounts[0];
+    }
+
     // contract data
     var config;
     var price = 0;
@@ -22,7 +31,7 @@ async function getMintPrice()
     var remainder;
 
     // get the current balance
-    var userBalance = await ERC721_CONTRACT.balanceOf(provider.provider.selectedAddress);
+    var userBalance = await ERC721_CONTRACT.balanceOf(LOGGED_IN_ADDRESS);
     var collectionSize = parseInt(ethers.utils.formatUnits(await CONTRACT.collectionSize(), 'wei'));
     var totalSupply = parseInt(ethers.utils.formatUnits(await ERC721_CONTRACT.getTotalSupply(), 'wei'));
 
@@ -31,7 +40,7 @@ async function getMintPrice()
 
 
     // get the whitelist information
-    await CONTRACT.allowlist(provider.provider.selectedAddress).then(function (resp) {
+    await CONTRACT.allowlist(LOGGED_IN_ADDRESS).then(function (resp) {
         // set whether this address is whitelisted
         whitelisted = ethers.utils.formatUnits(resp) != 0;
     });
@@ -72,7 +81,7 @@ async function getMintPrice()
             price = config[2];
 
             max = await CONTRACT.maxPerAddressDuringWhiteList();
-            value = await CONTRACT.allowlist(provider.provider.selectedAddress);
+            value = await CONTRACT.allowlist(LOGGED_IN_ADDRESS);
 
             remainder = value;
         }
@@ -174,7 +183,7 @@ async function mintNFTs() {
 
     // check if the user is whitelisted
     var whitelisted;
-    await CONTRACT.allowlist(provider.provider.selectedAddress).then(function (resp) {
+    await CONTRACT.allowlist(LOGGED_IN_ADDRESS).then(function (resp) {
         // set whether this address is whitelisted
         whitelisted = ethers.utils.formatUnits(resp) != 0;
     });
@@ -241,22 +250,8 @@ async function loadDocument()
     // const provider = new ethers.providers.Web3Provider(window.ethereum);
     let currentBlock = await provider.getBlockNumber();
 
-    // if there is no selected address, reroute to home
-    if (provider.provider.selectedAddress == null)
-    {
-        location.href = '/';
-    }
-
     // get the mint price --> sets global variable
     await getMintPrice();
-
-    // if the mint start time is past the current time and the public sale has not started yet, enable the button
-    CONTRACT.saleConfig().then(function (resp) {
-        if (((Date.now() / 1000) > resp[0]) && ((Date.now() / 1000) > resp[1]))
-        {
-
-        }
-    });
 
     // set the price
     $('#price').text(PRICE);
