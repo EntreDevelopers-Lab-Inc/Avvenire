@@ -161,4 +161,4 @@ def test_team_mint_past_collection_size():
 
     # Testing team mint after...
     with brownie.reverts():
-        avvenire_contract.teamMint({"from": admin_account})
+        avvenire_contract.teamMint(5, {"from": admin_account})
