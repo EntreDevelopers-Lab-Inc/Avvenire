@@ -3,7 +3,7 @@
 
 <head>
       <meta charset="utf-8" />
-      <meta content="Welcome to Avvenire City!" name="description" />
+      {% block description %}{% endblock %}
       <meta content="IE=edge" http-equiv="X-UA-Compatible" />
       <meta content="width=device-width, initial-scale=1, shrink-to-fit=no" name="viewport" />
       <!-- Title -->
@@ -116,6 +116,11 @@
                               <li class="nav-item">
                                     <a class="nav-link" href="{{url_for('home')}}#faq">
                                           FAQ
+                                    </a>
+                              </li>
+                              <li class="lh-55px">
+                                    <a class="btn login-btn ml-50" href="/mint">
+                                          Mint
                                     </a>
                               </li>
                               <!--Put Mint Here-->

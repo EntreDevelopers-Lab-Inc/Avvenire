@@ -4994,7 +4994,6 @@ textarea:required {
     top: 0;
     left: 0;
     z-index: 10;
-    background: linear-gradient(to right, rgba(72, 52, 212, 0.5), rgba(52, 31, 151, 0.5))
 }
 
 .breadcumb--con {

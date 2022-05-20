@@ -1,5 +1,9 @@
 {% extends "layout.html" %}
 
+{% block description %}
+        <meta content="Welcome to Avvenire City!" name="description" />
+{% endblock description %}
+
 {% block content %}
 <link href="{{url_for('static', filename='css/pages/home.css')}}" rel="stylesheet" />
 <!-- ##### Welcome Area Start ##### -->
