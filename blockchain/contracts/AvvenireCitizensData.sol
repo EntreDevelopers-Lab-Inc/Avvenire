@@ -93,8 +93,8 @@ contract AvvenireCitizensData is
         traitChangeRequests[traitId] = changeRequest; 
     }
 
-    function getTraitChangeRequest(uint256 citizenId) external view returns(bool)  {
-        return traitChangeRequests[citizenId]; 
+    function getTraitChangeRequest(uint256 traitId) external view returns(bool)  {
+        return traitChangeRequests[traitId];
     }
 
     /**
