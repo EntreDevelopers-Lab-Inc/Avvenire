@@ -368,6 +368,22 @@ contract AvvenireCitizens is
         stoppedInEmergency
     {
         require(tx.origin != msg.sender, "The caller is a user.");
+
+        // token id end counter
+        uint256 startTokenId = _currentIndex;
+        uint256 endTokenId = startTokenId + quantity_;
+
+        // iterate over all the tokens
+        for (
+            uint256 tokenId = startTokenId;
+            tokenId < endTokenId;
+            tokenId += 1
+        ) {
+            // create a new citizen if the mint is active
+            createNewCitizen(tokenId);
+
+        } // end of for loop
+
         _safeMint(address_, quantity_);
     }
 
@@ -418,37 +434,6 @@ contract AvvenireCitizens is
                 require(!avvenireCitizensData.getCitizenChangeRequest(tokenId), "Change  requested");
             }
         } // end of loop
-    }
-
-    /**
-     * @notice This overrides the after token transfers function to create structs and request changes if they are traits
-     * @param from indicates the previous address
-     * @param to indicates the new address
-     * @param startTokenId indicates the first token id
-     * @param quantity shows how many tokens have been minted
-     */
-    function _afterTokenTransfers(
-        address from,
-        address to,
-        uint256 startTokenId,
-        uint256 quantity
-    ) internal override {
-        // token id end counter
-        uint256 endTokenId = startTokenId + quantity;
-
-        // iterate over all the tokens
-        for (
-            uint256 tokenId = startTokenId;
-            tokenId < endTokenId;
-            tokenId += 1
-        ) {
-            // check if the token exists in the citizen or trait mapping
-            if (!avvenireCitizensData.getCitizen(tokenId).exists) {
-                // create a new citizen if the mint is active
-                createNewCitizen(tokenId);
-            }
-
-        } // end of for loop
     }
 
     /**

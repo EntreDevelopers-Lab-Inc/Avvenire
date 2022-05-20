@@ -158,11 +158,11 @@ contract AvvenireTraits is
         callerIsAllowed
         stoppedInEmergency
     {
+        require(tx.origin != msg.sender, "The caller is a user.");
         
         uint256 startTokenId = _currentIndex;
         uint256 endTokenId = startTokenId + quantity_;
         
-        require(tx.origin != msg.sender, "The caller is a user.");
         _safeMint(address_, quantity_);
 
         // sets trait in the mapping of the data contract...
@@ -171,7 +171,6 @@ contract AvvenireTraits is
             tokenId < endTokenId;
             tokenId += 1
         ) {
-        // check if the token exists in the citizen or trait mapping
                 // create a new trait and put it in the mapping --> just set the token id, that it exists and that it is free
                 Trait memory _trait = Trait({
                     tokenId: tokenId,
