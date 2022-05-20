@@ -58,6 +58,7 @@ async function connectEthereum() {
         // setup the provider
         setupProvider();
 
+        window.location.reload();
     })
     .catch((err) => {
       if (err.code === 4001) {
@@ -91,6 +92,7 @@ async function connectWalletConnect() {
     // setup the provider
     setupProvider();
 
+    window.location.reload();
   });
 
 }
@@ -104,7 +106,7 @@ function setButtonName()
     var end;
 
     start = CURRENT_ACCOUNT.substr(0, 5);
-    end = CURRENT_ACCOUNT.substr(window.ethereum.selectedAddress.length - 5);
+    end = CURRENT_ACCOUNT.substr(CURRENT_ACCOUNT.length - 5);
     name = start + '...' + end;
 
     $('#connect-wallet').text(name);
@@ -151,6 +153,9 @@ async function loadDocument() {
         {
             setChain();
         }
+
+        // set the current account
+        CURRENT_ACCOUNT = provider.provider.selectedAddress;
     }
     else if (providerSetting == 'wc')
     {
@@ -160,11 +165,14 @@ async function loadDocument() {
           });
 
         // ensure that wallet connect is enabled
-        p.enable().then(function () {
-            // set the provider to wallet connect
-            provider = new ethers.providers.Web3Provider(p);
-            setupProvider();
-        });
+        await p.enable();
+
+        // set the provider to wallet connect
+        provider = new ethers.providers.Web3Provider(p);
+        setupProvider();
+
+        // set the current account
+        CURRENT_ACCOUNT = provider.provider.accounts[0];
     }
     else
     {
@@ -176,6 +184,8 @@ async function loadDocument() {
     setupProvider();
 
     // set the button text
+    setButtonName();
+}
 
 // only set up the document if the window is ethereum
 async function setupProvider()
@@ -216,4 +226,3 @@ async function setupProvider()
 
 // call the load document function
 loadDocument();
-

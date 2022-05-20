@@ -2,7 +2,7 @@
 
 // get some constants
 var PRICE;
-var LOGGED_IN_ADDRESS;
+var CURRENT_ACCOUNT;
 
 const PUBLIC_SALE_KEY = 777;
 
@@ -12,14 +12,6 @@ const PUBLIC_SALE_KEY = 777;
 // this should also set the min/max/value of the input button
 async function getMintPrice()
 {
-    // set the address
-    LOGGED_IN_ADDRESS = provider.provider.selectedAddress;
-
-    if (LOGGED_IN_ADDRESS == undefined)
-    {
-        LOGGED_IN_ADDRESS = provider.provider.accounts[0];
-    }
-
     // contract data
     var config;
     var price = 0;
@@ -31,7 +23,7 @@ async function getMintPrice()
     var remainder;
 
     // get the current balance
-    var userBalance = await ERC721_CONTRACT.balanceOf(LOGGED_IN_ADDRESS);
+    var userBalance = await ERC721_CONTRACT.balanceOf(CURRENT_ACCOUNT);
     var collectionSize = parseInt(ethers.utils.formatUnits(await CONTRACT.collectionSize(), 'wei'));
     var totalSupply = parseInt(ethers.utils.formatUnits(await ERC721_CONTRACT.getTotalSupply(), 'wei'));
 
@@ -40,7 +32,7 @@ async function getMintPrice()
 
 
     // get the whitelist information
-    await CONTRACT.allowlist(LOGGED_IN_ADDRESS).then(function (resp) {
+    await CONTRACT.allowlist(CURRENT_ACCOUNT).then(function (resp) {
         // set whether this address is whitelisted
         whitelisted = ethers.utils.formatUnits(resp) != 0;
     });
@@ -81,7 +73,7 @@ async function getMintPrice()
             price = config[2];
 
             max = await CONTRACT.maxPerAddressDuringWhiteList();
-            value = await CONTRACT.allowlist(LOGGED_IN_ADDRESS);
+            value = await CONTRACT.allowlist(CURRENT_ACCOUNT);
 
             remainder = value;
         }
@@ -183,7 +175,7 @@ async function mintNFTs() {
 
     // check if the user is whitelisted
     var whitelisted;
-    await CONTRACT.allowlist(LOGGED_IN_ADDRESS).then(function (resp) {
+    await CONTRACT.allowlist(CURRENT_ACCOUNT).then(function (resp) {
         // set whether this address is whitelisted
         whitelisted = ethers.utils.formatUnits(resp) != 0;
     });

@@ -82,7 +82,7 @@ contract AvvenireAuction is Ownable, ReentrancyGuard {
      * @notice function used to mint during the auction
      * @param quantity is the quantity to mint
      */
-    function auctionMint(uint256 quantity) external payable callerIsUser nonReentrant {
+    function auctionMint(uint256 quantity) external payable callerIsUser {
         uint256 _saleStartTime = uint256(saleConfig.auctionSaleStartTime);
 
         // Require that the current time is past the designated start time 
@@ -119,7 +119,7 @@ contract AvvenireAuction is Ownable, ReentrancyGuard {
      * @notice function to mint for allow list
      * @param quantity amount to mint for whitelisted users
      */
-    function whiteListMint(uint256 quantity) external payable callerIsUser nonReentrant {
+    function whiteListMint(uint256 quantity) external payable callerIsUser {
         // Sets the price var to the mintlistPrice, which was set by endAuctionAndSetupNonAuctionSaleInfo(...)
         // mintlistPrice will be set to 30% below the publicSalePrice
         uint256 price = uint256(saleConfig.mintlistPrice);
@@ -152,7 +152,6 @@ contract AvvenireAuction is Ownable, ReentrancyGuard {
         external
         payable
         callerIsUser
-        nonReentrant
     {
         SaleConfig memory config = saleConfig; 
 
@@ -195,7 +194,7 @@ contract AvvenireAuction is Ownable, ReentrancyGuard {
     /**
      * @notice function that user can call to be refunded
      */
-    function refundMe() external nonReentrant {
+    function refundMe() external callerIsUser nonReentrant {
         uint256 endingPrice = saleConfig.publicPrice;
         require(endingPrice > 0, "public price not set yet");
 
