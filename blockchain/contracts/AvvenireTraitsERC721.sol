@@ -54,7 +54,7 @@ contract AvvenireTraits is
         // set the load uri
         loadURI = loadURI_;
 
-        // set the receiving address to the publisher of this contract
+        // set the the publisher of this contract to allowed
         allowedContracts[msg.sender] = true;
 
         // Set data contract
@@ -84,7 +84,7 @@ contract AvvenireTraits is
     }
 
     /**
-     * @notice sets an address's allowed list permission (for future interaction)
+     * @notice sets an address's allowed permission (for future interaction)
      * @param address_ is the address to set the data for
      * @param setting is the boolean for the data
      */
@@ -195,8 +195,7 @@ contract AvvenireTraits is
      * @param owner an address of an owner in the NFT collection
      */
     function numberMinted(address owner) public view returns (uint256) {
-        // check how many have been minted to this owner --> where is this data stored, in the standard?
-        // _addressData mapping in the ERC721A standard; line 51 - Daniel
+        // check how many have been minted to this owner
         return _numberMinted(owner);
     }
 
