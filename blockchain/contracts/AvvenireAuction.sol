@@ -80,9 +80,9 @@ contract AvvenireAuction is Ownable, ReentrancyGuard {
 
     /**
      * @notice function used to mint during the auction
-     * @param quantity quantity to mint
+     * @param quantity is the quantity to mint
      */
-    function auctionMint(uint256 quantity) external payable callerIsUser {
+    function auctionMint(uint256 quantity) external payable callerIsUser nonReentrant {
         uint256 _saleStartTime = uint256(saleConfig.auctionSaleStartTime);
 
         // Require that the current time is past the designated start time 
@@ -106,19 +106,20 @@ contract AvvenireAuction is Ownable, ReentrancyGuard {
             numberMintedDuringAuction[msg.sender] +
             quantity;
 
-        refundIfOver(totalCost); // make sure to refund the excess
-
         //Add to totalPaid mapping
         totalPaidDuringAuction[msg.sender] =
             totalPaidDuringAuction[msg.sender] +
             totalCost;
+
+        refundIfOver(totalCost); // make sure to refund the excess
+
     }
 
     /**
      * @notice function to mint for allow list
      * @param quantity amount to mint for whitelisted users
      */
-    function whiteListMint(uint256 quantity) external payable callerIsUser {
+    function whiteListMint(uint256 quantity) external payable callerIsUser nonReentrant {
         // Sets the price var to the mintlistPrice, which was set by endAuctionAndSetupNonAuctionSaleInfo(...)
         // mintlistPrice will be set to 30% below the publicSalePrice
         uint256 price = uint256(saleConfig.mintlistPrice);
@@ -151,6 +152,7 @@ contract AvvenireAuction is Ownable, ReentrancyGuard {
         external
         payable
         callerIsUser
+        nonReentrant
     {
         SaleConfig memory config = saleConfig; 
 

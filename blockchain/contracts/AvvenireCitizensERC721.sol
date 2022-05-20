@@ -417,12 +417,6 @@ contract AvvenireCitizens is
             if (!(avvenireCitizensData.getTradeBeforeChange())) {
                 require(!avvenireCitizensData.getCitizenChangeRequest(tokenId), "Change  requested");
             }
-
-            // if this is a trait, it must be free to be transferred
-            if (avvenireCitizensData.getTrait(tokenId).exists) {
-                require(
-                    avvenireCitizensData.getTrait(tokenId).free, "Trait non-transferrable");
-            }
         } // end of loop
     }
 
