@@ -109,8 +109,7 @@ def deploy_for_auction(
         "",
         "",
         AvvenireCitizensData[-1].address,
-        {"from": account},
-        publish_source=True
+        {"from": account}
     )
 
     # deploy avvenire citizens contract
@@ -121,8 +120,7 @@ def deploy_for_auction(
         "",
         AvvenireCitizensData[-1].address,
         AvvenireTraits[-1].address,
-        {"from": account},
-        publish_source=True
+        {"from": account}
     )
     
     avvenire_data_contract.setAllowedPermission(AvvenireCitizens[-1].address, True, {"from": account})
