@@ -95,7 +95,7 @@ async function getMintPrice()
         max = 1000;
         value = 5;
     }
-    else
+    else if (totalSupply >= 5000)
     {
         // make the default case that is is not mintable --> remove everything, change the mint buton's text to SOLD OUT
         $('#mint-info').hide();
@@ -108,7 +108,7 @@ async function getMintPrice()
     // only set everything if the price is more than 0
     if (price > 0)
     {
-        // if balance of is greater than or equal to max, diasble the mint button
+        // if balance of is greater than or equal to max, disable the mint button
         if (remainder <= 0)
         {
             $('#mint-btn').attr('class', 'btn more-btn disabled');
