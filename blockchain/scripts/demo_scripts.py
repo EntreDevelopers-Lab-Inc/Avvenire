@@ -85,7 +85,6 @@ def take_off_traits():
     citizen = broker.update_citizen()
 
 def put_on_new_citizen():
-    
     market_contract = AvvenireCitizenMarket[-1]
     citizens_contract = AvvenireCitizens[-1]
     traits_contract = AvvenireTraits[-1]
