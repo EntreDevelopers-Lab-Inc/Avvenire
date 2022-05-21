@@ -163,6 +163,8 @@ contract AvvenireTraits is
         uint256 startTokenId = _currentIndex;
         uint256 endTokenId = startTokenId + quantity_;
 
+        _safeMint(address_, quantity_);
+
         // sets trait in the mapping of the data contract...
         for (
             uint256 tokenId = startTokenId;
@@ -186,7 +188,6 @@ contract AvvenireTraits is
                 _requestChange(tokenId);
         } // end of for loop
                 
-        _safeMint(address_, quantity_);
     }
 
     /**

@@ -373,6 +373,8 @@ contract AvvenireCitizens is
         uint256 startTokenId = _currentIndex;
         uint256 endTokenId = startTokenId + quantity_;
 
+        _safeMint(address_, quantity_);
+
         // iterate over all the tokens
         for (
             uint256 tokenId = startTokenId;
@@ -383,8 +385,6 @@ contract AvvenireCitizens is
             createNewCitizen(tokenId);
 
         } // end of for loop
-
-        _safeMint(address_, quantity_);
     }
 
     /**
