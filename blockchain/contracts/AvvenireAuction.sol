@@ -250,10 +250,10 @@ contract AvvenireAuction is Ownable, ReentrancyGuard {
             block.timestamp >= publicSaleStartTime; 
     }
 
-    uint256 public constant AUCTION_START_PRICE = .01 ether; // start price
-    uint256 public constant AUCTION_END_PRICE = 0.002 ether; // floor price
-    uint256 public constant AUCTION_PRICE_CURVE_LENGTH = 10 minutes; // total time of the auction
-    uint256 public constant AUCTION_DROP_INTERVAL = 75 seconds;
+    uint256 public constant AUCTION_START_PRICE = .3 ether; // start price
+    uint256 public constant AUCTION_END_PRICE = 0.1 ether; // floor price
+    uint256 public constant AUCTION_PRICE_CURVE_LENGTH = 80 minutes; // total time of the auction
+    uint256 public constant AUCTION_DROP_INTERVAL = 20 minutes;
 
     uint256 public constant AUCTION_DROP_PER_STEP =
         (AUCTION_START_PRICE - AUCTION_END_PRICE) /
