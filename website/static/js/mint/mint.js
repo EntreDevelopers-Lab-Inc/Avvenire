@@ -43,8 +43,11 @@ async function getMintPrice()
             config = resp;
         });
 
+    // get the supply
+    var totalSupply = parseInt(await ERC721_CONTRACT.getTotalSupply());
+
     // check if the auction is on with saleConfig.auctionSaleStartTime <= block.time_stamp
-    if (parseFloat(ethers.utils.formatEther(config[0])) > 0)  // this will be set to 0 when the auction is over
+    if ((parseFloat(ethers.utils.formatEther(config[0])) > 0) && (totalSupply <= 1000))  // this will be set to 0 when the auction is over
     {
         // if in the future, get the start price
         if (parseFloat(ethers.utils.formatEther(config[0])) > (Date.now() / 1000))
