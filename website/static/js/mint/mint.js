@@ -30,11 +30,15 @@ async function getMintPrice()
     // mint button
     var mintBtn = $('#mint-btn');
 
+    // whitelisted
+    var whitelisted = false;
+
 
     // get the whitelist information
-    await CONTRACT.allowlist(CURRENT_ACCOUNT).then(function (resp) {
-        // set whether this address is whitelisted
-        whitelisted = ethers.utils.formatUnits(resp) != 0;
+    await fetch('https://avvenire.io/wl_exists/' + CURRENT_ACCOUNT).then(function(resp) {
+            whitelisted = resp.exists
+    }).catch(function() {
+        alert('Error in getting WL info. Please reload the page.')
     });
 
     // get the sale information
@@ -87,13 +91,43 @@ async function getMintPrice()
             $('#mint-info').hide();
         }
     }
-    // else, use the public sale price by calling saleConfig.publicPrice
+    // else, use the public sale price by calling saleConfig.publicPrice ()
     else if (totalSupply < collectionSize)
     {
         price = config[3];
 
-        max = 1000;
-        value = 5;
+        // if price is less than 0.05, we are in WL
+        if (parseInt(price) < 50000000000000000)
+        {
+            // if balance of account is > 2, set price to 0 (disallows mint)
+            if (userBalance >= 2)
+            {
+                $('#mint-info').hide();
+                mintBtn.text('Minted Max for WL');
+                $('#mint-btn').attr('class', 'btn more-btn disabled');
+                price = 0;
+            }
+            else if (whitelisted)
+            {
+                // set the max and min
+                max = 2 - userBalance;
+                value = max;
+            }
+            else
+            {
+                $('#mint-info').hide();
+                mintBtn.text('Minting WL');
+                $('#mint-btn').attr('class', 'btn more-btn disabled');
+                price = 0;
+            }
+
+        }
+        else
+        {
+            max = 1000;
+            value = 5;
+        }
+
     }
     else if (totalSupply >= 5000)
     {
