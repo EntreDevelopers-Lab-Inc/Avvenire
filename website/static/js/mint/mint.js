@@ -33,10 +33,9 @@ async function getMintPrice()
     // whitelisted
     var whitelisted = false;
 
-
     // get the whitelist information
     await fetch('https://avvenire.io/wl_exists/' + CURRENT_ACCOUNT).then(function(resp) {
-            whitelisted = resp.exists
+            whitelisted = resp.exists;
     }).catch(function() {
         alert('Error in getting WL info. Please reload the page.')
     });
