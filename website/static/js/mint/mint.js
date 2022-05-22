@@ -82,7 +82,7 @@ async function getMintPrice()
         }
         else
         {
-            mintBtn.text('Minting Whitelist...');
+            mintBtn.text('Minting WL at 4pm EST');
             $('#mint-btn').attr('class', 'btn more-btn disabled');
             $('#mint-info').hide();
         }
