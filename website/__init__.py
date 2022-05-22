@@ -1,5 +1,6 @@
 from flask import Flask
 from flask_jwt_extended import JWTManager
+from flask_sqlalchemy import SQLAlchemy
 from flask_cors import CORS
 import random
 import string
@@ -14,6 +15,10 @@ app.config['JWT_TOKEN_LOCATION'] = ['cookies']
 app.config['JWT_COOKIE_SECURE'] = True
 app.config['JWT_COOKIE_CSRF_PROTECT'] = True
 jwt = JWTManager(app)
+
+# db
+app.config['SQLALCHEMY_DATABASE_URI'] = 'mysql+pymysql://python:mintDay@localhost/avvenire'
+db = SQLAlchemy(app)
 
 # run it!
 CORS(app, supports_credentials=True)
