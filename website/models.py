@@ -6,3 +6,4 @@ class WLModel(db.Model):
     __tablename__ = 'wls'
     id = db.Column(db.Integer, primary_key=True)
     address = db.Column(db.String(128), nullable=False)
+    limit = db.Column(db.Integer, nullable=False)

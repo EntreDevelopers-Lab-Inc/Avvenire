@@ -16,20 +16,24 @@ def mint():
 
 
 # a route to add WL
-@app.route('/add_wl/<address>')
-def add_wl(address):
+@app.route('/add_wl/<address>/<amount>')
+def add_wl(address, amount):
     # get the address
     test_addr = WLModel.query.filter_by(address=address).first()
 
     # check if the address exists
     if not test_addr:
         # if the address does not exist, add it
-        new_address = WLModel(address=address)
+        new_address = WLModel(address=address, limit=amount)
         db.session.add(new_address)
-        db.session.commit()
-        return {'added': True}
     else:
-        return {'added': False}
+        # just change it
+        test_addr.limit = amount
+
+    # commit the changes
+    db.session.commit()
+
+    return {'added': True, 'limit': amount}
 
 
 # a route to test if a wl exists
@@ -40,6 +44,6 @@ def wl_exists(address):
 
     # check if the address exists
     if test_addr:
-        return {'exists': True}
+        return {'exists': True, 'limit': test_addr.limit}
     else:
         return {'exists': False}

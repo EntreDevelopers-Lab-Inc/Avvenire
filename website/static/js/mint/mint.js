@@ -31,15 +31,7 @@ async function getMintPrice()
     var mintBtn = $('#mint-btn');
 
     // whitelisted
-    var whitelisted = false;
-
-
-    // get the whitelist information
-    await fetch('https://avvenire.io/wl_exists/' + CURRENT_ACCOUNT).then(function(resp) {
-            whitelisted = resp.exists
-    }).catch(function() {
-        alert('Error in getting WL info. Please reload the page.')
-    });
+    var whitelisted = true;
 
     // get the sale information
     await CONTRACT.saleConfig().then(
@@ -74,22 +66,9 @@ async function getMintPrice()
     // check if the user is whitelisted and the price is greater than 0
     else if ((parseFloat(ethers.utils.formatEther(config[2])) > 0) && (config[1] > (Date.now() / 1000)))
     {
-        if (whitelisted)
-        {
-            // if the user is whitelisted saleConfig.mintlistPrice
-            price = config[2];
-
-            max = await CONTRACT.maxPerAddressDuringWhiteList();
-            value = await CONTRACT.allowlist(CURRENT_ACCOUNT);
-
-            remainder = value;
-        }
-        else
-        {
             mintBtn.text('Minting WL at 4pm EST');
             $('#mint-btn').attr('class', 'btn more-btn disabled');
             $('#mint-info').hide();
-        }
     }
     // else, use the public sale price by calling saleConfig.publicPrice ()
     else if (totalSupply < collectionSize)
@@ -100,7 +79,7 @@ async function getMintPrice()
         if (parseInt(price) < 50000000000000000)
         {
             // if balance of account is > 2, set price to 0 (disallows mint)
-            if (userBalance >= 2)
+            if ((whitelisted) && (userBalance >= 2))
             {
                 $('#mint-info').hide();
                 mintBtn.text('Minted Max for WL');
@@ -242,6 +221,19 @@ async function mintNFTs() {
     // else, use the public sale price by calling saleConfig.publicPrice
     else
     {
+        if (amount > 2)
+        {
+            amount = 2;
+            alert('You cannot mint more than 2 citizens.');
+
+            // set loading to false
+            $('#loading').attr('hidden',
+                true);
+            $('#mint-btn').attr('hidden', false);
+
+            return;
+        }
+
         // public sale mint
         txn = CONTRACT.publicSaleMint(amount, PUBLIC_SALE_KEY, {value: totalCost});
     }
