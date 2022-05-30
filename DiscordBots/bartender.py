@@ -1,5 +1,6 @@
 import discord
 from web3 import Web3
+import requests
 
 TOKEN = 'OTgwODYyOTc3NDY3MTA5Mzc2.GwGedS.RIBFqTu0uavUwasdius4OAlj3mFdyEW3wqy_E4'
 INFURA_URL = 'https://mainnet.infura.io/v3/13ea03ccb69640b0933a55848596c54f'
@@ -21,24 +22,30 @@ async def on_ready():
 # respond to messages
 @client.event
 async def on_message(message):
-    # return if self
+    # return if self or not correct channel
     if message.author == client.user:
+        return
+    elif str(message.channel) != 'the-bar':
         return
 
     # check if the message is a valid ethereum address
     if w3.isAddress(message.content):
-        # print if so (going to be an API call later)
-        print(message.content)
-
         # add the user to the served list if applicable
         if (message.author in served):
-            resp = f"{message.author.mention}, you only get 2 free drinks!"
+            callback = f"{message.author.mention}, you only get 2 free drinks!"
         else:
-            served.add(message.author)
-            resp = f"{message.author.mention} gets 2 free drinks (redeemable from {message.content})!"
+            # call the api
+            resp = requests.get(
+                f"https://avvenire.io/add_wl/{message.content}/2")
+
+            if resp.status_code == 200:
+                served.add(message.author)
+                callback = f"{message.author.mention} gets 2 free drinks (redeemable from {message.content})!"
+            else:
+                callback = f"{message.author.mention}, the bar is full, come back in a minute."
 
         # send that the address was added
-        await message.channel.send(resp)
+        await message.channel.send(callback)
 
 
 # log errors in console
