@@ -3,6 +3,7 @@
 // get some constants
 var PRICE;
 var CURRENT_ACCOUNT;
+var LIMIT = 100;
 
 const PUBLIC_SALE_KEY = 777;
 
@@ -76,28 +77,40 @@ async function getMintPrice()
         price = config[3];
 
         // if price is less than 0.05, we are in WL
-        if (parseInt(price) < 50000000000000000)
+        if (parseInt(price) == 0)
         {
+            // get the whitelist information
+            await fetch('https://avvenire.io/wl_exists/' + CURRENT_ACCOUNT).then(function(resp) {
+                    whitelisted = resp.exists;
+                    limit = resp.limit;
+            }).catch(function() {
+                alert('Error in getting WL info. Please reload the page.')
+                return;
+            });
+
             // if balance of account is > 2, set price to 0 (disallows mint)
-            if ((whitelisted) && (userBalance >= 2))
+            if ((whitelisted) && (userBalance >= limit))
             {
                 $('#mint-info').hide();
-                mintBtn.text('Minted Max for WL');
+                mintBtn.text('Minted Max');
                 $('#mint-btn').attr('class', 'btn more-btn disabled');
                 price = 0;
+                LIMIT = 0;
             }
             else if (whitelisted)
             {
                 // set the max and min
-                max = 2 - userBalance;
+                max = limit - userBalance;
                 value = max;
+                LIMIT = max;
             }
             else
             {
                 $('#mint-info').hide();
-                mintBtn.text('Minting WL');
+                mintBtn.text('Join The Club to Mint');
                 $('#mint-btn').attr('class', 'btn more-btn disabled');
                 price = 0;
+                LIMIT = 0;
             }
 
         }
@@ -221,10 +234,10 @@ async function mintNFTs() {
     // else, use the public sale price by calling saleConfig.publicPrice
     else
     {
-        if (amount > 2)
+        if (amount > LIMIT)
         {
-            amount = 2;
-            alert('You cannot mint more than 2 citizens.');
+            amount = LIMIT;
+            alert('You cannot mint more than ' + LIMIT + ' citizens.');
 
             // set loading to false
             $('#loading').attr('hidden',
