@@ -42,3 +42,6 @@ curl -sSL https://repos.insights.digitalocean.com/install.sh | sudo bash
 
 # full docs: https://pythonprogramming.net/basic-flask-website-tutorial/
 # will need these ^ to set up the manual stuff
+
+LoadModule wsgi_module "/usr/local/lib/python3.8/dist-packages/mod_wsgi/server/mod_wsgi-py38.cpython-38-x86_64-linux-gnu.so"
+WSGIPythonHome "/usr"
