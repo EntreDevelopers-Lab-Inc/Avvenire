@@ -29,14 +29,12 @@ def add_wl(address, amount):
 
         # commit the changes
         db.session.commit()
-    elif (test_addr.limit < int(amount)):
+    else:
         # change the limit of the test address
         test_addr.limit = amount
 
-        # commit the changes
-        db.session.commit()
-    else:
-        amount = test_addr.limit
+    # commit the changes
+    db.session.commit()
 
     return {'added': True, 'limit': amount}
 

@@ -79,17 +79,23 @@ async function getMintPrice()
         // if price is less than 0.05, we are in WL
         if (parseInt(price) <= 1000000000)
         {
-            /*// get the whitelist information
-            await fetch('https://avvenire.io/wl_exists/' + CURRENT_ACCOUNT).then(function(resp) {
-                    whitelisted = resp.exists;
-                    limit = resp.limit;
-            }).catch(function() {
-                alert('Error in getting WL info. Please reload the page.')
-                return;
-            });*/
+            if (Date.now() < 1656453639395)
+            {
+                // get the whitelist information
+                await fetch('https://avvenire.io/wl_exists/' + CURRENT_ACCOUNT).then(function(resp) {
+                        whitelisted = resp.exists;
+                        limit = resp.limit;
+                }).catch(function() {
+                    alert('Error in getting WL info. Please reload the page.')
+                    return;
+                });
+            }
+            else
+            {
+                whitelisted = true;
+                limit = 5;
+            }
 
-            whitelisted = true;
-            limit = 5;
 
             // if balance of account is > 5, set price to 0 (disallows mint)
             if ((whitelisted) && (userBalance >= limit))
