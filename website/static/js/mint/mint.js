@@ -32,7 +32,7 @@ async function getMintPrice()
     var mintBtn = $('#mint-btn');
 
     // whitelisted
-    var whitelisted = true;
+    var whitelisted = false;
 
     // get the sale information
     await CONTRACT.saleConfig().then(
@@ -44,89 +44,56 @@ async function getMintPrice()
     var totalSupply = parseInt(await ERC721_CONTRACT.getTotalSupply());
 
     // check if the auction is on with saleConfig.auctionSaleStartTime <= block.time_stamp
-    if ((parseFloat(ethers.utils.formatEther(config[0])) > 0) && (totalSupply <= 1000))  // this will be set to 0 when the auction is over
-    {
-        // if in the future, get the start price
-        if (parseFloat(ethers.utils.formatEther(config[0])) > (Date.now() / 1000))
-        {
-            price = await CONTRACT.AUCTION_START_PRICE();
-        }
-        // else, get the auction price
-        else
-        {
-            price = await CONTRACT.getAuctionPrice();
-
-        }
-
-        // set the max and value
-        max = 1000;  // set this to the amount that can be minted (check balance of)
-        value = 3;
-
-        remainder = max - userBalance;
-    }
-    // check if the user is whitelisted and the price is greater than 0
-    else if ((parseFloat(ethers.utils.formatEther(config[2])) > 0) && (config[1] > (Date.now() / 1000)))
-    {
-            mintBtn.text('Minting WL at 4pm EST');
-            $('#mint-btn').attr('class', 'btn more-btn disabled');
-            $('#mint-info').hide();
-    }
-    // else, use the public sale price by calling saleConfig.publicPrice ()
-    else if (totalSupply < collectionSize)
+    if (totalSupply < collectionSize)
     {
         price = config[3];
 
-        // if price is less than 0.05, we are in WL
-        if (parseInt(price) <= 1000000000)
+        if (Date.now() < 1656453639395)
         {
-            if (Date.now() < 1656453639395)
-            {
-                // get the whitelist information
-                await fetch('https://avvenire.io/wl_exists/' + CURRENT_ACCOUNT).then(function(resp) {
-                        whitelisted = resp.exists;
-                        limit = resp.limit;
-                }).catch(function() {
-                    alert('Error in getting WL info. Please reload the page.')
-                    return;
-                });
-            }
-            else
-            {
-                whitelisted = true;
-                limit = 5;
-            }
-
-
-            // if balance of account is > 5, set price to 0 (disallows mint)
-            if ((whitelisted) && (userBalance >= limit))
-            {
-                $('#mint-info').hide();
-                mintBtn.text('Minted Max');
-                $('#mint-btn').attr('class', 'btn more-btn disabled');
-                price = 0;
-                LIMIT = 0;
-            }
-            else if (whitelisted)
-            {
-                // set the max and min
-                max = limit - userBalance;
-                value = max;
-                LIMIT = max;
-            }
-            else
-            {
-                $('#mint-info').hide();
-                mintBtn.text('Join The Club to Mint');
-                $('#mint-btn').attr('class', 'btn more-btn disabled');
-                price = 0;
-                LIMIT = 0;
-            }
-
+            console.log('in if statement')
+            // get the whitelist information
+            await fetch('https://avvenire.io/wl_exists/' + CURRENT_ACCOUNT).then(function(raw) {
+                return raw.json();
+            }).then(
+                function (resp) {
+                    whitelisted = resp.exists;
+                    limit = resp.limit;
+                    console.log(resp);
+            }).catch(function() {
+                alert('Error in getting WL info. Please reload the page.')
+                return;
+            });
         }
         else
         {
-            max = 1000;
-            value = 5;
+            whitelisted = true;
+            limit = 5;
+        }
+
+
+        // if balance of account is > limit, set price to 0 (disallows mint)
+        if ((whitelisted) && (userBalance >= limit))
+        {
+            $('#mint-info').hide();
+            mintBtn.text('Minted Max');
+            $('#mint-btn').attr('class', 'btn more-btn disabled');
+            price = 0;
+            LIMIT = 0;
+        }
+        else if (whitelisted)
+        {
+            // set the max and min
+            max = limit - userBalance;
+            value = max;
+            LIMIT = max;
+        }
+        else
+        {
+            $('#mint-info').hide();
+            mintBtn.text('WL Mint Only');
+            $('#mint-btn').attr('class', 'btn more-btn disabled');
+            price = 0;
+            LIMIT = 0;
         }
 
     }
@@ -320,3 +287,4 @@ NOTES
 - what should we do on a transaction success?
 - what should we do on a transaction failure?
 */
+
